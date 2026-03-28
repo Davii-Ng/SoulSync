@@ -1,0 +1,7 @@
+fastapi>=0.115
+uvicorn[standard]>=0.34
+python-dotenv>=1.1
+httpx>=0.28
+pydantic>=2.11
+google-genai>=1.0
+elevenlabs>=1.50
