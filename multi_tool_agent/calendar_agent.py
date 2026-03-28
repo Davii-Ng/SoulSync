@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from google.adk.agents import Agent
 from datetime import datetime
 
-load_dotenv();
+load_dotenv()
 
 # In-memory event storage
 # Each event is a dict: {id, title, date, time, description}
@@ -44,7 +44,7 @@ def get_events(date: str = "") -> dict:
 
     Use this tool when the user asks about their schedule, upcoming events,
     or what they have planned. Also use proactively to reference the user's
-    calendar when context about their schedule would help the conversation..
+    calendar when context about their schedule would help the conversation.
 
     Args:
         date: Optional date filter in YYYY-MM-DD format.
