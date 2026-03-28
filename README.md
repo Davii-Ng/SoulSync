@@ -78,18 +78,24 @@ User speaks
 
 ```
 soulsync/
-├── frontend/              # React + Vite + TypeScript
+├── frontend/                  # React + Vite + TypeScript
 │   └── src/
-├── backend/               # FastAPI entry point + WebSocket
-│   ├── main.py
-│   └── requirements.txt
-├── agents/                # Google ADK agent definitions
-│   ├── core_companion.py  # Orchestrator agent
-│   ├── calendar_agent.py  # Calendar/event management
-│   ├── resource_agent.py  # Mental health resources
-│   ├── listener_agent.py  # Voice-to-text processing
-│   └── voice_agent.py     # ElevenLabs TTS
-├── .env                   # API keys (never commit!)
+│       ├── App.tsx
+│       ├── components/
+│       ├── hooks/
+│       ├── types/
+│       └── utils/
+├── backend/                   # FastAPI entry point + WebSocket
+│   └── main.py
+├── multi_tool_agent/          # Google ADK agents (adk run target)
+│   ├── agent.py               # Entry point: emotion analysis test agent
+│   ├── core_companion.py      # Orchestrator agent
+│   ├── calendar_agent.py      # Calendar/event management
+│   ├── resource_agent.py      # Mental health resources
+│   ├── listener_agent.py      # Voice-to-text processing
+│   └── voice_agent.py         # ElevenLabs TTS
+├── .env                       # API keys (never commit!)
+├── requirements.txt
 ├── CLAUDE.md
 └── README.md
 ```
@@ -121,16 +127,31 @@ ELEVENLABS_API_KEY=your_elevenlabs_api_key
 GOOGLE_CLOUD_PROJECT=your_gcp_project_id  # if needed
 ```
 
-### 3. Start the backend
+### 3. Install Python dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Run the agents (Google ADK)
+
+```powershell
+# Terminal chat
+adk run multi_tool_agent
+
+# Browser UI at localhost:8000
+adk web multi_tool_agent
+```
+
+### 5. Start the backend
 
 ```bash
 cd backend
-pip install -r requirements.txt
 uvicorn main:app --reload
 # → http://localhost:8000
 ```
 
-### 4. Start the frontend
+### 6. Start the frontend
 
 ```bash
 cd frontend

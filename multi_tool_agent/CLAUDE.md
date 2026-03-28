@@ -21,13 +21,22 @@ Python + Google ADK. Agents are orchestrated by Core Companion.
 User audio → Listener Agent → text → Core Companion → (calls Calendar/Resource if needed) → response text → Voice Agent → audio back to backend
 
 ## File Structure
-agents/
+multi_tool_agent/
+├── agent.py           # ADK entry point — defines root_agent, test tools
 ├── CLAUDE.md
 ├── core_companion.py
 ├── calendar_agent.py
 ├── resource_agent.py
 ├── listener_agent.py
-└── voice_agent.py
+├── voice_agent.py
+└── __init__.py        # Must stay UTF-8 encoded
+
+## Running
+```powershell
+# From SoulSync/ root
+adk run multi_tool_agent
+adk web multi_tool_agent
+```
 
 ## Dependencies
 - google-adk
