@@ -62,3 +62,27 @@ def get_events(date: str = "") -> dict:
         return {"status": "success", "message": "No events found.", "events": []}
 
     return {"status": "success", "message": f"Found {len(filtered)} event(s).", "events": filtered}
+
+
+calendar_agent = Agent(
+    name="calendar_agent",
+    model="gemini-2.0-flash",
+    description="Manages the user's calendar events. Saves new events and retrieves upcoming schedule when needed.",
+    instruction="""You are the Calendar Agent for SoulSync, a mental health companion.
+Your job is to help manage the user's schedule and events.
+
+When the user mentions an event, appointment, deadline, or reminder:
+- Extract the title, date, time, and any description
+- Use save_event to store it
+- Confirm back to the user what was saved
+
+When the user asks about their schedule or you need calendar context:
+- Use get_events to retrieve relevant events
+- Summarize clearly and concisely
+
+Always be warm and supportive in tone — you are part of a mental health companion.
+If the user gives incomplete info (e.g. no time), do your best to save what you have.
+Use YYYY-MM-DD for dates and HH:MM 24h format for times.
+""",
+    tools=[save_event, get_events],
+)
