@@ -27,20 +27,37 @@ Flow: User speaks → Listener → Core Companion (orchestrates, calls Calendar/
 
 ## Project Structure
 soulsync/
-├── frontend/          # React + Vite + TypeScript
+├── frontend/              # React + Vite + TypeScript
 │   └── src/
-├── backend/           # FastAPI entry point + WebSocket
-│   ├── main.py
-│   └── requirements.txt
-├── agents/            # Google ADK agent definitions
-│   ├── core_companion.py
-│   ├── calendar_agent.py
-│   ├── resource_agent.py
-│   ├── listener_agent.py
-│   └── voice_agent.py
-├── .env               # API keys (never commit)
+│       ├── App.tsx
+│       ├── components/
+│       ├── hooks/
+│       ├── types/
+│       └── utils/
+├── backend/               # FastAPI entry point + WebSocket
+│   └── main.py
+├── multi_tool_agent/      # Google ADK agent definitions (adk run target)
+│   ├── agent.py           # Test agent: analyze_emotion + suggest_resource tools
+│   ├── core_companion.py  # Orchestrator agent
+│   ├── calendar_agent.py  # Calendar/event management
+│   ├── resource_agent.py  # Mental health resources
+│   ├── listener_agent.py  # Voice-to-text processing
+│   ├── voice_agent.py     # ElevenLabs TTS
+│   ├── __init__.py
+│   └── CLAUDE.md
+├── .env                   # API keys (never commit)
+├── requirements.txt
 ├── CLAUDE.md
 └── README.md
+
+## Running Agents (Google ADK)
+```powershell
+# From project root (SoulSync/)
+adk run multi_tool_agent     # terminal chat
+adk web multi_tool_agent     # browser UI at localhost:8000
+```
+- `agent.py` is the ADK entry point — must define `root_agent`
+- `__init__.py` must be UTF-8 encoded (not UTF-16)
 
 ## Coding Conventions
 - Frontend: functional components, TypeScript strict, named exports
