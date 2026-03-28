@@ -1,3 +1,5 @@
+// Scrollable list of user/AI message bubbles
+
 import type { Message } from '../types'
 import { MessageBubble } from './MessageBubble'
 

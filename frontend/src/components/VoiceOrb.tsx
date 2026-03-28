@@ -1,3 +1,5 @@
+// Animated circle centerpiece, mic control with pulse animation
+
 import type { OrbState } from '../types'
 
 interface Props {

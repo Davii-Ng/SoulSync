@@ -1,3 +1,5 @@
+// Type declarations for Web Speech API (SpeechRecognition)
+
 interface SpeechRecognition extends EventTarget {
   lang: string
   interimResults: boolean

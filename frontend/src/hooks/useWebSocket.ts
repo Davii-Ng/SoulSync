@@ -1,3 +1,5 @@
+// Manages WebSocket connection to backend
+
 import { useEffect, useRef, useCallback, useState } from 'react'
 import { WS_URL } from '../utils/constants'
 import type { Message, Emotion } from '../types'

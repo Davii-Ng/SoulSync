@@ -1,3 +1,5 @@
+// Web Speech API hook for voice-to-text
+
 import { useState, useRef, useCallback } from 'react'
 
 interface UseVoiceInputReturn {

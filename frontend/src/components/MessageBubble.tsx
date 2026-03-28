@@ -1,3 +1,5 @@
+// Single chat bubble, styled by role (user/assistant)
+
 import type { Message } from '../types'
 
 interface Props {

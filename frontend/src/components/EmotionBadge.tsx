@@ -1,3 +1,5 @@
+// Displays current detected emotion with color
+
 import type { Emotion } from '../types'
 import { EMOTION_CONFIG } from '../utils/constants'
 
