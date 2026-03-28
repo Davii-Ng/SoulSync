@@ -1,7 +1,7 @@
 function App() {
   return (
     <div>
-      <h1>SoulSync</h1>
+      <h1 className="text-3xl font-bold text-purple-500">SoulSync</h1>
     </div>
   )
 }
