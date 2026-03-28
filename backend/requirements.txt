@@ -1,0 +1,7 @@
+fastapi==0.135.2
+uvicorn[standard]==0.42.0
+python-dotenv==1.2.2
+google-generativeai==0.8.6
+google-adk==1.28.0
+elevenlabs==2.40.0
+websockets==15.0.1
