@@ -9,6 +9,7 @@ Python + Google ADK. Agents are orchestrated by Core Companion.
 - snake_case, type hints on function signatures
 - API keys loaded from root .env via python-dotenv
 - Never hardcode keys or secrets
+- Use "gemini-3-flash-preview" for llm models
 
 ## Agent Definitions
 - core_companion.py — Orchestrator. Receives user text, analyzes emotion via Gemini API, generates empathetic response, delegates to other agents when needed
