@@ -20,6 +20,10 @@ _resource_patch = patch(
     "multi_tool_agent.core_companion.suggest_resource",
     return_value={"suggestion": "Try deep breathing for 5 minutes."},
 )
+_stt_patch = patch(
+    "multi_tool_agent.voice_agent.speech_to_text",
+    return_value="transcribed text from audio",
+)
 _tts_patch = patch(
     "multi_tool_agent.voice_agent.text_to_speech",
     return_value=b"fake-audio-bytes",
@@ -27,6 +31,7 @@ _tts_patch = patch(
 
 _emotion_mock = _emotion_patch.start()
 _resource_mock = _resource_patch.start()
+_stt_mock = _stt_patch.start()
 _tts_mock = _tts_patch.start()
 
 import sys, os
@@ -40,6 +45,7 @@ client = TestClient(app)
 def teardown_module() -> None:
     _emotion_patch.stop()
     _resource_patch.stop()
+    _stt_patch.stop()
     _tts_patch.stop()
 
 
@@ -120,7 +126,7 @@ def test_speech_with_voice_id():
 def test_speech_failure_returns_502():
     """When TTS fails, frontend expects a 502 JSON error."""
     with patch(
-        "app.api.routes.speech.voice_agent.text_to_speech",
+        "app.api.routes.speech.text_to_speech",
         side_effect=RuntimeError("TTS down"),
     ):
         resp = client.post("/speech", json={"text": "test"})
@@ -187,3 +193,62 @@ def test_ws_multiple_messages():
             resp = ws.receive_json()
             assert resp["type"] == "response"
             assert resp["content"]  # non-empty
+
+
+# ---------- Transcribe (POST /transcribe) ----------
+
+import base64
+
+
+def test_transcribe_returns_200():
+    audio_b64 = base64.b64encode(b"fake-audio").decode()
+    resp = client.post("/transcribe", json={"audio_base64": audio_b64})
+    assert resp.status_code == 200
+
+
+def test_transcribe_response_shape():
+    """Frontend expects { success: true, transcript: '...' }."""
+    audio_b64 = base64.b64encode(b"fake-audio").decode()
+    data = client.post("/transcribe", json={"audio_base64": audio_b64}).json()
+    assert data["success"] is True
+    assert "transcript" in data
+    assert isinstance(data["transcript"], str)
+
+
+def test_transcribe_empty_payload_returns_422():
+    """Missing audio_base64 should fail validation."""
+    resp = client.post("/transcribe", json={})
+    assert resp.status_code == 422
+
+
+def test_transcribe_failure_returns_502():
+    """When STT fails, frontend expects a 502 JSON error."""
+    with patch(
+        "app.api.routes.speech.speech_to_text",
+        side_effect=RuntimeError("STT down"),
+    ):
+        audio_b64 = base64.b64encode(b"fake-audio").decode()
+        resp = client.post("/transcribe", json={"audio_base64": audio_b64})
+    assert resp.status_code == 502
+    data = resp.json()
+    assert data["success"] is False
+    assert "error" in data
+
+
+# ---------- WebSocket audio messages ----------
+
+def test_ws_audio_message_returns_transcript_and_response():
+    """Frontend sends { type: 'audio', content: '<base64>' },
+    expects back a transcript message then a response message."""
+    audio_b64 = base64.b64encode(b"fake-audio").decode()
+    with client.websocket_connect("/ws") as ws:
+        ws.send_text(json.dumps({"type": "audio", "content": audio_b64}))
+        transcript_msg = ws.receive_json()
+        response_msg = ws.receive_json()
+
+        assert transcript_msg["type"] == "transcript"
+        assert isinstance(transcript_msg["content"], str)
+
+        assert response_msg["type"] == "response"
+        assert "content" in response_msg
+        assert "emotion" in response_msg
