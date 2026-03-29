@@ -147,3 +147,4 @@ __pycache__/
 venv/
 __pycache__/
 .adk
+.vscode/
