@@ -2,7 +2,7 @@ import logging
 from fastapi import APIRouter
 from app.schemas.chat import ChatRequest, ChatResponse
 from app.schemas.common import APIResponse
-from multi_tool_agent.core_companion import analyze_emotion, suggest_resource
+from app.services.agent_runner import run_agent
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -11,14 +11,12 @@ router = APIRouter()
 @router.post("/chat")
 async def chat(request: ChatRequest) -> APIResponse:
     try:
-        emotion_result = analyze_emotion(request.message)
-        emotion = emotion_result.get("emotion", "neutral")
-        resource_result = suggest_resource(emotion)
+        result = await run_agent(request.message)
         return APIResponse(
             success=True,
             data=ChatResponse(
-                content=resource_result.get("suggestion", ""),
-                emotion=emotion,
+                content=result["content"],
+                emotion=result["emotion"],
             ).model_dump(),
         )
     except Exception as e:
