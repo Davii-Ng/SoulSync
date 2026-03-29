@@ -5,21 +5,34 @@ import { TextInput } from "./components/TextInput";
 import { useWebSocket } from "./hooks/useWebSocket";
 import { useVoiceInput } from "./hooks/useVoiceInput";
 import { EmotionBadge } from "./components/EmotionBadge";
-import type { OrbState, Message, Emotion, SavedEvent } from "./types";
+import type { OrbState, Message, Emotion, SavedEvent, WsResponse } from "./types";
 import { useState, useEffect, useCallback, useRef } from "react";
+
+const getEventId = (event: SavedEvent): string => {
+  const trimmed = event.id?.trim();
+  if (trimmed) return trimmed;
+  return `${event.title}|${event.dateLabel}`.toLowerCase();
+};
+
+const mergeEvents = (existing: SavedEvent[], incoming: SavedEvent[]): SavedEvent[] => {
+  if (incoming.length === 0) return existing;
+
+  const byId = new Map<string, SavedEvent>();
+  for (const event of existing) {
+    byId.set(getEventId(event), { ...event, id: getEventId(event) });
+  }
+  for (const event of incoming) {
+    const normalized = { ...event, id: getEventId(event) };
+    byId.set(normalized.id, normalized);
+  }
+  return Array.from(byId.values());
+};
 
 function App() {
   const [orbState, setOrbState] = useState<OrbState>("idle");
   const [messages, setMessages] = useState<Message[]>([]);
   const [emotion, setEmotion] = useState<Emotion>("neutral");
-  const [savedEvents] = useState<SavedEvent[]>([
-    {
-      id: "1",
-      title: "Therapy check-in reminder",
-      dateLabel: "Monday, 7:30 PM",
-      note: "Captured from your latest conversation.",
-    },
-  ]);
+  const [savedEvents, setSavedEvents] = useState<SavedEvent[]>([]);
   const { isConnected, sendMessage, ws } = useWebSocket();
   const { isListening, transcript, startListening, stopListening } = useVoiceInput();
   const listeningRef = useRef(false);
@@ -36,7 +49,7 @@ function App() {
     if (!socket) return;
 
     const handleMessage = (event: MessageEvent) => {
-      const data = JSON.parse(event.data);
+      const data = JSON.parse(event.data) as WsResponse;
 
       // Backend error — show as system message, reset orb
       if (data.type === "error") {
@@ -65,6 +78,10 @@ function App() {
 
       if (data.emotion) {
         setEmotion(data.emotion);
+      }
+
+      if (data.events && data.events.length > 0) {
+        setSavedEvents((prev) => mergeEvents(prev, data.events ?? []));
       }
 
       // Play audio automatically if available
@@ -152,6 +169,9 @@ function App() {
   }, [orbState, startListening, stopListening, sendMessage]);
 
   const isBusy = orbState === "thinking" || orbState === "speaking";
+  const handleDismissEvent = useCallback((eventId: string) => {
+    setSavedEvents((prev) => prev.filter((event) => getEventId(event) !== eventId));
+  }, []);
 
   return (
     <div
@@ -235,7 +255,7 @@ function App() {
               </p>
             </article>
 
-            {/* Events — show saved event */}
+            {/* Events — dynamic saved events */}
             <article
               className="dashboard-card dashboard-card-hover rounded-2xl border p-5"
               style={{ borderColor: "var(--soul-border-light)" }}
@@ -246,32 +266,74 @@ function App() {
               >
                 Events
               </h3>
-              <div
-                className="mt-3 rounded-lg px-3.5 py-2.5"
-                style={{
-                  background: "var(--soul-accent-pale)",
-                  border: "1px solid var(--soul-accent-light)",
-                }}
-              >
-                <p
-                  className="text-sm font-medium"
-                  style={{ color: "var(--soul-text)" }}
+              {savedEvents.length === 0 ? (
+                <div
+                  className="mt-3 rounded-lg px-3.5 py-3"
+                  style={{
+                    background: "var(--soul-surface-alt)",
+                    border: "1px solid var(--soul-border-light)",
+                  }}
                 >
-                  {savedEvents[0]?.title}
-                </p>
-                <p
-                  className="text-xs mt-1"
-                  style={{ color: "var(--soul-accent)" }}
-                >
-                  {savedEvents[0]?.dateLabel}
-                </p>
-              </div>
-              <p
-                className="text-xs mt-2"
-                style={{ color: "var(--soul-text-muted)" }}
-              >
-                {savedEvents[0]?.note}
-              </p>
+                  <p className="text-sm" style={{ color: "var(--soul-text-secondary)" }}>
+                    No events captured yet
+                  </p>
+                  <p className="text-xs mt-1" style={{ color: "var(--soul-text-muted)" }}>
+                    Mention a date, deadline, or appointment and it will appear here.
+                  </p>
+                </div>
+              ) : (
+                <div className="mt-3 max-h-40 overflow-y-auto space-y-2 pr-1">
+                  {savedEvents.map((event) => {
+                    const eventId = getEventId(event);
+                    return (
+                      <div
+                        key={eventId}
+                        className="rounded-lg px-3.5 py-2.5"
+                        style={{
+                          background: "var(--soul-accent-pale)",
+                          border: "1px solid var(--soul-accent-light)",
+                        }}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p
+                              className="text-sm font-medium"
+                              style={{ color: "var(--soul-text)" }}
+                            >
+                              {event.title}
+                            </p>
+                            <p
+                              className="text-xs mt-1"
+                              style={{ color: "var(--soul-accent)" }}
+                            >
+                              {event.dateLabel}
+                            </p>
+                            {event.note ? (
+                              <p
+                                className="text-xs mt-2"
+                                style={{ color: "var(--soul-text-muted)" }}
+                              >
+                                {event.note}
+                              </p>
+                            ) : null}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleDismissEvent(eventId)}
+                            className="text-xs px-2 py-1 rounded-md border"
+                            style={{
+                              color: "var(--soul-text-muted)",
+                              borderColor: "var(--soul-border-light)",
+                            }}
+                          >
+                            Dismiss
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </article>
 
             {/* Resources — static helpful links */}
