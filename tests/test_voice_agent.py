@@ -100,6 +100,51 @@ async def test_get_available_voices_returns_list():
     assert voices == [{"voice_id": "v1", "name": "Rachel"}]
 
 
+# --- speech_to_text ---
+
+def test_speech_to_text_no_client():
+    """Raises RuntimeError when client is None."""
+    with patch.object(va, "_client", None):
+        with pytest.raises(RuntimeError, match="ELEVENLABS_API_KEY"):
+            va.speech_to_text(b"audio-data")
+
+
+def test_speech_to_text_returns_transcript():
+    """Returns transcript string from STT response."""
+    mock_client = MagicMock()
+    mock_response = MagicMock()
+    mock_response.text = "Hello, how are you?"
+    mock_client.speech_to_text.convert.return_value = mock_response
+
+    with patch.object(va, "_client", mock_client):
+        result = va.speech_to_text(b"audio-data")
+
+    assert result == "Hello, how are you?"
+    mock_client.speech_to_text.convert.assert_called_once_with(
+        model_id="scribe_v1",
+        file=b"audio-data",
+        language_code=None,
+    )
+
+
+def test_speech_to_text_with_language_code():
+    """Passes language_code to ElevenLabs when provided."""
+    mock_client = MagicMock()
+    mock_response = MagicMock()
+    mock_response.text = "Hola"
+    mock_client.speech_to_text.convert.return_value = mock_response
+
+    with patch.object(va, "_client", mock_client):
+        result = va.speech_to_text(b"audio-data", language_code="es")
+
+    assert result == "Hola"
+    mock_client.speech_to_text.convert.assert_called_once_with(
+        model_id="scribe_v1",
+        file=b"audio-data",
+        language_code="es",
+    )
+
+
 # --- Agent configuration ---
 
 def test_voice_agent_config():
