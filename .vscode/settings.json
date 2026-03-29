@@ -1,5 +1,6 @@
 {
-    "python-envs.defaultEnvManager": "ms-python.python:system",
+    "python-envs.defaultEnvManager": "ms-python.python:conda",
     "python.terminal.useEnvFile": true,
-    "python.envFile": "${workspaceFolder}/.env"
+    "python.envFile": "${workspaceFolder}/.env",
+    "python-envs.defaultPackageManager": "ms-python.python:conda"
 }
