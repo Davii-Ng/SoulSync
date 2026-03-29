@@ -3,7 +3,7 @@ import json
 import logging
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from app.ws.manager import manager
-from multi_tool_agent.core_companion import analyze_emotion, suggest_resource
+from app.services.agent_runner import run_agent
 from multi_tool_agent.voice_agent import text_to_speech, speech_to_text
 
 logger = logging.getLogger(__name__)
@@ -11,12 +11,11 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-async def _process_text(websocket: WebSocket, content: str) -> None:
-    """Analyze emotion, generate reply, convert to speech, and send back."""
-    emotion_result = analyze_emotion(content)
-    emotion = emotion_result.get("emotion", "neutral")
-    resource_result = suggest_resource(emotion)
-    reply = resource_result.get("suggestion", "")
+async def _process_text(websocket: WebSocket, content: str, user_id: str = "default") -> None:
+    """Run message through ADK agent, convert to speech, and send back."""
+    result = await run_agent(content, user_id=user_id)
+    reply = result["content"]
+    emotion = result["emotion"]
 
     audio_b64 = None
     try:
@@ -48,7 +47,6 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
             content = data.get("content", "")
 
             if msg_type == "audio" and content:
-                # Transcribe base64 audio, then process as text
                 try:
                     audio_bytes = base64.b64decode(content)
                     transcript = speech_to_text(audio_bytes)
