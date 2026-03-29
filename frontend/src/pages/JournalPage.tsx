@@ -1,25 +1,30 @@
-import type { Message } from '../types'
+import { useState } from 'react'
+import type { JournalEntry } from '../types'
 import { EMOTION_CONFIG } from '../utils/constants'
 
 interface Props {
-  messages: Message[]
+  journals: JournalEntry[]
 }
 
-export function JournalPage({ messages }: Props) {
-  const entries = messages.filter((m) => m.role === 'user')
+export function JournalPage({ journals }: Props) {
+  const [expandedId, setExpandedId] = useState<string | null>(null)
+
+  // Sort by date descending
+  const sorted = [...journals].sort((a, b) => b.date.localeCompare(a.date))
+
+  const toggle = (id: string) =>
+    setExpandedId((prev) => (prev === id ? null : id))
 
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <h1 className="text-2xl section-heading text-soul-text">
-          Journal
-        </h1>
+        <h1 className="text-2xl section-heading text-soul-text">Journal</h1>
         <p className="text-sm mt-1 text-soul-text-muted">
-          Your reflections and conversations, saved here.
+          Your daily conversations, saved and organized.
         </p>
       </div>
 
-      {entries.length === 0 ? (
+      {sorted.length === 0 ? (
         <div className="dashboard-card rounded-2xl border border-soul-border-light p-8 text-center">
           <span className="material-symbols-outlined text-5xl mb-3 text-soul-accent-light">
             auto_stories
@@ -28,42 +33,94 @@ export function JournalPage({ messages }: Props) {
             No journal entries yet
           </p>
           <p className="text-sm mt-1 text-soul-text-muted">
-            Start a conversation on the Speaking page and your entries will appear here.
+            Tell SoulSync "save today's journal" when you're done chatting.
           </p>
         </div>
       ) : (
         <div className="flex flex-col gap-3">
-          {entries.map((entry) => {
-            const emotion = entry.emotion
-            const emotionStyle = emotion ? EMOTION_CONFIG[emotion] : null
-            const date = new Date(entry.timestamp)
-            const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-            const dateStr = date.toLocaleDateString([], { month: 'short', day: 'numeric' })
+          {sorted.map((entry) => {
+            const isOpen = expandedId === entry.id
+            const date = new Date(entry.date + 'T00:00:00')
+            const dateStr = date.toLocaleDateString([], {
+              weekday: 'long',
+              month: 'long',
+              day: 'numeric',
+              year: 'numeric',
+            })
+            const msgCount = entry.messages.length
+            // Find dominant emotion from assistant messages
+            const emotions = entry.messages
+              .filter((m) => m.role === 'assistant' && m.emotion)
+              .map((m) => m.emotion!)
+            const dominant = emotions.length > 0 ? mostCommon(emotions) : null
+            const emotionStyle = dominant ? EMOTION_CONFIG[dominant] : null
 
             return (
               <article
                 key={entry.id}
-                className="dashboard-card dashboard-card-hover rounded-2xl border border-soul-border-light p-5 md:p-6"
+                className="dashboard-card rounded-2xl border border-soul-border-light overflow-hidden"
               >
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-medium text-soul-text-muted">
-                    {dateStr} at {timeStr}
-                  </span>
-                  {emotionStyle && (
-                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium ${emotionStyle.bg} ${emotionStyle.color}`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${emotionStyle.dot}`} />
-                      {emotionStyle.label}
+                {/* Collapsible header */}
+                <button
+                  type="button"
+                  onClick={() => toggle(entry.id)}
+                  className="w-full flex items-center justify-between p-5 md:p-6 text-left hover:bg-soul-surface-alt transition-colors"
+                >
+                  <div className="flex flex-col gap-1">
+                    <span className="text-sm font-semibold text-soul-text">
+                      {dateStr}
                     </span>
-                  )}
-                </div>
-                <p className="text-sm leading-relaxed text-soul-text">
-                  {entry.content}
-                </p>
-                {entry.isVoice && (
-                  <span className="inline-flex items-center gap-1 mt-2 text-xs text-soul-text-muted">
-                    <span className="material-symbols-outlined text-sm">mic</span>
-                    Voice entry
-                  </span>
+                    <span className="text-xs text-soul-text-muted">
+                      {msgCount} message{msgCount !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {emotionStyle && (
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium ${emotionStyle.bg} ${emotionStyle.color}`}
+                      >
+                        <span className={`w-1.5 h-1.5 rounded-full ${emotionStyle.dot}`} />
+                        {emotionStyle.label}
+                      </span>
+                    )}
+                    <span
+                      className={`material-symbols-outlined text-lg text-soul-text-muted transition-transform ${
+                        isOpen ? 'rotate-180' : ''
+                      }`}
+                    >
+                      expand_more
+                    </span>
+                  </div>
+                </button>
+
+                {/* Expandable conversation body */}
+                {isOpen && (
+                  <div className="border-t border-soul-border px-5 md:px-6 py-4 flex flex-col gap-3">
+                    {entry.messages.map((msg) => {
+                      const time = new Date(msg.timestamp).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })
+                      const isUser = msg.role === 'user'
+                      return (
+                        <div
+                          key={msg.id}
+                          className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}
+                        >
+                          <div
+                            className={`max-w-[85%] px-4 py-2.5 text-sm leading-relaxed ${
+                              isUser ? 'bubble-user' : 'bubble-ai'
+                            }`}
+                          >
+                            {msg.content}
+                          </div>
+                          <span className="text-[0.65rem] mt-0.5 text-soul-text-muted">
+                            {time}
+                          </span>
+                        </div>
+                      )
+                    })}
+                  </div>
                 )}
               </article>
             )
@@ -72,4 +129,16 @@ export function JournalPage({ messages }: Props) {
       )}
     </div>
   )
+}
+
+/** Return the most frequent item in an array. */
+function mostCommon<T>(arr: T[]): T {
+  const counts = new Map<T, number>()
+  for (const item of arr) counts.set(item, (counts.get(item) || 0) + 1)
+  let best = arr[0]
+  let max = 0
+  for (const [item, count] of counts) {
+    if (count > max) { best = item; max = count }
+  }
+  return best
 }
