@@ -87,8 +87,9 @@ User speaks into mic (browser)
 SoulSync/
 ├── frontend/                  # React + Vite + TypeScript
 │   └── src/
-│       ├── App.tsx            # Root — orb, transcript, emotion badge
+│       ├── App.tsx            # Root — routing, state, WebSocket wiring
 │       ├── components/
+│       │   ├── Layout.tsx         # App shell — header, sidebar, bottom nav
 │       │   ├── VoiceOrb.tsx       # Mic button with listening/thinking states
 │       │   ├── ChatTranscript.tsx
 │       │   ├── MessageBubble.tsx
@@ -96,7 +97,16 @@ SoulSync/
 │       │   ├── Header.tsx
 │       │   ├── TextInput.tsx      # Text message input field
 │       │   ├── AudioPlayer.tsx    # Inline audio playback for TTS
-│       │   └── EventsPanel.tsx    # Calendar events display
+│       │   ├── EventsPanel.tsx    # Calendar events display
+│       │   ├── QuickCheckIn.tsx   # Quick emotion check-in widget
+│       │   └── ResourcesCard.tsx  # Resource display card
+│       ├── pages/
+│       │   ├── SpeakingPage.tsx   # Main voice/chat interface (home)
+│       │   ├── JournalPage.tsx    # Journal entry viewer
+│       │   ├── CalendarPage.tsx   # Calendar events view
+│       │   ├── HistoryPage.tsx    # Conversation history
+│       │   ├── ResourcesPage.tsx  # Mental health resources
+│       │   └── SettingsPage.tsx   # Voice selection & preferences
 │       ├── hooks/
 │       │   ├── useWebSocket.ts    # WS connection to backend
 │       │   └── useVoiceInput.ts   # Browser speech recognition
@@ -142,6 +152,8 @@ SoulSync/
 | GET | `/` | Health check — returns status and version |
 | POST | `/chat` | Send text, get AI response + detected emotion |
 | POST | `/speech` | Convert text to speech, returns `audio/mpeg` bytes |
+| GET | `/voices` | List available ElevenLabs voices |
+| POST | `/voices/preview` | Preview a voice with a sample phrase, returns `audio/mpeg` |
 | POST | `/transcribe` | Convert base64 audio to text via ElevenLabs Scribe |
 | WS | `/ws` | Real-time conversation — text or audio in, AI response + emotion + TTS audio out |
 
@@ -242,11 +254,16 @@ pytest -q
 ## Demo Walkthrough
 
 1. Open `http://localhost:5173` in Chrome (required for Web Speech API).
-2. Click the **voice orb** to start speaking.
-3. Say something like _"I've been feeling really burned out lately"_.
-4. Click the orb again to stop — your message appears in the transcript.
-5. SoulSync analyzes your emotion, responds empathetically, and speaks the reply aloud.
-6. The **emotion badge** updates to reflect the detected mood (stressed, anxious, sad, angry, happy, calm, neutral).
+2. You land on the **Speak** page — the main voice/chat interface.
+3. Click the **voice orb** to start speaking, or type a message in the text input.
+4. Say something like _"I've been feeling really burned out lately"_.
+5. Click the orb again to stop — your message appears in the transcript.
+6. SoulSync analyzes your emotion, responds empathetically, and speaks the reply aloud.
+7. The **emotion badge** updates to reflect the detected mood (stressed, anxious, sad, angry, happy, calm, neutral).
+8. Use the **bottom nav** to explore other pages:
+   - **Journal** — view saved journal entries and reflective prompts.
+   - **Calendar** — see events and deadlines extracted from conversations.
+   - **History** / **Resources** / **Settings** — available in the sidebar (desktop) or via navigation.
 
 ---
 
