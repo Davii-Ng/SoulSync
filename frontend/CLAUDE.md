@@ -16,10 +16,12 @@ npm run dev → http://localhost:5173
 - No App.css — deleted during cleanup
 
 ## Key Responsibilities
+- Multi-page SPA with react-router-dom (Layout + bottom nav + sidebar)
 - Voice input UI (mic button, recording state, waveform)
 - Display conversation transcript (user + AI messages)
 - Emotion indicator display
 - Audio playback of AI response (from ElevenLabs)
+- Voice selection and preview (Settings page)
 - WebSocket connection to backend for real-time communication
 
 ## Communication with Backend
@@ -30,9 +32,15 @@ npm run dev → http://localhost:5173
 ## File Structure
 src/
 ├── main.tsx           # Entry point
-├── App.tsx            # Root component
+├── App.tsx            # Root — routing, global state, WebSocket wiring
 ├── index.css          # Global reset styles
-├── components/        # Reusable UI components
-├── hooks/             # Custom hooks (useWebSocket, useAudioRecorder, etc.)
+├── components/        # Reusable UI components (Layout, VoiceOrb, ChatTranscript, etc.)
+├── pages/             # Route pages (SpeakingPage, JournalPage, CalendarPage, HistoryPage, ResourcesPage, SettingsPage)
+├── hooks/             # Custom hooks (useWebSocket, useVoiceInput)
 ├── types/             # TypeScript type definitions
 └── utils/             # Helper functions
+
+## Navigation
+- Bottom nav (always visible): Speak (/), Journal (/journal), Calendar (/calendar)
+- Sidebar (desktop): History (/history), Resources (/resources), Settings (/settings)
+- Layout.tsx provides the app shell with header, sidebar, and bottom nav

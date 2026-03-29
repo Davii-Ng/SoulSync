@@ -70,6 +70,7 @@ SoulSync/
 │   └── src/
 │       ├── App.tsx
 │       ├── components/
+│       ├── pages/         # SpeakingPage, JournalPage, CalendarPage, HistoryPage, ResourcesPage, SettingsPage
 │       ├── hooks/
 │       ├── types/
 │       └── utils/
