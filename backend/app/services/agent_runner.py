@@ -1,6 +1,7 @@
 """Runs user messages through the ADK agent pipeline and returns the final response."""
 
 import logging
+import importlib
 from typing import Any
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
@@ -108,6 +109,16 @@ async def run_agent(message: str, user_id: str = "default") -> dict:
     """Send a message through the ADK agent and return text, emotion, and events."""
     session_id = await get_or_create_session(user_id)
 
+    calendar_events_before: list[Any] = []
+    calendar_module = None
+    try:
+        calendar_module = importlib.import_module("multi_tool_agent.calendar_agent")
+        maybe_events = getattr(calendar_module, "events", [])
+        if isinstance(maybe_events, list):
+            calendar_events_before = list(maybe_events)
+    except Exception:
+        calendar_module = None
+
     content = types.Content(
         role="user",
         parts=[types.Part.from_text(text=message)],
@@ -145,6 +156,14 @@ async def run_agent(message: str, user_id: str = "default") -> dict:
         from multi_tool_agent.core_companion import analyze_emotion
         result = analyze_emotion(message)
         emotion = result.get("emotion", "neutral")
+
+    # Fallback: read calendar in-memory store in case ADK event payload omits tool outputs.
+    if calendar_module is not None:
+        maybe_events = getattr(calendar_module, "events", [])
+        if isinstance(maybe_events, list):
+            new_events = maybe_events[len(calendar_events_before):]
+            captured_events.extend(_extract_events(new_events))
+            captured_events.extend(_extract_events(maybe_events))
 
     deduped_events = _dedupe_events(captured_events)
 
