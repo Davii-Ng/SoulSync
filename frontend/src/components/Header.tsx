@@ -7,7 +7,7 @@ interface Props {
 export function Header({ isConnected }: Props) {
   return (
     <header
-      className="dashboard-strip header-shell rounded-xl border px-5 py-3.5 md:px-6"
+      className="dashboard-strip header-shell rounded-2xl border px-5 py-3.5 md:px-6"
       style={{ borderColor: 'var(--soul-border-light)', background: 'var(--soul-surface)' }}
     >
       <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
@@ -29,10 +29,14 @@ export function Header({ isConnected }: Props) {
           />
           <button
             type="button"
-            className="px-4 py-1.5 rounded-full text-sm header-avatar"
+            className="w-9 h-9 rounded-full flex items-center justify-center text-sm header-avatar"
             style={{ borderColor: 'var(--soul-border)', color: 'var(--soul-text-secondary)' }}
+            aria-label="User profile"
           >
-            avatar
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <circle cx="12" cy="8" r="4"/>
+              <path d="M20 21a8 8 0 0 0-16 0"/>
+            </svg>
           </button>
         </div>
       </div>

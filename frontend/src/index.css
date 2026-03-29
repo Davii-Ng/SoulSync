@@ -3,22 +3,23 @@
 
 /* ── Warm therapeutic palette ── */
 :root {
-  --soul-bg: linear-gradient(180deg, #f6f9fc 0%, #eef3f9 60%, #e8eff7 100%);
-  --soul-surface: #ffffff;
-  --soul-surface-alt: #f2f5f9;
-  --soul-border: #c5d1df;
-  --soul-border-light: #dbe4ef;
-  --soul-text: #1f2b3a;
-  --soul-text-secondary: #4a5d75;
-  --soul-text-muted: #70839b;
-  --soul-accent: #5c92c4;
-  --soul-accent-light: #b7d4ee;
-  --soul-accent-pale: #e6f2fc;
-  --soul-user-bubble: #edf5ff;
-  --soul-user-text: #1f2b3a;
-  --soul-gradient-start: #f8fbff;
-  --soul-gradient-end: #d8e8f8;
-  --soul-orb-ring: rgba(92, 146, 196, 0.22);
+  --soul-bg: linear-gradient(180deg, #edf2f8 0%, #e4ecf5 40%, #dce6f1 100%);
+  --soul-surface: rgba(255, 255, 255, 0.85);
+  --soul-surface-alt: #eaeff6;
+  --soul-border: #b8c8da;
+  --soul-border-light: #cdd8e6;
+  --soul-text: #1a2535;
+  --soul-text-secondary: #3f5570;
+  --soul-text-muted: #6b7f97;
+  --soul-accent: #4a82b8;
+  --soul-accent-light: #a3c6e4;
+  --soul-accent-pale: #dceaf7;
+  --soul-user-bubble: #d6e7f7;
+  --soul-user-text: #1a2535;
+  --soul-ai-bubble: rgba(255, 255, 255, 0.7);
+  --soul-gradient-start: #e8f0fa;
+  --soul-gradient-end: #b8d2ea;
+  --soul-orb-ring: rgba(74, 130, 184, 0.25);
 }
 
 /* ── Base reset ── */
@@ -32,12 +33,11 @@ html,
 body,
 #root {
   width: 100%;
-  min-width: 100%;
 }
 
 body {
   font-family: 'Plus Jakarta Sans', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-  background: #f4f8fd;
+  background: #e2eaf3;
   color: var(--soul-text);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
@@ -46,6 +46,13 @@ body {
 #root {
   min-height: 100vh;
   background: var(--soul-bg);
+}
+
+/* ── Heading font ── */
+.section-heading {
+  font-family: 'Sora', 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 /* ── Scrollbar ── */
@@ -115,15 +122,20 @@ body {
 
 .soul-dashboard {
   background-image:
-    radial-gradient(circle at 85% 12%, rgba(120, 172, 219, 0.14), transparent 42%),
-    radial-gradient(circle at 12% 90%, rgba(189, 210, 233, 0.2), transparent 38%);
+    radial-gradient(circle at 80% 10%, rgba(90, 148, 200, 0.18), transparent 45%),
+    radial-gradient(circle at 15% 85%, rgba(160, 190, 220, 0.22), transparent 40%);
 }
 
 .dashboard-strip,
 .dashboard-chat,
 .dashboard-card {
-  background: linear-gradient(140deg, rgba(255, 255, 255, 0.97), rgba(243, 248, 255, 0.95));
-  box-shadow: 0 10px 30px rgba(90, 118, 149, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.82), rgba(240, 246, 255, 0.78));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow:
+    0 1px 3px rgba(80, 110, 145, 0.07),
+    0 12px 32px rgba(80, 110, 145, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 .dashboard-transcript {
@@ -138,11 +150,36 @@ body {
   min-height: 126px;
 }
 
+.dashboard-card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: default;
+}
+
+.dashboard-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 1px 3px rgba(80, 110, 145, 0.07),
+    0 18px 40px rgba(80, 110, 145, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.resource-row {
+  transition: background 0.15s ease;
+}
+
+.resource-row:hover {
+  background: var(--soul-accent-pale);
+}
+
 .header-shell {
   border-radius: 16px;
   background:
-    linear-gradient(95deg, rgba(255, 255, 255, 0.99), rgba(235, 245, 255, 0.95));
-  box-shadow: 0 16px 30px rgba(84, 120, 153, 0.12);
+    linear-gradient(95deg, rgba(255, 255, 255, 0.88), rgba(230, 242, 255, 0.82));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow:
+    0 1px 3px rgba(70, 100, 135, 0.06),
+    0 16px 30px rgba(70, 100, 135, 0.12);
 }
 
 .header-title {
@@ -167,6 +204,30 @@ body {
 .header-avatar {
   border: 1px solid var(--soul-border);
   background: linear-gradient(145deg, #ffffff, #eff5fc);
+}
+
+/* ── User / AI bubble styles ── */
+.bubble-user {
+  background: var(--soul-user-bubble);
+  border: 1px solid var(--soul-accent-light);
+}
+
+.bubble-ai {
+  background: var(--soul-ai-bubble);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--soul-border-light);
+  border-left: 3px solid var(--soul-accent);
+}
+
+/* ── Text input focus ── */
+.soul-input-wrap {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.soul-input-wrap:focus-within {
+  border-color: var(--soul-accent-light) !important;
+  box-shadow: 0 0 0 3px rgba(74, 130, 184, 0.12);
 }
 
 @media (min-width: 768px) {
