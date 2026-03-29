@@ -106,10 +106,10 @@ function App() {
 
   return (
     <div
-      className="min-h-screen soul-dashboard px-4 py-6 md:px-10 md:py-8"
+      className="min-h-screen soul-dashboard px-4 py-5 md:px-8 md:py-8"
       style={{ background: 'var(--soul-bg)' }}
     >
-      <div className="max-w-5xl mx-auto w-full flex flex-col gap-4 md:gap-5">
+      <div className="w-full flex flex-col gap-4 md:gap-6">
         <Header isConnected={isConnected} />
 
         <section
@@ -125,9 +125,9 @@ function App() {
           </span>
         </section>
 
-        <section className="flex flex-col items-center py-2 md:py-3">
+        <section className="flex flex-col items-center py-3 md:py-4">
           <VoiceOrb state={orbState} onClick={handleOrbClick} />
-          <p className="text-xs mt-2" style={{ color: 'var(--soul-text-muted)' }}>
+          <p className="text-sm mt-2" style={{ color: 'var(--soul-text-muted)' }}>
             idle / listening / thinking / speaking
           </p>
         </section>
@@ -137,13 +137,13 @@ function App() {
           style={{ borderColor: 'var(--soul-border-light)' }}
         >
           <ChatTranscript messages={messages} />
-          <div className="mt-4">
+          <div className="mt-5">
             <TextInput onSend={handleTextSend} disabled={isBusy} />
           </div>
         </section>
 
-        <section className="pt-1">
-          <p className="text-sm text-center mb-3" style={{ color: 'var(--soul-text-muted)' }}>
+        <section className="pt-1 md:pt-0">
+          <p className="text-base text-center mb-3" style={{ color: 'var(--soul-text-secondary)' }}>
             Phase 2 cards
           </p>
 
