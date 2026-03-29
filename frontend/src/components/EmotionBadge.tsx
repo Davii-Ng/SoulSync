@@ -1,4 +1,4 @@
-// Displays current detected emotion with color
+// Compact emotion badge with colored dot
 
 import type { Emotion } from '../types'
 import { EMOTION_CONFIG } from '../utils/constants'
@@ -11,10 +11,9 @@ export function EmotionBadge({ emotion }: Props) {
   const config = EMOTION_CONFIG[emotion]
 
   return (
-    <div className="flex justify-center px-6 py-2">
-      <span className={`px-4 py-1.5 rounded-full bg-white/5 text-sm ${config.color}`}>
-        {config.label}
-      </span>
-    </div>
+    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${config.bg} ${config.color}`}>
+      <span className={`w-1.5 h-1.5 rounded-full ${config.dot}`} />
+      {config.label}
+    </span>
   )
 }

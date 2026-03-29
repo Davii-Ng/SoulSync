@@ -10,4 +10,6 @@ export interface Message {
   content: string
   timestamp: number
   emotion?: Emotion
+  audio_base64?: string
+  isVoice?: boolean
 }
