@@ -66,7 +66,7 @@ def get_events(date: str = "") -> dict:
 
 calendar_agent = Agent(
     name="calendar_agent",
-    model="gemini-2.0-flash",
+    model="gemini-3-flash-preview",
     description="Manages the user's calendar events. Saves new events and retrieves upcoming schedule when needed.",
     instruction="""You are the Calendar Agent for SoulSync, a mental health companion.
 Your job is to help manage the user's schedule and events.

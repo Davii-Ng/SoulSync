@@ -1,5 +1,6 @@
 from google.adk.agents.llm_agent import Agent
 from multi_tool_agent.core_companion import core_companion_agent
+from .calendar_agent import calendar_agent
 
 
 def transcribe_audio(audio_input: str) -> str:

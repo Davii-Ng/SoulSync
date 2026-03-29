@@ -1,2 +1,2 @@
 from . import agent
-from . import calendar_agent
+from .calendar_agent import calendar_agent
