@@ -25,7 +25,7 @@ const GROUNDING_STEPS = [
 
 function BreathingGuide({ onClose }: { onClose: () => void }) {
   const [phase, setPhase] = useState(0)
-  const [seconds, setSeconds] = useState(BREATHING_PHASES[0].duration)
+  const [seconds, setSeconds] = useState<number>(BREATHING_PHASES[0].duration)
   const [cycles, setCycles] = useState(0)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
@@ -85,7 +85,7 @@ function BreathingGuide({ onClose }: { onClose: () => void }) {
           {current.label}
         </p>
         <div className="flex gap-1.5">
-          {BREATHING_PHASES.map((p, i) => (
+          {BREATHING_PHASES.map((_, i) => (
             <span
               key={i}
               className="w-2 h-2 rounded-full transition-colors"
