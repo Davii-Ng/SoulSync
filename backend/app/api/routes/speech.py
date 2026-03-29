@@ -11,7 +11,7 @@ router = APIRouter()
 @router.post("/speech")
 async def speech(request: SpeechRequest) -> Response:
     try:
-        audio_bytes = await voice_agent.text_to_speech(request.text, request.voice_id)
+        audio_bytes = voice_agent.text_to_speech(request.text, request.voice_id)
         return Response(content=audio_bytes, media_type="audio/mpeg")
     except Exception as e:
         logger.error(f"Speech endpoint error: {e}")

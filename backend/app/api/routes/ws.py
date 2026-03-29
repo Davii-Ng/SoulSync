@@ -32,7 +32,7 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
                 # Generate TTS audio
                 audio_b64 = None
                 try:
-                    audio_bytes = await text_to_speech(reply)
+                    audio_bytes = text_to_speech(reply)
                     audio_b64 = base64.b64encode(audio_bytes).decode("utf-8")
                 except Exception as e:
                     logger.error(f"TTS failed: {e}")

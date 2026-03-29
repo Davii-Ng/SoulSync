@@ -49,8 +49,8 @@ def speak_response(response_text: str) -> dict:
         return {"status": "error", "message": str(e)}
 
 
-async def text_to_speech(text: str, voice_id: str | None = None) -> bytes:
-    """Backend-facing async TTS helper. Returns raw mp3 bytes for API routes."""
+def text_to_speech(text: str, voice_id: str | None = None) -> bytes:
+    """Backend-facing TTS helper. Returns raw mp3 bytes for API routes."""
     if not _client:
         raise RuntimeError("ELEVENLABS_API_KEY not set")
 
