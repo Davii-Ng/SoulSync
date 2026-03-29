@@ -127,6 +127,7 @@ async def run_agent(message: str, user_id: str = "default") -> dict:
     final_text = ""
     emotion = "neutral"
     captured_events: list[dict[str, str]] = []
+    journal_saved = False
 
     async for event in _runner.run_async(
         user_id=user_id,
@@ -150,6 +151,10 @@ async def run_agent(message: str, user_id: str = "default") -> dict:
                 function_response = getattr(part, "function_response", None)
                 if function_response:
                     captured_events.extend(_extract_events(function_response))
+                    # Detect save_journal tool signal
+                    resp_data = getattr(function_response, "response", None)
+                    if isinstance(resp_data, dict) and resp_data.get("journal_saved"):
+                        journal_saved = True
 
     # If no emotion from state, try to detect from the function calls
     if emotion == "neutral" and final_text:
@@ -167,8 +172,11 @@ async def run_agent(message: str, user_id: str = "default") -> dict:
 
     deduped_events = _dedupe_events(captured_events)
 
-    return {
+    result: dict[str, Any] = {
         "content": final_text,
         "emotion": emotion,
         "events": deduped_events,
     }
+    if journal_saved:
+        result["journal_saved"] = True
+    return result

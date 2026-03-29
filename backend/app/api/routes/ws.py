@@ -72,6 +72,7 @@ async def _process_text(websocket: WebSocket, content: str, voice_id: str | None
         reply = (agent_result.get("content") or "").strip()
         emotion = agent_result.get("emotion", "neutral")
         events = agent_result.get("events", [])
+        journal_saved = agent_result.get("journal_saved", False)
         if not reply:
             reply = "I'm here with you. Want to share a little more about what's on your mind?"
     except Exception as e:
@@ -98,6 +99,8 @@ async def _process_text(websocket: WebSocket, content: str, voice_id: str | None
     }
     if events:
         response["events"] = events
+    if journal_saved:
+        response["journal_saved"] = True
     if tts_error:
         response["tts_error"] = tts_error
     if audio_b64:

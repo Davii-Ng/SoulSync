@@ -85,6 +85,18 @@ def get_entries(date: str = "") -> dict:
     return {"status": "success", "count": len(filtered), "entries": filtered}
 
 
+def save_journal() -> dict:
+    """Signal that the user wants to save today's conversation as a journal entry.
+
+    Call this when the user says things like 'save today's journal', 'that's it for today',
+    'done for the day', 'save this conversation', 'wrap up', etc.
+
+    Returns:
+        dict with journal_saved signal for the frontend
+    """
+    return {"status": "journal_saved", "journal_saved": True, "message": "Journal saved! Your conversation has been saved for today."}
+
+
 def get_prompt(emotion: str = "neutral") -> dict:
     """Get a reflective journaling prompt based on the user's current emotion.
 
@@ -109,8 +121,11 @@ journal_agent = Agent(
         "If they're just starting and don't know what to write, use 'get_prompt' with their emotion to give them something real to respond to.\n\n"
         "When they want to look back, use 'get_entries' to pull up what they've written and reflect on it with them — "
         "notice patterns, celebrate growth, or just acknowledge how they felt.\n\n"
+        "IMPORTANT: When the user says things like 'save today's journal', 'that's it for today', 'done for the day', "
+        "'save this conversation', 'wrap up for today', 'end session', or anything that signals they want to save and close out — "
+        "call 'save_journal' immediately. This tells the frontend to snapshot the full conversation.\n\n"
         "Your job isn't to solve anything. It's to help people get their thoughts out of their head and onto the page. "
         "Be curious. Ask follow-up questions. Make them feel like their words matter — because they do."
     ),
-    tools=[write_entry, get_entries, get_prompt],
+    tools=[write_entry, get_entries, get_prompt, save_journal],
 )
