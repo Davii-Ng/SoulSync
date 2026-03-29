@@ -82,11 +82,7 @@ def get_events(date: str = "") -> dict:
     return {"status": "success", "message": f"Found {len(filtered)} event(s).", "events": filtered}
 
 
-calendar_agent = Agent(
-    name="calendar_agent",
-    model="gemini-3.1-pro-preview",
-    description="Manages the user's calendar events. Saves new events and retrieves upcoming schedule when needed.",
-    instruction="""You're the one who keeps track of things so the user doesn't have to stress about it.
+
 def _build_calendar_instruction() -> str:
     today = datetime.now().strftime("%Y-%m-%d")
     weekday = datetime.now().strftime("%A")
@@ -114,7 +110,7 @@ Dates MUST go in YYYY-MM-DD format, times in HH:MM 24h format.
 
 calendar_agent = Agent(
     name="calendar_agent",
-    model="gemini-3-flash-preview",
+    model="gemini-3.1-pro-preview",
     description="Manages the user's calendar events. Saves new events and retrieves upcoming schedule when needed.",
     instruction=_build_calendar_instruction(),
     tools=[save_event, get_events],
