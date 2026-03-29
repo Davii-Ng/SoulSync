@@ -38,6 +38,9 @@ function App() {
   const [selectedVoiceId, setSelectedVoiceId] = useState<string | null>(
     () => localStorage.getItem('soulsync_voice_id'),
   )
+  const [selectedVoiceName, setSelectedVoiceName] = useState<string | null>(
+    () => localStorage.getItem('soulsync_voice_name'),
+  )
   const { isConnected, sendMessage, setVoice, ws } = useWebSocket()
   const { isListening, transcript, startListening, stopListening } = useVoiceInput()
   const listeningRef = useRef(false)
@@ -172,10 +175,13 @@ function App() {
   }, [orbState, startListening, stopListening, sendMessage])
 
   const handleVoiceChange = useCallback(
-    (voiceId: string | null) => {
+    (voiceId: string | null, voiceName: string | null) => {
       setSelectedVoiceId(voiceId)
+      setSelectedVoiceName(voiceName)
       if (voiceId) localStorage.setItem('soulsync_voice_id', voiceId)
       else localStorage.removeItem('soulsync_voice_id')
+      if (voiceName) localStorage.setItem('soulsync_voice_name', voiceName)
+      else localStorage.removeItem('soulsync_voice_name')
       setVoice(voiceId)
     },
     [setVoice],
@@ -203,6 +209,7 @@ function App() {
               transcript={transcript}
               isBusy={isBusy}
               savedEvents={savedEvents}
+              voiceName={selectedVoiceName}
               onOrbClick={handleOrbClick}
               onTextSend={handleTextSend}
             />

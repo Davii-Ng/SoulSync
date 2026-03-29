@@ -29,20 +29,17 @@ export function HistoryPage({ messages }: Props) {
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <h1 className="text-2xl section-heading" style={{ color: 'var(--soul-text)' }}>
+        <h1 className="text-2xl section-heading text-soul-text">
           Mood History
         </h1>
-        <p className="text-sm mt-1" style={{ color: 'var(--soul-text-muted)' }}>
+        <p className="text-sm mt-1 text-soul-text-muted">
           Track how your emotions have evolved over your sessions.
         </p>
       </div>
 
       {/* Weekly overview */}
-      <div
-        className="dashboard-card rounded-2xl border p-5"
-        style={{ borderColor: 'var(--soul-border-light)' }}
-      >
-        <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--soul-text)' }}>
+      <div className="dashboard-card rounded-2xl border border-soul-border-light p-5 md:p-6">
+        <h3 className="text-sm font-semibold mb-4 text-soul-text">
           This Week
         </h3>
         <div className="flex items-end justify-around gap-2">
@@ -52,34 +49,31 @@ export function HistoryPage({ messages }: Props) {
             return (
               <div key={day} className="flex flex-col items-center gap-2">
                 <div
-                  className={`w-8 rounded-lg ${colors[i]} transition-all`}
-                  style={{ height: `${heights[i]}px`, opacity: 0.7 }}
+                  className={`w-8 rounded-lg ${colors[i]} transition-all opacity-70`}
+                  style={{ height: `${heights[i]}px` }}
                 />
-                <span className="text-xs" style={{ color: 'var(--soul-text-muted)' }}>
+                <span className="text-xs text-soul-text-muted">
                   {day}
                 </span>
               </div>
             )
           })}
         </div>
-        <p className="text-xs mt-4" style={{ color: 'var(--soul-text-muted)' }}>
+        <p className="text-xs mt-4 text-soul-text-muted">
           Mostly positive this week
         </p>
       </div>
 
       {/* Timeline */}
       {moodEntries.length === 0 ? (
-        <div
-          className="dashboard-card rounded-2xl border p-8 text-center"
-          style={{ borderColor: 'var(--soul-border-light)' }}
-        >
-          <span className="material-symbols-outlined text-5xl mb-3" style={{ color: 'var(--soul-accent-light)' }}>
+        <div className="dashboard-card rounded-2xl border border-soul-border-light p-8 text-center">
+          <span className="material-symbols-outlined text-5xl mb-3 text-soul-accent-light">
             timeline
           </span>
-          <p className="text-base font-medium" style={{ color: 'var(--soul-text-secondary)' }}>
+          <p className="text-base font-medium text-soul-text-secondary">
             No mood data yet
           </p>
-          <p className="text-sm mt-1" style={{ color: 'var(--soul-text-muted)' }}>
+          <p className="text-sm mt-1 text-soul-text-muted">
             As you talk with SoulSync, your emotional journey will be tracked here.
           </p>
         </div>
@@ -93,8 +87,7 @@ export function HistoryPage({ messages }: Props) {
             return (
               <div
                 key={entry.id}
-                className="dashboard-card rounded-2xl border p-4 flex items-start gap-3"
-                style={{ borderColor: 'var(--soul-border-light)' }}
+                className="dashboard-card rounded-2xl border border-soul-border-light p-5 md:p-6 flex items-start gap-3"
               >
                 <div
                   className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${config.bg}`}
@@ -109,11 +102,11 @@ export function HistoryPage({ messages }: Props) {
                       <span className={`w-1.5 h-1.5 rounded-full ${config.dot}`} />
                       {config.label}
                     </span>
-                    <span className="text-xs" style={{ color: 'var(--soul-text-muted)' }}>
+                    <span className="text-xs text-soul-text-muted">
                       {timeStr}
                     </span>
                   </div>
-                  <p className="text-xs mt-1.5 leading-relaxed" style={{ color: 'var(--soul-text-secondary)' }}>
+                  <p className="text-xs mt-1.5 leading-relaxed text-soul-text-secondary">
                     {entry.snippet}
                   </p>
                 </div>

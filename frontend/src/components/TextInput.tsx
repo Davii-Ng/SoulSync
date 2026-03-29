@@ -17,15 +17,8 @@ export function TextInput({ onSend, disabled = false }: Props) {
   }, [text, disabled, onSend])
 
   return (
-    <div className="flex items-center" style={{ gap: '15px' }}>
-      <div
-        className="flex-1 flex items-center pl-8 pr-5 rounded-full"
-        style={{
-          background: 'var(--soul-surface-alt)',
-          border: '1px solid var(--soul-border)',
-          height: '48px',
-        }}
-      >
+    <div className="flex items-center gap-4">
+      <div className="flex-1 flex items-center pl-8 pr-5 rounded-full h-12 bg-soul-surface-alt border border-soul-border">
         <input
           type="text"
           value={text}
@@ -38,19 +31,16 @@ export function TextInput({ onSend, disabled = false }: Props) {
           }}
           placeholder="Type a message..."
           disabled={disabled}
-          className="flex-1 text-sm bg-transparent outline-none"
-          style={{ color: 'var(--soul-text)' }}
+          className="flex-1 text-sm bg-transparent outline-none text-soul-text"
         />
       </div>
 
       <button
         onClick={handleSend}
         disabled={!text.trim() || disabled}
-        className="h-11 w-11 flex-shrink-0 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95"
-        style={{
-          background: text.trim() ? 'var(--soul-accent)' : 'var(--soul-border)',
-          opacity: disabled ? 0.6 : !text.trim() ? 0.4 : 1,
-        }}
+        className={`h-11 w-11 flex-shrink-0 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95 ${
+          text.trim() ? 'bg-soul-accent' : 'bg-soul-border'
+        } ${disabled ? 'opacity-60' : !text.trim() ? 'opacity-40' : ''}`}
       >
         {disabled ? (
           <svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none"

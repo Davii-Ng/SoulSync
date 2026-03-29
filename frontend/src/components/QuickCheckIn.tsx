@@ -31,11 +31,11 @@ export function QuickCheckIn({ onCheckIn }: Props) {
   }, [confirmed, onCheckIn])
 
   return (
-    <article className="soul-card p-6">
-      <h3 className="text-sm font-semibold tracking-wide uppercase mb-1" style={{ color: 'var(--soul-text-muted)' }}>
+    <article className="soul-card p-5 md:p-6">
+      <h3 className="text-sm font-semibold tracking-wide uppercase mb-1 text-soul-text-muted">
         Quick Check-in
       </h3>
-      <p className="text-sm mb-5" style={{ color: 'var(--soul-text-secondary)' }}>
+      <p className="text-sm mb-5 text-soul-text-secondary">
         {confirmed ? 'Logged! Thanks for checking in.' : 'How are you feeling right now?'}
       </p>
 
@@ -44,22 +44,19 @@ export function QuickCheckIn({ onCheckIn }: Props) {
           <button
             key={mood.value}
             onClick={() => handleSelect(mood)}
-            className="flex flex-col items-center gap-1.5 px-2 py-2 rounded-xl transition-all"
-            style={{
-              background: selected === mood.value
-                ? 'var(--soul-accent-pale)'
-                : 'transparent',
-              border: selected === mood.value
-                ? '1px solid var(--soul-accent-light)'
-                : '1px solid transparent',
-              opacity: confirmed && selected !== mood.value ? 0.4 : 1,
-              cursor: confirmed ? 'default' : 'pointer',
-            }}
+            className={`flex flex-col items-center gap-1.5 px-2 py-2 rounded-xl transition-all border ${
+              selected === mood.value
+                ? 'bg-soul-accent-pale border-soul-accent-light'
+                : 'bg-transparent border-transparent'
+            } ${confirmed && selected !== mood.value ? 'opacity-40' : ''} ${
+              confirmed ? 'cursor-default' : 'cursor-pointer'
+            }`}
           >
             <span className="text-2xl">{mood.emoji}</span>
             <span
-              className="text-[10px] font-medium"
-              style={{ color: selected === mood.value ? 'var(--soul-accent)' : 'var(--soul-text-muted)' }}
+              className={`text-xs font-medium ${
+                selected === mood.value ? 'text-soul-accent' : 'text-soul-text-muted'
+              }`}
             >
               {mood.label}
             </span>

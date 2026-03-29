@@ -4,24 +4,22 @@ import type { Message } from '../types'
 
 interface Props {
   message: Message
+  voiceName?: string | null
 }
 
-export function MessageBubble({ message }: Props) {
+export function MessageBubble({ message, voiceName }: Props) {
   const isUser = message.role === 'user'
   return (
-    <div className={`flex msg-enter ${isUser ? 'justify-start' : 'justify-end'}`}>
+    <div className={`flex msg-enter px-3 py-1.5 ${isUser ? 'justify-start' : 'justify-end'}`}>
       <div
-        className={`max-w-[85%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${
+        className={`max-w-[85%] px-5 py-4 rounded-2xl text-sm leading-relaxed ${
           isUser ? 'bubble-user' : 'bubble-ai'
         }`}
       >
-        <span
-          className="text-xs font-medium block mb-1"
-          style={{ color: 'var(--soul-text-muted)' }}
-        >
-          {isUser ? 'You' : 'SoulSync'}
+        <span className="text-xs font-medium block mb-1 text-soul-text-muted">
+          {isUser ? 'You' : voiceName || 'SoulSync'}
         </span>
-        <span style={{ color: 'var(--soul-text)' }}>{message.content}</span>
+        <span className="text-soul-text">{message.content}</span>
       </div>
     </div>
   )

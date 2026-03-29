@@ -31,23 +31,20 @@ export function Layout({ isConnected }: Props) {
           <button
             type="button"
             onClick={() => setSidebarOpen((o) => !o)}
-            className="hidden md:flex w-9 h-9 items-center justify-center rounded-lg hover:bg-[var(--soul-accent-pale)] transition-colors"
+            className="hidden md:flex w-9 h-9 items-center justify-center rounded-lg hover:bg-soul-accent-pale transition-colors"
             aria-label="Toggle sidebar"
           >
-            <span
-              className="material-symbols-outlined text-xl"
-              style={{ color: "var(--soul-text-secondary)" }}
-            >
+            <span className="material-symbols-outlined text-xl text-soul-text-secondary">
               {sidebarOpen ? "menu_open" : "menu"}
             </span>
           </button>
           <NavLink
             to="/"
-            className="text-2xl font-bold tracking-tight text-[var(--soul-text)] flex items-center gap-2"
+            className="text-2xl font-bold tracking-tight text-soul-text flex items-center gap-2"
           >
-            <span className="tech-font text-[var(--soul-accent)]">&lt;</span>
+            <span className="tech-font text-soul-accent">&lt;</span>
             SoulSync
-            <span className="tech-font text-[var(--soul-accent)]">/&gt;</span>
+            <span className="tech-font text-soul-accent">/&gt;</span>
           </NavLink>
         </div>
         <div className="flex items-center gap-3">
@@ -57,9 +54,8 @@ export function Layout({ isConnected }: Props) {
           />
           <button
             type="button"
-            className="w-9 h-9 rounded-full flex items-center justify-center header-avatar"
+            className="w-9 h-9 rounded-full flex items-center justify-center header-avatar text-soul-text"
             aria-label="User profile"
-            style={{ color: "var(--soul-text)" }}
           >
             <svg
               width="18"
@@ -78,10 +74,10 @@ export function Layout({ isConnected }: Props) {
       </header>
 
       {/* ── Body: sidebar + main ── */}
-      <div className="mt-[72px] block">
+      <div className="mt-[80px] block">
         {/* Sidebar (desktop, retractable) — only History & Resources */}
         <aside
-          className={`hidden md:flex flex-col fixed top-[72px] bottom-[88px] left-0 z-40 sidebar-panel sidebar-transition ${
+          className={`hidden md:flex flex-col fixed top-[80px] bottom-[88px] left-0 z-40 sidebar-panel sidebar-transition ${
             sidebarOpen ? "w-56" : "w-0 overflow-hidden border-r-0"
           }`}
         >
@@ -108,14 +104,14 @@ export function Layout({ isConnected }: Props) {
 
         {/* Main content workspace */}
         <div style={{ marginLeft: sidebarOpen ? '14rem' : '0' }} className="hidden md:block bg-transparent min-h-[calc(100vh-160px)]">
-          <main className="flex-1 flex flex-col items-center justify-start pt-8 pb-56 px-4 md:px-8 w-full">
+          <main className="flex-1 flex flex-col items-center justify-start pt-8 pb-56 px-5 md:px-8 w-full">
             <div className="w-full max-w-3xl">
               <Outlet />
             </div>
           </main>
         </div>
         <div className="md:hidden block bg-transparent min-h-[calc(100vh-160px)]">
-          <main className="flex-1 flex flex-col items-center justify-start pt-8 pb-56 px-4 w-full">
+          <main className="flex-1 flex flex-col items-center justify-start pt-8 pb-56 px-5 w-full">
             <div className="w-full max-w-3xl">
               <Outlet />
             </div>
@@ -139,7 +135,7 @@ export function Layout({ isConnected }: Props) {
               <span className="material-symbols-outlined text-xl">
                 {item.icon}
               </span>
-              <span className="text-[11px] font-medium tracking-wide uppercase mt-0.5">
+              <span className="text-xs font-medium tracking-wide uppercase mt-0.5">
                 {item.label}
               </span>
             </NavLink>
@@ -163,7 +159,7 @@ export function Layout({ isConnected }: Props) {
               <span className="material-symbols-outlined text-xl">
                 {item.icon}
               </span>
-              <span className="text-[11px] font-medium tracking-wide uppercase mt-0.5">
+              <span className="text-xs font-medium tracking-wide uppercase mt-0.5">
                 {item.label}
               </span>
             </NavLink>

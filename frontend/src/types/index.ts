@@ -16,6 +16,7 @@ export interface SavedEvent {
 export interface Voice {
   voice_id: string
   name: string
+  gender: 'male' | 'female' | 'unknown'
 }
 
 export interface WsResponse {

@@ -12,16 +12,17 @@ interface Props {
   transcript: string
   isBusy: boolean
   savedEvents: SavedEvent[]
+  voiceName?: string | null
   onOrbClick: () => void
   onTextSend: (text: string) => void
 }
 
 export function SpeakingPage({
   orbState, messages, emotion, transcript, isBusy,
-  savedEvents, onOrbClick, onTextSend,
+  savedEvents, voiceName, onOrbClick, onTextSend,
 }: Props) {
   return (
-    <div className="flex flex-col gap-6" style={{ marginTop: '60px' }}>
+    <div className="flex flex-col gap-6">
       {/* Emotion signal */}
       <section className="flex items-center justify-center gap-3 py-2">
         <EmotionBadge emotion={emotion} />
@@ -33,8 +34,8 @@ export function SpeakingPage({
       </section>
 
       {/* Conversation card — chat + input together */}
-      <section className="soul-card p-5 md:p-7 w-full flex flex-col">
-        <ChatTranscript messages={messages} />
+      <section className="soul-card p-5 md:p-6 w-full flex flex-col">
+        <ChatTranscript messages={messages} voiceName={voiceName} />
         <div className="mt-4">
           <TextInput onSend={onTextSend} disabled={isBusy} />
         </div>
@@ -49,24 +50,24 @@ export function SpeakingPage({
             }}
           />
 
-          <article className="soul-card p-6">
-            <h3 className="text-sm font-semibold tracking-wide uppercase mb-3" style={{ color: 'var(--soul-text-muted)' }}>
+          <article className="soul-card p-5 md:p-6">
+            <h3 className="text-sm font-semibold tracking-wide uppercase mb-3 text-soul-text-muted">
               Events
             </h3>
             {savedEvents.length === 0 ? (
-              <p className="text-sm" style={{ color: 'var(--soul-text-muted)' }}>
+              <p className="text-sm text-soul-text-muted">
                 Mention a date or appointment and SoulSync will track it here.
               </p>
             ) : (
-              <div className="rounded-2xl px-4 py-3" style={{ background: 'var(--soul-accent-pale)' }}>
-                <p className="text-sm font-semibold" style={{ color: 'var(--soul-text)' }}>
+              <div className="rounded-2xl px-4 py-3 bg-soul-accent-pale">
+                <p className="text-sm font-semibold text-soul-text">
                   {savedEvents[0]?.title}
                 </p>
-                <p className="text-xs mt-1" style={{ color: 'var(--soul-accent)' }}>
+                <p className="text-xs mt-1 text-soul-accent">
                   {savedEvents[0]?.dateLabel}
                 </p>
                 {savedEvents[0]?.note && (
-                  <p className="text-xs mt-2" style={{ color: 'var(--soul-text-muted)' }}>
+                  <p className="text-xs mt-2 text-soul-text-muted">
                     {savedEvents[0].note}
                   </p>
                 )}

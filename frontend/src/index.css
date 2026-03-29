@@ -2,6 +2,34 @@
 @import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
 @import "tailwindcss";
 
+/* ── Tailwind v4 Theme Tokens ── */
+@theme {
+  --color-soul-bg: #ffffff;
+  --color-soul-surface: #f8f9fa;
+  --color-soul-surface-alt: #f1f5f9;
+  --color-soul-border: #e2e8f0;
+  --color-soul-border-light: #cbd5e1;
+
+  --color-soul-text: #0f172a;
+  --color-soul-text-secondary: #475569;
+  --color-soul-text-muted: #64748b;
+
+  --color-soul-accent: #06b6d4;
+  --color-soul-accent-light: #22d3ee;
+  --color-soul-accent-pale: rgba(6, 182, 212, 0.12);
+
+  --color-soul-user-bubble: rgba(6, 182, 212, 0.15);
+  --color-soul-user-text: #0f172a;
+  --color-soul-ai-bubble: #f1f5f9;
+
+  --color-soul-error: #dc2626;
+
+  --color-soul-orb-ring: rgba(6, 182, 212, 0.25);
+
+  --font-family-heading: "Outfit", "Plus Jakarta Sans", sans-serif;
+  --font-family-mono: "JetBrains Mono", monospace;
+}
+
 /* ── Neo-morphic / Glass Tech Palette (Light Mode) ── */
 :root {
   --soul-bg: #ffffff;
@@ -9,291 +37,353 @@
   --soul-surface-alt: #f1f5f9;
   --soul-border: #e2e8f0;
   --soul-border-light: #cbd5e1;
-  
+
   --soul-text: #0f172a;
   --soul-text-secondary: #475569;
   --soul-text-muted: #64748b;
-  
+
   /* Tech Cyan */
   --soul-accent: #06b6d4; /* Cyan 500 */
   --soul-accent-light: #22d3ee; /* Cyan 400 */
   --soul-accent-pale: rgba(6, 182, 212, 0.12);
-  
+
   /* Bubbles */
   --soul-user-bubble: rgba(6, 182, 212, 0.15);
   --soul-user-text: #0f172a;
   --soul-ai-bubble: #f1f5f9;
-  
+
   /* Glows */
   --soul-orb-ring: rgba(6, 182, 212, 0.25);
 }
 
-/* ── Material Symbols config ── */
-.material-symbols-outlined {
-  font-variation-settings:
-    "FILL" 0,
-    "wght" 300,
-    "GRAD" 0,
-    "opsz" 24;
-}
-
-/* ── Base reset ── */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-html, body, #root {
-  width: 100%;
-}
-
-body {
-  font-family:
-    "Plus Jakarta Sans",
-    "Segoe UI",
-    -apple-system,
-    sans-serif;
-  background-color: var(--soul-bg);
-  background-attachment: fixed;
-  color: var(--soul-text);
-  -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
-  overflow-y: scroll !important;
-}
-
-#root {
-  min-height: 100vh;
-}
-
-/* ── Heading font ── */
-.section-heading {
-  font-family: "Outfit", "Plus Jakarta Sans", sans-serif;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-}
-
-/* ── Tech Monospace Elements ── */
-.tech-font {
-  font-family: "JetBrains Mono", monospace;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  font-size: 0.75rem;
-}
-
-/* Standard scrollbar behavior enabled per user request */
-
 /* ══════════════════════════════════
-   LAYOUT: Header, Sidebar, Bottom Nav
+   BASE — resets & globals
+   Must be in @layer base so Tailwind
+   utilities can override them.
    ══════════════════════════════════ */
+@layer base {
+  /* ── Material Symbols config ── */
+  .material-symbols-outlined {
+    font-variation-settings:
+      "FILL" 0,
+      "wght" 300,
+      "GRAD" 0,
+      "opsz" 24;
+  }
 
-/* Header bar */
-.header-bar {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-bottom: 1px solid var(--soul-border);
-}
+  /* ── Base reset ── */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
 
-.header-avatar {
-  border: 1px solid var(--soul-border);
-  background: var(--soul-surface);
-  color: var(--soul-text-secondary);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
+  html, body, #root {
+    width: 100%;
+  }
 
-.header-avatar:hover {
-  background: var(--soul-accent-pale);
-  border-color: var(--soul-accent-light);
-  color: var(--soul-accent);
-}
+  body {
+    font-family:
+      "Plus Jakarta Sans",
+      "Segoe UI",
+      -apple-system,
+      sans-serif;
+    background-color: var(--soul-bg);
+    background-attachment: fixed;
+    color: var(--soul-text);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    overflow-y: scroll !important;
+  }
 
-/* Sidebar */
-.sidebar-panel {
-  background: rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-right: 1px solid var(--soul-border);
-}
+  #root {
+    min-height: 100vh;
+  }
 
-.sidebar-transition {
-  transition: width 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
+  /* ── Heading font ── */
+  .section-heading {
+    font-family: "Outfit", "Plus Jakarta Sans", sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
 
-.sidebar-link {
-  display: flex;
-  align-items: center;
-  gap: 0.875rem;
-  padding: 0.75rem 1rem;
-  border-radius: 0.75rem;
-  color: var(--soul-text-secondary);
-  text-decoration: none;
-  transition: all 0.2s ease;
-  position: relative;
-  overflow: hidden;
-}
+  /* ── Tech Monospace Elements ── */
+  .tech-font {
+    font-family: "JetBrains Mono", monospace;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+  }
 
-.sidebar-link::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 3px;
-  height: 0%;
-  background: var(--soul-accent);
-  border-radius: 0 4px 4px 0;
-  transition: height 0.2s ease;
-}
+  /* ── Minimal Scrollbar ── */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--soul-border-light) transparent;
+  }
 
-.sidebar-link:hover {
-  background: var(--soul-surface-alt);
-  color: var(--soul-text);
-}
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
 
-.sidebar-link-active {
-  background: var(--soul-accent-pale);
-  color: var(--soul-accent-light) !important;
-}
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
 
-.sidebar-link-active::before {
-  height: 60%;
-}
+  ::-webkit-scrollbar-thumb {
+    background: var(--soul-border-light);
+    border-radius: 999px;
+  }
 
-.sidebar-link-active .material-symbols-outlined {
-  font-variation-settings:
-    "FILL" 1,
-    "wght" 400,
-    "GRAD" 0,
-    "opsz" 24;
-  color: var(--soul-accent);
-}
-
-.sidebar-insights-heading {
-  font-family: "JetBrains Mono", monospace;
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  padding-left: 1rem;
-  color: var(--soul-text-muted);
-  text-transform: uppercase;
-}
-
-/* Bottom nav (mobile) */
-.bottom-nav-bar {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-top: 1px solid var(--soul-border);
-  border-radius: 1.5rem 1.5rem 0 0;
-}
-
-.bottom-nav-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  width: 5.5rem;
-  padding: 0.625rem 0.5rem;
-  border-radius: 1rem;
-  color: var(--soul-text-secondary);
-  text-decoration: none;
-  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.bottom-nav-item .material-symbols-outlined {
-  display: block;
-  margin: 0 auto;
-  transition: transform 0.2s ease;
-}
-
-.bottom-nav-item:hover {
-  color: var(--soul-text);
-  background: var(--soul-surface-alt);
-}
-
-.bottom-nav-item-active {
-  color: var(--soul-accent-light) !important;
-  transform: translateY(-4px);
-}
-
-.bottom-nav-item-active .material-symbols-outlined {
-  font-variation-settings:
-    "FILL" 1,
-    "wght" 400,
-    "GRAD" 0,
-    "opsz" 24;
-  transform: scale(1.1);
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--soul-border);
+  }
 }
 
 /* ══════════════════════════════════
-   CARDS & SURFACES
+   COMPONENTS — reusable patterns
+   Must be in @layer components so
+   Tailwind utilities can override them.
    ══════════════════════════════════ */
+@layer components {
+  /* ── Header bar ── */
+  .header-bar {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-bottom: 1px solid var(--soul-border);
+  }
 
-/* Soft ambient card — large radius, subtle shadow */
-.soul-card,
-.dashboard-strip,
-.dashboard-chat,
-.dashboard-card {
-  background: var(--soul-surface);
-  border: 1px solid var(--soul-border);
-  border-radius: 1.75rem;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(0, 0, 0, 0.02);
+  .header-avatar {
+    border: 1px solid var(--soul-border);
+    background: var(--soul-surface);
+    color: var(--soul-text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .header-avatar:hover {
+    background: var(--soul-accent-pale);
+    border-color: var(--soul-accent-light);
+    color: var(--soul-accent);
+  }
+
+  /* ── Sidebar ── */
+  .sidebar-panel {
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-right: 1px solid var(--soul-border);
+  }
+
+  .sidebar-transition {
+    transition: width 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    color: var(--soul-text-secondary);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .sidebar-link::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 0%;
+    background: var(--soul-accent);
+    border-radius: 0 4px 4px 0;
+    transition: height 0.2s ease;
+  }
+
+  .sidebar-link:hover {
+    background: var(--soul-surface-alt);
+    color: var(--soul-text);
+  }
+
+  .sidebar-link-active {
+    background: var(--soul-accent-pale);
+    color: var(--soul-accent-light) !important;
+  }
+
+  .sidebar-link-active::before {
+    height: 60%;
+  }
+
+  .sidebar-link-active .material-symbols-outlined {
+    font-variation-settings:
+      "FILL" 1,
+      "wght" 400,
+      "GRAD" 0,
+      "opsz" 24;
+    color: var(--soul-accent);
+  }
+
+  .sidebar-insights-heading {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    padding-left: 1rem;
+    color: var(--soul-text-muted);
+    text-transform: uppercase;
+  }
+
+  /* ── Bottom nav ── */
+  .bottom-nav-bar {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-top: 1px solid var(--soul-border);
+    border-radius: 1.5rem 1.5rem 0 0;
+  }
+
+  .bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    width: 5.5rem;
+    padding: 0.625rem 0.5rem;
+    border-radius: 1rem;
+    color: var(--soul-text-secondary);
+    text-decoration: none;
+    transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .bottom-nav-item .material-symbols-outlined {
+    display: block;
+    margin: 0 auto;
+    transition: transform 0.2s ease;
+  }
+
+  .bottom-nav-item:hover {
+    color: var(--soul-text);
+    background: var(--soul-surface-alt);
+  }
+
+  .bottom-nav-item-active {
+    color: var(--soul-accent-light) !important;
+    transform: translateY(-4px);
+  }
+
+  .bottom-nav-item-active .material-symbols-outlined {
+    font-variation-settings:
+      "FILL" 1,
+      "wght" 400,
+      "GRAD" 0,
+      "opsz" 24;
+    transform: scale(1.1);
+  }
+
+  /* ── Cards & Surfaces ── */
+  .soul-card,
+  .dashboard-strip,
+  .dashboard-chat,
+  .dashboard-card {
+    background: var(--soul-surface);
+    border: 1px solid var(--soul-border);
+    border-radius: 1.75rem;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(0, 0, 0, 0.02);
+  }
+
+  .dashboard-transcript {
+    background: transparent;
+  }
+
+  .dashboard-chat {
+    padding: 1.25rem 1.5rem;
+  }
+
+  .dashboard-card-hover {
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .dashboard-card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+    border-color: var(--soul-accent-light);
+  }
+
+  /* ── Bubbles & Inputs ── */
+  .bubble-user {
+    background: var(--soul-user-bubble);
+    border: 1px solid rgba(6, 182, 212, 0.15);
+    border-radius: 1.25rem 1.25rem 0.25rem 1.25rem;
+    color: var(--soul-user-text);
+  }
+
+  .bubble-ai {
+    background: var(--soul-surface-alt);
+    border: 1px solid var(--soul-border);
+    border-radius: 1.25rem 1.25rem 1.25rem 0.25rem;
+  }
+
+  .soul-input-wrap {
+    transition: all 0.2s ease;
+    background: var(--soul-surface-alt);
+    border: 1px solid var(--soul-border);
+    border-radius: 99px;
+  }
+
+  .soul-input-wrap:focus-within {
+    border-color: var(--soul-accent);
+    box-shadow: 0 0 0 3px var(--soul-accent-pale);
+  }
+
+  /* ── Orb Animations ── */
+  .orb-idle {
+    animation: orb-breathe 4s ease-in-out infinite;
+  }
+
+  .orb-listening {
+    animation: orb-listening-glow 1.5s ease-in-out infinite;
+    border-color: #22d3ee !important;
+  }
+
+  .orb-listening .pulse-ring {
+    animation: pulse-ring 2s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+    background: rgba(34, 211, 238, 0.4);
+  }
+
+  .orb-thinking {
+    animation: orb-breathe 1s ease-in-out infinite;
+    filter: hue-rotate(45deg);
+  }
+
+  .thinking-dot {
+    background: var(--soul-accent-light);
+    border-radius: 50%;
+  }
+  .thinking-dot:nth-child(1) { animation-delay: 0s; }
+  .thinking-dot:nth-child(2) { animation-delay: 0.15s; }
+  .thinking-dot:nth-child(3) { animation-delay: 0.3s; }
+
+  /* ── Layout Utilities ── */
+  .centered-page-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100%;
+    width: 100%;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
 }
 
-.dashboard-transcript {
-  background: transparent;
-}
-
-.dashboard-chat {
-  padding: 1.25rem 1.5rem;
-}
-
-.dashboard-card-hover {
-  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.dashboard-card-hover:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
-  border-color: var(--soul-accent-light);
-}
-
-/* ══════════════════════════════════
-   BUBBLES & INPUTS
-   ══════════════════════════════════ */
-
-.bubble-user {
-  background: var(--soul-user-bubble);
-  border: 1px solid rgba(6, 182, 212, 0.15);
-  border-radius: 1.25rem 1.25rem 0.25rem 1.25rem;
-  color: var(--soul-user-text);
-}
-
-.bubble-ai {
-  background: var(--soul-surface-alt);
-  border: 1px solid var(--soul-border);
-  border-radius: 1.25rem 1.25rem 1.25rem 0.25rem;
-}
-
-.soul-input-wrap {
-  transition: all 0.2s ease;
-  background: var(--soul-surface-alt);
-  border: 1px solid var(--soul-border);
-  border-radius: 99px;
-}
-
-.soul-input-wrap:focus-within {
-  border-color: var(--soul-accent);
-  box-shadow: 0 0 0 3px var(--soul-accent-pale);
-}
-
-/* ══════════════════════════════════
-   ORB ANIMATIONS (Neo-Tech)
-   ══════════════════════════════════ */
-
+/* ── Keyframes (must be outside @layer) ── */
 @keyframes pulse-ring {
   0% { transform: scale(0.9); opacity: 0.8; }
   50% { opacity: 0.3; }
@@ -301,66 +391,16 @@ body {
 }
 
 @keyframes orb-breathe {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
 }
 
 @keyframes orb-listening-glow {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.1);
-  }
-}
-
-.orb-idle {
-  animation: orb-breathe 4s ease-in-out infinite;
-}
-
-.orb-listening {
-  animation: orb-listening-glow 1.5s ease-in-out infinite;
-  border-color: #22d3ee !important;
-}
-
-.orb-listening .pulse-ring {
-  animation: pulse-ring 2s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
-  background: rgba(34, 211, 238, 0.4);
-}
-
-.orb-thinking {
-  animation: orb-breathe 1s ease-in-out infinite;
-  filter: hue-rotate(45deg);
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
 }
 
 @keyframes thinking-dot {
   0%, 80%, 100% { opacity: 0.2; transform: scale(0.6); }
   40% { opacity: 1; transform: scale(1.2); box-shadow: 0 0 10px var(--soul-accent); }
-}
-
-.thinking-dot {
-  background: var(--soul-accent-light);
-  border-radius: 50%;
-}
-.thinking-dot:nth-child(1) { animation-delay: 0s; }
-.thinking-dot:nth-child(2) { animation-delay: 0.15s; }
-.thinking-dot:nth-child(3) { animation-delay: 0.3s; }
-
-/* ══════════════════════════════════
-   LAYOUT UTILITIES
-   ══════════════════════════════════ */
-
-.centered-page-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100%;
-  width: 100%;
-  padding-top: 2rem;
-  padding-bottom: 2rem;
 }
