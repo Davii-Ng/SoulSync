@@ -1,6 +1,7 @@
 import re
 
 from google.adk.agents.llm_agent import Agent
+from google.genai import types
 
 # --- Crisis detection (highest priority) ---
 
@@ -129,28 +130,10 @@ EMOTION_KEYWORDS = {
     },
 }
 
-# --- Intensity modifiers ---
-
-AMPLIFIERS = [
-    "very", "really", "extremely", "incredibly", "so", "super",
-    "absolutely", "completely", "totally", "utterly", "seriously",
-    "deeply", "genuinely", "honestly", "truly",
-]
-
-DIMINISHERS = [
-    "a little", "a bit", "slightly", "kinda", "sort of", "somewhat",
-    "mildly", "not that", "not very", "not really", "low-key",
-]
-
 # --- Negation handling ---
 
 NEGATION_PATTERN = re.compile(
     r"\b(not|don'?t feel|don'?t think i'?m|never|no longer|isn'?t|aren'?t|wasn'?t|hardly|barely)\s+(\w+\s+){0,2}"
-)
-
-# "but" / "anymore" flips — "I was happy but now I'm not"
-CONTRAST_PATTERN = re.compile(
-    r"\b(but|however|yet|except|although|anymore|used to be)\b"
 )
 
 
@@ -164,26 +147,6 @@ def _is_negated(text_lower: str, keyword: str) -> bool:
     return bool(NEGATION_PATTERN.search(window))
 
 
-def _has_contrast_before(text_lower: str, keyword: str) -> bool:
-    """Check if a contrast word appears before a keyword, suggesting the emotion is past tense."""
-    idx = text_lower.find(keyword)
-    if idx == -1:
-        return False
-    before = text_lower[:idx]
-    return bool(CONTRAST_PATTERN.search(before))
-
-
-def _get_intensity_modifier(text_lower: str) -> float:
-    """Returns a multiplier based on amplifiers/diminishers in the text."""
-    amp_count = sum(1 for a in AMPLIFIERS if f" {a} " in f" {text_lower} ")
-    dim_count = sum(1 for d in DIMINISHERS if d in text_lower)
-    if amp_count > dim_count:
-        return 1.5
-    if dim_count > amp_count:
-        return 0.5
-    return 1.0
-
-
 def _score_emotion(text_lower: str, tiers: dict[str, list[str]]) -> float:
     """Score an emotion using tiered keywords. High=3, Medium=2, Low=1 per match, negation-aware."""
     weights = {"high": 3.0, "medium": 2.0, "low": 1.0}
@@ -191,19 +154,15 @@ def _score_emotion(text_lower: str, tiers: dict[str, list[str]]) -> float:
     for tier, keywords in tiers.items():
         for kw in keywords:
             if kw in text_lower and not _is_negated(text_lower, kw):
-                # Contrast reduces positive emotions but not negative ones
-                if tier in ("low",) and _has_contrast_before(text_lower, kw):
-                    continue
                 score += weights[tier]
     return score
 
 
-def _severity_from_score(score: float, modifier: float) -> str:
-    """Dynamic severity from weighted score * intensity modifier."""
-    effective = score * modifier
-    if effective >= 6.0:
+def _severity_from_score(score: float) -> str:
+    """Dynamic severity from weighted score."""
+    if score >= 6.0:
         return "high"
-    if effective >= 3.0:
+    if score >= 3.0:
         return "medium"
     return "low"
 
@@ -239,10 +198,7 @@ def analyze_emotion(text: str) -> dict:
             "confidence": min(0.6 + passive_hits * 0.1, 1.0),
         }
 
-    # 3. Intensity modifier from amplifiers/diminishers
-    modifier = _get_intensity_modifier(text_lower)
-
-    # 4. Score each emotion with tiered keywords + negation awareness
+    # 3. Score each emotion with tiered keywords + negation awareness
     scores = {}
     for emotion, tiers in EMOTION_KEYWORDS.items():
         score = _score_emotion(text_lower, tiers)
@@ -259,7 +215,7 @@ def analyze_emotion(text: str) -> dict:
             "confidence": 0.3,
         }
 
-    # 5. Top 2 emotions (mixed emotion support)
+    # 4. Top 2 emotions (mixed emotion support)
     ranked = sorted(scores.items(), key=lambda x: x[1], reverse=True)
     primary_emotion, primary_score = ranked[0]
     secondary_emotion = None
@@ -269,11 +225,11 @@ def analyze_emotion(text: str) -> dict:
         if second_score >= primary_score * 0.4:
             secondary_emotion = second_emotion
 
-    # 6. Passive crisis escalation: sad/stressed high severity + passive hit = crisis
+    # 5. Passive crisis escalation: sad/stressed high severity + passive hit = crisis
     if (
         passive_hits >= 1
         and primary_emotion in ("sad", "stressed")
-        and _severity_from_score(primary_score, modifier) == "high"
+        and _severity_from_score(primary_score) == "high"
     ):
         return {
             "status": "success",
@@ -291,7 +247,7 @@ def analyze_emotion(text: str) -> dict:
         "status": "success",
         "emotion": primary_emotion,
         "secondary_emotion": secondary_emotion,
-        "severity": _severity_from_score(primary_score, modifier),
+        "severity": _severity_from_score(primary_score),
         "crisis": False,
         "confidence": round(confidence, 2),
     }
@@ -455,7 +411,11 @@ core_companion_agent = Agent(
         "'I want to make sure I'm reading this right — how are you actually feeling?'\n\n"
         "TONE: Sound like a real person. Use contractions. Be direct. Vary your language. "
         "Say things like 'that sounds really tough' or 'okay, let's talk about this' — not 'I understand your concerns.'\n\n"
+        "KEEP IT SHORT: 2-3 sentences max. Be concise. No essays.\n\n"
         "If they mention their schedule, hand it off to the calendar agent. Never diagnose. Never lecture. Just be there."
     ),
     tools=[analyze_emotion, suggest_resource],
+    generate_content_config=types.GenerateContentConfig(
+        max_output_tokens=300,
+    ),
 )

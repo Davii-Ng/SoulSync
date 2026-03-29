@@ -13,6 +13,14 @@ export interface SavedEvent {
   note?: string
 }
 
+export interface WsResponse {
+  type?: 'response' | 'error' | 'transcript'
+  content?: string
+  emotion?: Emotion
+  audio_base64?: string
+  events?: SavedEvent[]
+}
+
 export interface Message {
   id: string
   role: 'user' | 'assistant'

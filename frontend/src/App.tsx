@@ -8,21 +8,33 @@ import { ResourcesPage } from './pages/ResourcesPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { useWebSocket } from './hooks/useWebSocket'
 import { useVoiceInput } from './hooks/useVoiceInput'
-import type { OrbState, Message, Emotion, SavedEvent } from './types'
+import type { OrbState, Message, Emotion, SavedEvent, WsResponse } from './types'
 import { useState, useEffect, useCallback, useRef } from 'react'
+
+const getEventId = (event: SavedEvent): string => {
+  const trimmed = event.id?.trim()
+  if (trimmed) return trimmed
+  return `${event.title}|${event.dateLabel}`.toLowerCase()
+}
+
+const mergeEvents = (existing: SavedEvent[], incoming: SavedEvent[]): SavedEvent[] => {
+  if (incoming.length === 0) return existing
+  const byId = new Map<string, SavedEvent>()
+  for (const event of existing) {
+    byId.set(getEventId(event), { ...event, id: getEventId(event) })
+  }
+  for (const event of incoming) {
+    const normalized = { ...event, id: getEventId(event) }
+    byId.set(normalized.id, normalized)
+  }
+  return Array.from(byId.values())
+}
 
 function App() {
   const [orbState, setOrbState] = useState<OrbState>('idle')
   const [messages, setMessages] = useState<Message[]>([])
   const [emotion, setEmotion] = useState<Emotion>('neutral')
-  const [savedEvents] = useState<SavedEvent[]>([
-    {
-      id: '1',
-      title: 'Therapy check-in reminder',
-      dateLabel: 'Monday, 7:30 PM',
-      note: 'Captured from your latest conversation.',
-    },
-  ])
+  const [savedEvents, setSavedEvents] = useState<SavedEvent[]>([])
   const { isConnected, sendMessage, ws } = useWebSocket()
   const { isListening, transcript, startListening, stopListening } = useVoiceInput()
   const listeningRef = useRef(false)
@@ -36,7 +48,7 @@ function App() {
     if (!socket) return
 
     const handleMessage = (event: MessageEvent) => {
-      const data = JSON.parse(event.data)
+      const data = JSON.parse(event.data) as WsResponse
 
       if (data.type === 'error') {
         const errMsg: Message = {
@@ -64,6 +76,10 @@ function App() {
 
       if (data.emotion) {
         setEmotion(data.emotion)
+      }
+
+      if (data.events && data.events.length > 0) {
+        setSavedEvents((prev) => mergeEvents(prev, data.events ?? []))
       }
 
       if (data.audio_base64) {
@@ -156,6 +172,7 @@ function App() {
               emotion={emotion}
               transcript={transcript}
               isBusy={isBusy}
+              savedEvents={savedEvents}
               onOrbClick={handleOrbClick}
               onTextSend={handleTextSend}
             />

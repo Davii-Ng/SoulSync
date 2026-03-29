@@ -1,16 +1,8 @@
 from google.adk.agents.llm_agent import Agent
 from multi_tool_agent.core_companion import core_companion_agent
-from multi_tool_agent.journal_agent import journal_agent
 from multi_tool_agent.calendar_agent import calendar_agent
 from multi_tool_agent.resource_agent import resource_agent
-from multi_tool_agent.listener_agent import listener_agent
-from multi_tool_agent.voice_agent import voice_agent
-
-
-from pathlib import Path
-from dotenv import load_dotenv
-load_dotenv(Path(__file__).parent / ".env")
-load_dotenv(Path(__file__).parent.parent / ".env")
+from multi_tool_agent.journal_agent import journal_agent
 
 root_agent = Agent(
     model="gemini-3-flash-preview",
@@ -29,10 +21,8 @@ root_agent = Agent(
     ),
     sub_agents=[
         core_companion_agent,
-        journal_agent,
         calendar_agent,
         resource_agent,
-        listener_agent,
-        voice_agent,
+        journal_agent,
     ],
 )

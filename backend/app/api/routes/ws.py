@@ -8,25 +8,24 @@ from app.core.config import GOOGLE_API_KEY
 from app.ws.manager import manager
 from app.services.agent_runner import run_agent
 from multi_tool_agent.voice_agent import text_to_speech, speech_to_text
-from multi_tool_agent.core_companion import analyze_emotion, suggest_resource
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-_gemini = genai.Client(api_key=GOOGLE_API_KEY)
-
-# Per-connection chat histories keyed by websocket id
-_chat_histories: dict[int, list[dict]] = {}
-
+# Retained for prompt reference. The active response path uses ADK via run_agent().
 _SYSTEM_PROMPT = (
     "You are SoulSync, a warm and empathetic AI journal companion. "
-    "You talk like a caring friend — use contractions, be direct, and keep it real. "
+    "You talk like a caring friend, use contractions, be direct, and keep it real. "
     "Never lecture, never diagnose, never say 'I understand your concerns.' "
     "Reflect their words back naturally, sit with them in it before offering anything. "
     "Keep responses concise (2-4 sentences). "
-    "If given emotion context, weave it in naturally — don't announce it."
+    "If given emotion context, weave it in naturally and do not announce it."
 )
+
+# Legacy direct-Gemini support (currently unused; ADK run_agent is active path).
+_gemini = genai.Client(api_key=GOOGLE_API_KEY)
+_chat_histories: dict[int, list[dict]] = {}
 
 
 def _build_prompt(content: str, emotion: str, severity: str, suggestion: str, follow_up: str) -> str:
@@ -63,18 +62,15 @@ async def _generate_reply(ws_id: int, prompt: str) -> str:
 
 
 async def _process_text(websocket: WebSocket, content: str) -> None:
-    """Analyze emotion, generate LLM reply, convert to speech, and send back."""
+    """Run ADK pipeline, convert response to speech, and send back."""
     try:
-        emotion_result = await asyncio.to_thread(analyze_emotion, content)
-        emotion = emotion_result.get("emotion", "neutral")
-        severity = emotion_result.get("severity", "medium")
-        resource_result = await asyncio.to_thread(suggest_resource, emotion, severity)
-        suggestion = resource_result.get("suggestion", "")
-        follow_up = resource_result.get("follow_up", "")
-
-        prompt = _build_prompt(content, emotion, severity, suggestion, follow_up)
-        ws_id = id(websocket)
-        reply = await _generate_reply(ws_id, prompt)
+        user_id = str(id(websocket))
+        agent_result = await run_agent(content, user_id=user_id)
+        reply = (agent_result.get("content") or "").strip()
+        emotion = agent_result.get("emotion", "neutral")
+        events = agent_result.get("events", [])
+        if not reply:
+            reply = "I'm here with you. Want to share a little more about what's on your mind?"
     except Exception as e:
         logger.error(f"Agent processing failed: {e}")
         await manager.send_json(websocket, {
@@ -95,6 +91,8 @@ async def _process_text(websocket: WebSocket, content: str) -> None:
         "content": reply,
         "emotion": emotion,
     }
+    if events:
+        response["events"] = events
     if audio_b64:
         response["audio_base64"] = audio_b64
 
@@ -127,9 +125,7 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
                 await manager.send_json(websocket, {"type": "error", "content": "Empty or unsupported message"})
 
     except WebSocketDisconnect:
-        _chat_histories.pop(id(websocket), None)
         manager.disconnect(websocket)
     except Exception as e:
         logger.error(f"WebSocket error: {e}")
-        _chat_histories.pop(id(websocket), None)
         manager.disconnect(websocket)
