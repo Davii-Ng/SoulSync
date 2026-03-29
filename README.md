@@ -27,7 +27,7 @@ SoulSync is a **voice-first AI journal** that listens to you, understands your e
 
 ## Architecture
 
-![SoulSync Architecture](image.png)
+![alt text](image-1.png)
 
 ```
 root_agent (agent.py) — ADK entry point, orchestrator
