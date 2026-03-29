@@ -11,4 +11,5 @@ export const EMOTION_CONFIG: Record<string, { label: string; color: string; bg: 
   sad:      { label: 'Sad',      color: 'text-blue-700',   bg: 'bg-blue-50',    dot: 'bg-blue-400' },
   angry:    { label: 'Angry',    color: 'text-red-700',    bg: 'bg-red-50',     dot: 'bg-red-400' },
   neutral:  { label: 'Neutral',  color: 'text-slate-600',  bg: 'bg-slate-100',  dot: 'bg-slate-400' },
+  crisis:   { label: 'Crisis',   color: 'text-rose-700',   bg: 'bg-rose-50',    dot: 'bg-rose-400' },
 }
