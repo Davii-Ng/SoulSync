@@ -6,7 +6,7 @@ import { useWebSocket } from "./hooks/useWebSocket";
 import { useVoiceInput } from "./hooks/useVoiceInput";
 import { EmotionBadge } from "./components/EmotionBadge";
 import type { OrbState, Message, Emotion, SavedEvent } from "./types";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 function App() {
   const [orbState, setOrbState] = useState<OrbState>("idle");
@@ -21,16 +21,22 @@ function App() {
     },
   ]);
   const { isConnected, sendMessage, ws } = useWebSocket();
-  const { startListening, stopListening } = useVoiceInput();
+  const { isListening, transcript, startListening, stopListening } = useVoiceInput();
+  const listeningRef = useRef(false);
 
-  // Handle incoming WebSocket messages
+  // Keep ref in sync so handleOrbClick always sees current value
+  useEffect(() => {
+    listeningRef.current = isListening;
+  }, [isListening]);
+
+
+  // Handle incoming WebSocket messages — re-attach when connection changes
   useEffect(() => {
     const socket = ws.current;
     if (!socket) return;
 
-    const handleMessage = (event: Event) => {
-      const messageEvent = event as MessageEvent;
-      const data = JSON.parse(messageEvent.data);
+    const handleMessage = (event: MessageEvent) => {
+      const data = JSON.parse(event.data);
 
       // Backend error — show as system message, reset orb
       if (data.type === "error") {
@@ -71,12 +77,10 @@ function App() {
         setOrbState("idle");
       }
     };
-    if (socket) socket.addEventListener("message", handleMessage);
 
-    return () => {
-      if (socket) socket.removeEventListener("message", handleMessage);
-    };
-  }, [isConnected, ws, sendMessage]);
+    socket.addEventListener("message", handleMessage);
+    return () => socket.removeEventListener("message", handleMessage);
+  }, [isConnected, ws]);
 
   // Send text message (from TextInput)
   const handleTextSend = useCallback(
@@ -89,16 +93,37 @@ function App() {
         isVoice: false,
       };
       setMessages((prev) => [...prev, userMsg]);
-      sendMessage(text);
-      setOrbState("thinking");
+      const sent = sendMessage(text);
+      if (sent) {
+        setOrbState("thinking");
+      } else {
+        // Not connected — show error so user isn't stuck
+        const errMsg: Message = {
+          id: (Date.now() + 1).toString(),
+          role: "assistant",
+          content: "Not connected to server. Please check that the backend is running.",
+          timestamp: Date.now(),
+        };
+        setMessages((prev) => [...prev, errMsg]);
+      }
     },
     [sendMessage],
   );
 
   // Handle orb click (voice input)
-  // handleOrbClick — thêm async và await
+  // Uses listeningRef instead of orbState to avoid stale closure issues
   const handleOrbClick = useCallback(async () => {
-    if (orbState === "idle") {
+    if (listeningRef.current) {
+      // Stop recording — stopListening fires the callback which sends the message.
+      // The callback sets orbState to "thinking" if sent, so don't override it here.
+      const text = await stopListening();
+      if (!text) {
+        setOrbState("idle");
+      }
+    } else if (orbState === "listening") {
+      // Recognition ended on its own but orbState wasn't reset — recover
+      setOrbState("idle");
+    } else if (orbState === "idle") {
       startListening((text: string) => {
         const userMsg: Message = {
           id: Date.now().toString(),
@@ -108,17 +133,21 @@ function App() {
           isVoice: true,
         };
         setMessages((prev) => [...prev, userMsg]);
-        sendMessage(text);
-        setOrbState("thinking");
+        const sent = sendMessage(text);
+        if (sent) {
+          setOrbState("thinking");
+        } else {
+          const errMsg: Message = {
+            id: (Date.now() + 1).toString(),
+            role: "assistant",
+            content: "Not connected to server. Please check that the backend is running.",
+            timestamp: Date.now(),
+          };
+          setMessages((prev) => [...prev, errMsg]);
+          setOrbState("idle");
+        }
       });
       setOrbState("listening");
-    } else if (orbState === "listening") {
-      const text = await stopListening(); // ← thêm await
-      if (text) {
-        setOrbState("thinking");
-      } else {
-        setOrbState("idle");
-      }
     }
   }, [orbState, startListening, stopListening, sendMessage]);
 
@@ -149,7 +178,7 @@ function App() {
         </section>
 
         <section className="flex flex-col items-center py-4 md:py-6">
-          <VoiceOrb state={orbState} onClick={handleOrbClick} />
+          <VoiceOrb state={orbState} onClick={handleOrbClick} transcript={transcript} />
         </section>
 
         <section

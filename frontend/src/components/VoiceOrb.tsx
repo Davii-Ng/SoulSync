@@ -5,9 +5,10 @@ import type { OrbState } from '../types'
 interface Props {
   state: OrbState
   onClick: () => void
+  transcript?: string
 }
 
-export function VoiceOrb({ state, onClick }: Props) {
+export function VoiceOrb({ state, onClick, transcript }: Props) {
   const stateLabel: Record<OrbState, string> = {
     idle: 'Tap to speak',
     listening: 'Listening...',
@@ -61,6 +62,14 @@ export function VoiceOrb({ state, onClick }: Props) {
       <span className="text-2xl font-medium" style={{ color: 'var(--soul-text)' }}>
         {stateLabel[state]}
       </span>
+      {state === 'listening' && transcript && (
+        <p
+          className="text-sm max-w-xs text-center mt-1 italic"
+          style={{ color: 'var(--soul-text-secondary)' }}
+        >
+          {transcript}
+        </p>
+      )}
     </div>
   )
 }

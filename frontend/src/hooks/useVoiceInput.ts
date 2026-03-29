@@ -40,11 +40,25 @@ export function useVoiceInput(): UseVoiceInputReturn {
       setTranscript(text);
     };
 
-    recognition.onend = () => setIsListening(false);
-    recognition.onerror = () => {
-      console.error("Speech recognition error");
+    recognition.onend = () => {
       setIsListening(false);
+      // If stopped via stopListening(), the promise handler takes over
+      // If ended naturally (e.g. silence timeout), fire the callback
+      if (callbackRef.current && latestTranscriptRef.current) {
+        callbackRef.current(latestTranscriptRef.current);
+        callbackRef.current = null;
+      }
     };
+    recognition.addEventListener("error", (event) => {
+      // event.error: "not-allowed" | "no-speech" | "network" | "aborted" etc.
+      const reason = (event as unknown as { error: string }).error ?? "unknown";
+      console.error("Speech recognition error:", reason);
+      // "no-speech" fires when silence is detected — not a real failure,
+      // the recognition keeps running in continuous mode
+      if (reason === "no-speech") return;
+      setIsListening(false);
+      callbackRef.current = null;
+    });
 
     recognitionRef.current = recognition;
     latestTranscriptRef.current = "";
@@ -62,13 +76,33 @@ export function useVoiceInput(): UseVoiceInputReturn {
         return;
       }
 
-      // Override onend to resolve after final onresult has fired
-      recognition.onend = () => {
+      let settled = false;
+      const finish = () => {
+        if (settled) return;
+        settled = true;
         setIsListening(false);
-        resolve(latestTranscriptRef.current);
+        recognitionRef.current = null;
+        const text = latestTranscriptRef.current;
+        if (savedCallback && text) {
+          savedCallback(text);
+        }
+        resolve(text);
       };
 
-      recognition.stop();
+      const savedCallback = callbackRef.current;
+      callbackRef.current = null;
+
+      recognition.onend = finish;
+      recognition.onerror = finish;
+
+      // Safety timeout — if onend never fires, force cleanup
+      setTimeout(finish, 500);
+
+      try {
+        recognition.stop();
+      } catch {
+        finish();
+      }
     });
   }, []);
 

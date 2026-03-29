@@ -56,10 +56,13 @@ export function useWebSocket() {
     }
   }, [connect])
 
-  const sendMessage = useCallback((text: string) => {
+  const sendMessage = useCallback((text: string): boolean => {
     if (ws.current?.readyState === WebSocket.OPEN) {
       ws.current.send(JSON.stringify({ type: 'text', content: text }))
+      return true
     }
+    console.warn('WebSocket not connected — message not sent')
+    return false
   }, [])
 
   return { isConnected, sendMessage, ws }
