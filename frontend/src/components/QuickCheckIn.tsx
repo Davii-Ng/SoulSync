@@ -39,12 +39,12 @@ export function QuickCheckIn({ onCheckIn }: Props) {
         {confirmed ? 'Logged! Thanks for checking in.' : 'How are you feeling right now?'}
       </p>
 
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex flex-wrap items-center justify-center gap-2">
         {MOODS.map((mood) => (
           <button
             key={mood.value}
             onClick={() => handleSelect(mood)}
-            className={`flex flex-col items-center gap-1.5 px-2 py-2 rounded-xl transition-all border ${
+            className={`flex flex-col items-center gap-1.5 px-2 py-2 rounded-xl transition-all border min-w-0 ${
               selected === mood.value
                 ? 'bg-soul-accent-pale border-soul-accent-light'
                 : 'bg-transparent border-transparent'

@@ -107,8 +107,29 @@ export function SettingsPage({ selectedVoiceId, onVoiceChange }: SettingsPagePro
         </div>
         <p className="text-sm mb-4 text-soul-text-muted">
           Choose the voice SoulSync uses when speaking to you.
-          {selectedVoiceId ? '' : ' Using default voice.'}
         </p>
+
+        <div className="flex items-center gap-3 mb-4 rounded-xl border border-soul-border-light px-5 py-3.5 bg-soul-accent-pale">
+          <span className="material-symbols-outlined text-xl text-soul-accent">
+            graphic_eq
+          </span>
+          <div className="flex flex-col">
+            <span className="text-xs font-medium text-soul-text-muted">Current voice</span>
+            <span className="text-sm font-semibold text-soul-text">
+              {selectedVoiceId
+                ? voices.find((v) => v.voice_id === selectedVoiceId)?.name ?? 'Unknown'
+                : 'Default'}
+            </span>
+          </div>
+          {selectedVoiceId && (
+            <button
+              onClick={() => onVoiceChange(null, null)}
+              className="ml-auto rounded-lg px-3 py-1.5 text-xs font-medium transition-colors bg-soul-border-light text-soul-text-secondary"
+            >
+              Reset to default
+            </button>
+          )}
+        </div>
 
         {/* Filter & Sort controls */}
         <div className="flex flex-wrap items-center gap-3 mb-4">
