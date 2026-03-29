@@ -10,18 +10,31 @@ import { QuickCheckIn } from "./components/QuickCheckIn";
 import type { OrbState, Message, Emotion, SavedEvent } from "./types";
 import { useState, useEffect, useCallback, useRef } from "react";
 
+const getEventId = (event: SavedEvent): string => {
+  const trimmed = event.id?.trim();
+  if (trimmed) return trimmed;
+  return `${event.title}|${event.dateLabel}`.toLowerCase();
+};
+
+const mergeEvents = (existing: SavedEvent[], incoming: SavedEvent[]): SavedEvent[] => {
+  if (incoming.length === 0) return existing;
+
+  const byId = new Map<string, SavedEvent>();
+  for (const event of existing) {
+    byId.set(getEventId(event), { ...event, id: getEventId(event) });
+  }
+  for (const event of incoming) {
+    const normalized = { ...event, id: getEventId(event) };
+    byId.set(normalized.id, normalized);
+  }
+  return Array.from(byId.values());
+};
+
 function App() {
   const [orbState, setOrbState] = useState<OrbState>("idle");
   const [messages, setMessages] = useState<Message[]>([]);
   const [emotion, setEmotion] = useState<Emotion>("neutral");
-  const [savedEvents] = useState<SavedEvent[]>([
-    {
-      id: "1",
-      title: "Therapy check-in reminder",
-      dateLabel: "Monday, 7:30 PM",
-      note: "Captured from your latest conversation.",
-    },
-  ]);
+  const [savedEvents, setSavedEvents] = useState<SavedEvent[]>([]);
   const { isConnected, sendMessage, ws } = useWebSocket();
   const { isListening, transcript, startListening, stopListening } = useVoiceInput();
   const listeningRef = useRef(false);
@@ -38,7 +51,7 @@ function App() {
     if (!socket) return;
 
     const handleMessage = (event: MessageEvent) => {
-      const data = JSON.parse(event.data);
+      const data = JSON.parse(event.data) as WsResponse;
 
       // Backend error — show as system message, reset orb
       if (data.type === "error") {
@@ -67,6 +80,10 @@ function App() {
 
       if (data.emotion) {
         setEmotion(data.emotion);
+      }
+
+      if (data.events && data.events.length > 0) {
+        setSavedEvents((prev) => mergeEvents(prev, data.events ?? []));
       }
 
       // Play audio automatically if available
@@ -154,6 +171,9 @@ function App() {
   }, [orbState, startListening, stopListening, sendMessage]);
 
   const isBusy = orbState === "thinking" || orbState === "speaking";
+  const handleDismissEvent = useCallback((eventId: string) => {
+    setSavedEvents((prev) => prev.filter((event) => getEventId(event) !== eventId));
+  }, []);
 
   return (
     <div
@@ -203,7 +223,7 @@ function App() {
               }}
             />
 
-            {/* Events — show saved event */}
+            {/* Events — dynamic saved events */}
             <article
               className="dashboard-card dashboard-card-hover rounded-2xl border p-5"
               style={{ borderColor: "var(--soul-border-light)" }}
