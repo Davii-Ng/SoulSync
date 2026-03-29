@@ -22,20 +22,18 @@ export function VoiceOrb({ state, onClick, transcript }: Props) {
     'orb-idle'
 
   return (
-    <div className="flex flex-col items-center gap-2">
+    <div className="flex flex-col items-center gap-3">
       <button
         onClick={onClick}
-        className={`relative w-40 h-40 md:w-48 md:h-48 rounded-full flex items-center justify-center cursor-pointer transition-transform hover:scale-102 active:scale-95 ${orbClass}`}
+        className={`relative w-40 h-40 md:w-48 md:h-48 rounded-full flex items-center justify-center cursor-pointer transition-transform hover:scale-105 active:scale-95 ${orbClass}`}
         style={{
-          background: 'linear-gradient(135deg, var(--soul-gradient-start), var(--soul-gradient-end))',
-          boxShadow: '0 8px 32px rgba(74, 130, 184, 0.2), inset 0 1px 0 rgba(255,255,255,0.5)',
+          background: 'var(--soul-accent)',
         }}
         aria-label={stateLabel[state]}
       >
         {/* Pulse ring (visible when listening) */}
         <div
           className="pulse-ring absolute w-40 h-40 md:w-48 md:h-48 rounded-full"
-          style={{ border: '1.5px solid var(--soul-accent-light)' }}
         />
 
         {/* Mic icon */}
@@ -59,8 +57,8 @@ export function VoiceOrb({ state, onClick, transcript }: Props) {
           </svg>
         )}
       </button>
-      <span className="text-2xl font-medium" style={{ color: 'var(--soul-text)' }}>
-        {stateLabel[state]}
+      <span className="text-sm tech-font mt-2" style={{ color: 'var(--soul-text-secondary)' }}>
+        {stateLabel[state].toUpperCase()}
       </span>
       {state === 'listening' && transcript && (
         <p

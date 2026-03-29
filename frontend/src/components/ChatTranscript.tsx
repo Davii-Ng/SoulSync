@@ -17,14 +17,16 @@ export function ChatTranscript({ messages }: Props) {
 
   return (  
     <div className="dashboard-transcript p-2 md:p-3">
-      <h2 className="text-xl section-heading mb-3" style={{ color: 'var(--soul-text)' }}>
-        Conversation
+      <h2 className="tech-font text-[var(--soul-accent-light)] mb-3">
+        &gt; CHAT_LOG
       </h2>
-      <div className="min-h-[200px] max-h-[320px] md:max-h-[380px] overflow-y-auto space-y-3 pr-1">
+      <div className="min-h-[380px] max-h-[500px] md:max-h-[640px] overflow-y-auto space-y-3 pr-2 flex flex-col">
         {messages.length === 0 ? (
-          <p className="text-center text-base py-8" style={{ color: 'var(--soul-text-muted)' }}>
-            Start speaking to begin a conversation
-          </p>
+          <div className="flex-1 flex items-center justify-center min-h-[300px]">
+            <p className="text-center text-base" style={{ color: 'var(--soul-text-muted)' }}>
+              Start speaking to begin a conversation
+            </p>
+          </div>
         ) : (
           messages.map((msg) => <MessageBubble key={msg.id} message={msg} />)
         )}

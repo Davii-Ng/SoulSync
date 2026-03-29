@@ -1,6 +1,6 @@
 // Text input with send button for typing messages
 
-import { useState, useCallback, type KeyboardEvent } from 'react'
+import { useState, useCallback } from 'react'
 
 interface Props {
   onSend: (text: string) => void
@@ -18,31 +18,23 @@ export function TextInput({ onSend, disabled = false }: Props) {
     }
   }, [text, disabled, onSend])
 
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      handleSend()
-    }
-  }, [handleSend])
-
   return (
-    <div className="flex items-center gap-2">
-      <div
-        className="soul-input-wrap flex-1 flex items-center rounded-full px-4"
-        style={{
-          background: 'var(--soul-surface)',
-          border: '1px solid var(--soul-border-light)',
-        }}
-      >
-        <input
-          type="text"
+    <div className="flex items-end gap-3 w-full">
+      <div className="soul-input-wrap flex-1 flex items-start px-6 py-2 rounded-3xl w-full min-h-[72px] md:min-h-[88px] bg-[var(--soul-surface)] border border-[var(--soul-border-light)] shadow-sm">
+        <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
-          onKeyDown={handleKeyDown}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              handleSend();
+            }
+          }}
           placeholder="Type a message..."
           disabled={disabled}
-          className="flex-1 py-3 text-sm bg-transparent outline-none placeholder:text-[var(--soul-text-muted)]"
+          className="flex-1 py-3 text-[17px] md:text-lg bg-transparent outline-none placeholder:text-[var(--soul-text-muted)] w-full resize-none h-full min-h-[56px] md:min-h-[72px]"
           style={{ color: 'var(--soul-text)' }}
+          rows={2}
         />
       </div>
 
@@ -50,7 +42,7 @@ export function TextInput({ onSend, disabled = false }: Props) {
       <button
         onClick={handleSend}
         disabled={!text.trim() || disabled}
-        className="h-9 rounded-full flex items-center justify-center gap-1.5 transition-all hover:scale-105 active:scale-95 disabled:hover:scale-100"
+        className="h-14 w-14 md:h-16 md:w-16 flex-shrink-0 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95 disabled:hover:scale-100"
         style={{
           background: disabled
             ? 'var(--soul-accent-light)'
@@ -71,7 +63,7 @@ export function TextInput({ onSend, disabled = false }: Props) {
             <span className="text-xs font-medium text-white">Thinking...</span>
           </>
         ) : (
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
             stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <line x1="22" y1="2" x2="11" y2="13"/>
             <polygon points="22,2 15,22 11,13 2,9"/>

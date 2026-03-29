@@ -31,15 +31,12 @@ export function QuickCheckIn({ onCheckIn }: Props) {
   }, [confirmed, onCheckIn])
 
   return (
-    <article
-      className="dashboard-card dashboard-card-hover rounded-2xl border p-5"
-      style={{ borderColor: 'var(--soul-border-light)' }}
-    >
-      <h3 className="text-lg section-heading" style={{ color: 'var(--soul-text)' }}>
-        Quick Check-in
+    <article className="dashboard-card dashboard-card-hover p-6">
+      <h3 className="tech-font text-[var(--soul-accent-light)] mb-2">
+        &gt; QUICK_CHECK_IN
       </h3>
-      <p className="text-xs mt-1 mb-4" style={{ color: 'var(--soul-text-muted)' }}>
-        {confirmed ? 'Logged! Thanks for checking in.' : 'How are you feeling right now?'}
+      <p className="text-sm mt-1 mb-5 opacity-70">
+        {confirmed ? '[ LOGGED: THANK_YOU ]' : 'How are you feeling right now?'}
       </p>
 
       <div className="flex items-center justify-between gap-2">

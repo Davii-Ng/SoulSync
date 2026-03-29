@@ -74,7 +74,7 @@ function BreathingGuide({ onClose }: { onClose: () => void }) {
           style={{
             width: 80,
             height: 80,
-            background: 'linear-gradient(135deg, var(--soul-accent-light), var(--soul-accent))',
+            background: 'var(--soul-accent)',
             transform: `scale(${scale})`,
             opacity: 0.8 + scale * 0.2,
           }}
@@ -179,20 +179,17 @@ export function ResourcesCard({ emotion, aiSuggested }: Props) {
   const highlightCrisis = CRISIS_EMOTIONS.includes(emotion)
 
   return (
-    <article
-      className="dashboard-card dashboard-card-hover rounded-2xl border p-5"
-      style={{ borderColor: 'var(--soul-border-light)' }}
-    >
-      <div className="flex items-center gap-2 mb-3">
-        <h3 className="text-lg section-heading" style={{ color: 'var(--soul-text)' }}>
-          Resources
+    <article className="dashboard-card dashboard-card-hover p-7">
+      <div className="flex items-center gap-3 mb-4">
+        <h3 className="tech-font text-[var(--soul-accent-light)]">
+          &gt; RESOURCES_HUB
         </h3>
         {aiSuggested && (
           <span
-            className="text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full"
-            style={{ background: 'var(--soul-accent-pale)', color: 'var(--soul-accent)' }}
+            className="tech-font text-[9px] px-2 py-0.5 rounded-full"
+            style={{ background: 'var(--soul-accent-pale)', color: 'var(--soul-accent-light)' }}
           >
-            Suggested by AI
+            [ AI_OP_SUGGESTED ]
           </span>
         )}
       </div>
