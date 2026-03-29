@@ -145,3 +145,6 @@ __pycache__/
 
 .env
 venv/
+__pycache__/
+.adk
+.vscode/

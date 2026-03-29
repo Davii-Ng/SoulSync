@@ -1,6 +1,6 @@
 # SoulSync
 
-**AI-Powered Mental Health Companion for Burnout, Stress & Loneliness**
+**AI-Powered Journal & Mental Health Companion**
 
 > Built with love at USF Hackathon Tampa 2026.
 
@@ -8,7 +8,7 @@
 
 ## What is SoulSync?
 
-SoulSync is a **voice-first** AI companion that listens to you, understands your emotions, and responds with empathy — using natural voice. It proactively helps by saving calendar events, suggesting therapy resources, and guiding you through mindfulness exercises.
+SoulSync is a **voice-first AI journal** that listens to you, understands your emotions, and responds like a friend — not a chatbot. Write or speak your thoughts, and SoulSync helps you process them, reflect on past entries, and feel less alone.
 
 **You speak. SoulSync listens. You feel heard.**
 
@@ -160,11 +160,13 @@ SoulSync/
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/<your-org>/soulsync.git
-cd soulsync
+git clone https://github.com/Davii-Ng/SoulSync.git
+cd SoulSync
 ```
 
 ### 2. Set up environment variables
+
+Create a `.env` file in the project root:
 
 Create a `.env` file in the project root:
 
