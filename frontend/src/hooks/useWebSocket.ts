@@ -56,14 +56,22 @@ export function useWebSocket() {
     }
   }, [connect])
 
-  const sendMessage = useCallback((text: string): boolean => {
+  const sendMessage = useCallback((text: string, voiceId?: string | null): boolean => {
     if (ws.current?.readyState === WebSocket.OPEN) {
-      ws.current.send(JSON.stringify({ type: 'text', content: text }))
+      const payload: Record<string, string> = { type: 'text', content: text }
+      if (voiceId) payload.voice_id = voiceId
+      ws.current.send(JSON.stringify(payload))
       return true
     }
     console.warn('WebSocket not connected — message not sent')
     return false
   }, [])
 
-  return { isConnected, sendMessage, ws }
+  const setVoice = useCallback((voiceId: string | null): void => {
+    if (ws.current?.readyState === WebSocket.OPEN) {
+      ws.current.send(JSON.stringify({ type: 'set_voice', voice_id: voiceId || '' }))
+    }
+  }, [])
+
+  return { isConnected, sendMessage, setVoice, ws }
 }

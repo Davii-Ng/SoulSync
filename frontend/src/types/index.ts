@@ -13,12 +13,19 @@ export interface SavedEvent {
   note?: string
 }
 
+export interface Voice {
+  voice_id: string
+  name: string
+}
+
 export interface WsResponse {
-  type?: 'response' | 'error' | 'transcript'
+  type?: 'response' | 'error' | 'transcript' | 'voice_set'
   content?: string
   emotion?: Emotion
   audio_base64?: string
+  tts_error?: string
   events?: SavedEvent[]
+  voice_id?: string
 }
 
 export interface Message {

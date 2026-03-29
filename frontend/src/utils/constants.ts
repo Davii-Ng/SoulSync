@@ -1,6 +1,7 @@
 // App-wide constants: WebSocket URL, emotion display config
 
 export const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8000/ws'
+export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
 export const EMOTION_CONFIG: Record<string, { label: string; color: string; bg: string; dot: string }> = {
   calm:     { label: 'Calm',     color: 'text-teal-700',   bg: 'bg-teal-50',    dot: 'bg-teal-400' },

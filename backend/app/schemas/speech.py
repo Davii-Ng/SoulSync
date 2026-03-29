@@ -6,6 +6,10 @@ class SpeechRequest(BaseModel):
     voice_id: str | None = None
 
 
+class VoicePreviewRequest(BaseModel):
+    voice_id: str
+
+
 class TranscribeRequest(BaseModel):
     audio_base64: str
     language_code: str | None = None

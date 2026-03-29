@@ -35,7 +35,10 @@ function App() {
   const [messages, setMessages] = useState<Message[]>([])
   const [emotion, setEmotion] = useState<Emotion>('neutral')
   const [savedEvents, setSavedEvents] = useState<SavedEvent[]>([])
-  const { isConnected, sendMessage, ws } = useWebSocket()
+  const [selectedVoiceId, setSelectedVoiceId] = useState<string | null>(
+    () => localStorage.getItem('soulsync_voice_id'),
+  )
+  const { isConnected, sendMessage, setVoice, ws } = useWebSocket()
   const { isListening, transcript, startListening, stopListening } = useVoiceInput()
   const listeningRef = useRef(false)
 
@@ -80,6 +83,16 @@ function App() {
 
       if (data.events && data.events.length > 0) {
         setSavedEvents((prev) => mergeEvents(prev, data.events ?? []))
+      }
+
+      if (data.tts_error) {
+        const note: Message = {
+          id: (Date.now() + 2).toString(),
+          role: 'assistant',
+          content: data.tts_error,
+          timestamp: Date.now(),
+        }
+        setMessages((prev) => [...prev, note])
       }
 
       if (data.audio_base64) {
@@ -158,6 +171,23 @@ function App() {
     }
   }, [orbState, startListening, stopListening, sendMessage])
 
+  const handleVoiceChange = useCallback(
+    (voiceId: string | null) => {
+      setSelectedVoiceId(voiceId)
+      if (voiceId) localStorage.setItem('soulsync_voice_id', voiceId)
+      else localStorage.removeItem('soulsync_voice_id')
+      setVoice(voiceId)
+    },
+    [setVoice],
+  )
+
+  // Send stored voice preference when WebSocket connects
+  useEffect(() => {
+    if (isConnected && selectedVoiceId) {
+      setVoice(selectedVoiceId)
+    }
+  }, [isConnected, selectedVoiceId, setVoice])
+
   const isBusy = orbState === 'thinking' || orbState === 'speaking'
 
   return (
@@ -182,7 +212,7 @@ function App() {
         <Route path="calendar" element={<CalendarPage events={savedEvents} />} />
         <Route path="history" element={<HistoryPage messages={messages} />} />
         <Route path="resources" element={<ResourcesPage />} />
-        <Route path="settings" element={<SettingsPage />} />
+        <Route path="settings" element={<SettingsPage selectedVoiceId={selectedVoiceId} onVoiceChange={handleVoiceChange} />} />
       </Route>
     </Routes>
   )
