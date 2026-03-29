@@ -14,14 +14,13 @@ def get_crisis_resources() -> dict:
 
 
 def get_therapist_resources() -> dict:
-    """Returns links and tips for finding professional therapy. Stub implementation."""
-    # TODO: Integrate a therapist directory API (e.g., Psychology Today, BetterHelp)
+    """Returns links and tips for finding professional therapy."""
     return {
         "status": "success",
         "resources": [
-            {"name": "Psychology Today Therapist Finder", "url": "[STUB] https://www.psychologytoday.com/us/therapists"},
-            {"name": "BetterHelp Online Therapy", "url": "[STUB] https://www.betterhelp.com"},
-            {"name": "Open Path Collective (affordable therapy)", "url": "[STUB] https://openpathcollective.org"},
+            {"name": "Psychology Today Therapist Finder", "url": "https://www.psychologytoday.com/us/therapists"},
+            {"name": "BetterHelp Online Therapy", "url": "https://www.betterhelp.com"},
+            {"name": "Open Path Collective (affordable therapy)", "url": "https://openpathcollective.org"},
         ],
     }
 
