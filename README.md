@@ -27,41 +27,20 @@ SoulSync is a **voice-first** AI companion that listens to you, understands your
 
 ## Architecture
 
+![SoulSync Architecture](image.png)
+
 ```
-User speaks
-    │
-    ▼
-┌──────────────────────────────────────────┐
-│         root_agent (Orchestrator)         │  ← agent.py — ADK entry point
-│                                           │
-│  1. transcribe_audio (Listener stub)      │
-│  2. delegate to core_companion sub-agent  │
-│  3. manage_calendar (Calendar stub)       │
-│  4. speak_response (Voice stub)           │
-└───────────────┬──────────────────────────┘
-                │ sub_agent
-                ▼
-┌──────────────────────────────────────────┐
-│         core_companion_agent              │  ← Gemini: emotion analysis + response
-│                                           │
-│  tools: analyze_emotion, suggest_resource │
-│  delegates to: calendar_agent             │
-│               resource_agent              │
-└──────────────────────────────────────────┘
-                │
-                ▼
-┌──────────────────┐    ┌──────────────────┐
-│  calendar_agent  │    │  resource_agent  │
-│  save_event      │    │  crisis hotlines │
-│  list_events     │    │  therapist refs  │
-│                  │    │  mindfulness     │
-└──────────────────┘    └──────────────────┘
-                │
-                ▼
-┌──────────────────┐
-│   voice_agent    │  ← ElevenLabs TTS → natural voice
-│  speak_response  │
-└──────────────────┘
+root_agent (agent.py) — ADK entry point, orchestrator
+├── sub_agents:
+│   ├── core_companion_agent   ← Gemini: emotion analysis + empathetic response
+│   │   └── tools: analyze_emotion, suggest_resource
+│   ├── calendar_agent         ← save/list events (in-memory store)
+│   │   └── tools: save_event, list_events
+│   └── resource_agent         ← crisis hotlines, therapy refs, mindfulness
+│       └── tools: get_crisis_resources, get_therapist_resources, get_mindfulness_exercise
+└── tools: [] (pure orchestrator)
+
+voice_agent  ← ElevenLabs TTS utility, called by backend post-response
 ```
 
 ---
@@ -71,13 +50,12 @@ User speaks
 | Layer | Technology |
 |-------|-----------|
 | **Frontend** | React + Vite + TypeScript |
-| **Backend** | Python + FastAPI |
+| **Backend** | Python + FastAPI + WebSocket |
 | **Agents** | Google ADK (Python) |
 | **LLM** | Gemini API (`gemini-3-flash-preview`) |
 | **Voice Output** | ElevenLabs TTS |
 | **Voice Input** | Web Speech API (browser-side) |
-| **Database** | SQLite / in-memory |
-| **Real-time** | WebSocket |
+| **Database** | In-memory (hackathon scope) |
 | **Deploy** | Vercel (frontend) · Railway/Render (backend) |
 
 ---
@@ -93,15 +71,15 @@ SoulSync/
 │       ├── hooks/
 │       ├── types/
 │       └── utils/
-├── backend/                   # FastAPI entry point + WebSocket
+├── backend/                   # FastAPI + WebSocket
 │   └── main.py
 ├── multi_tool_agent/          # Google ADK agents (adk run target)
-│   ├── agent.py               # ADK entry point — root_agent (main orchestrator)
-│   ├── core_companion.py      # Core Companion sub-agent (emotion + response)
-│   ├── calendar_agent.py      # Calendar/event management
-│   ├── resource_agent.py      # Mental health resources + crisis hotlines
-│   ├── listener_agent.py      # Voice-to-text (stub → Google STT)
-│   ├── voice_agent.py         # Text-to-voice via ElevenLabs
+│   ├── agent.py               # ADK entry point — root_agent (orchestrator)
+│   ├── core_companion.py      # Emotion analysis + empathetic response
+│   ├── calendar_agent.py      # Event/deadline management
+│   ├── resource_agent.py      # Crisis hotlines + therapy resources
+│   ├── listener_agent.py      # Voice-to-text stub (browser handles STT)
+│   ├── voice_agent.py         # ElevenLabs TTS utility
 │   ├── __init__.py
 │   └── CLAUDE.md
 ├── .env                       # API keys (never commit!)
@@ -123,11 +101,13 @@ SoulSync/
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/<your-org>/soulsync.git
-cd soulsync
+git clone https://github.com/Davii-Ng/SoulSync.git
+cd SoulSync
 ```
 
 ### 2. Set up environment variables
+
+Create a `.env` file in the project root:
 
 ```env
 GOOGLE_API_KEY=your_gemini_api_key
@@ -143,7 +123,7 @@ pip install -r requirements.txt
 
 ### 4. Run the agents (Google ADK)
 
-```powershell
+```bash
 # From project root (SoulSync/)
 adk run multi_tool_agent     # terminal chat
 adk web multi_tool_agent     # browser UI at localhost:8000
@@ -152,8 +132,8 @@ adk web multi_tool_agent     # browser UI at localhost:8000
 ### 5. Start the backend
 
 ```bash
-cd backend
-uvicorn main:app --reload
+# From project root (SoulSync/)
+python -m uvicorn backend.main:app --reload
 # → http://localhost:8000
 ```
 
