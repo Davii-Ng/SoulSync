@@ -19,7 +19,7 @@ SoulSync is a **voice-first AI journal** that listens to you, understands your e
 | Track | How We Use It |
 |-------|--------------|
 | **Oracle** | Human-centered AI — empathetic, proactive mental health support |
-| **Google ADK Multi-Agent** | Multi-agent orchestration with 6 specialized sub-agents |
+| **Google ADK Multi-Agent** | Multi-agent orchestration with 3 specialized sub-agents |
 | **ElevenLabs** | Natural voice I/O — TTS via SDK + STT via Scribe MCP |
 | **Gemini API** | Emotion analysis + conversational AI responses |
 
@@ -42,8 +42,9 @@ User speaks into mic (browser)
 ┌─────────────────────────────────────────────────┐
 │          Backend (FastAPI + WebSocket)            │
 │  /chat  /speech  /transcribe  /ws                │
+│  analyze_emotion + Gemini LLM + ElevenLabs TTS   │
 └───────────────────┬─────────────────────────────┘
-                    │  Calls agent tools directly
+                    │  Routes to ADK agents
                     ▼
 ┌─────────────────────────────────────────────────┐
 │       root_agent (ADK Orchestrator)              │
@@ -54,13 +55,12 @@ User speaks into mic (browser)
 │  ├── journal_agent   → save_entry, get_entries,   │
 │  │                     reflective prompts          │
 │  ├── calendar_agent  → save_event, get_events     │
-│  ├── resource_agent  → crisis hotlines,           │
-│  │                     therapist refs, mindfulness │
-│  ├── listener_agent  → ElevenLabs Scribe STT      │
-│  │                     (via MCP toolset)           │
-│  └── voice_agent     → ElevenLabs TTS             │
-│                        (speak_response,            │
-│                         text_to_speech)            │
+│  └── resource_agent  → crisis hotlines,           │
+│                        therapist refs, mindfulness │
+│                                                   │
+│  Backend utilities (not sub_agents):              │
+│  ├── voice_agent     → ElevenLabs TTS             │
+│  └── listener_agent  → ElevenLabs Scribe STT      │
 └─────────────────────────────────────────────────┘
 ```
 
@@ -75,7 +75,7 @@ User speaks into mic (browser)
 | **Agents** | Google ADK (Python) — multi-agent orchestration |
 | **LLM** | Gemini API (`gemini-3-flash-preview`) |
 | **Voice Output** | ElevenLabs TTS (Python SDK) |
-| **Voice Input** | Web Speech API (browser) + ElevenLabs Scribe STT (server) |
+| **Voice Input** | Web Speech API (browser) + ElevenLabs Scribe STT (server via MCP) |
 | **Real-time** | WebSocket — text + audio + emotion in a single message |
 | **Deploy** | Vercel (frontend) · Railway/Render (backend) |
 
@@ -156,7 +156,7 @@ SoulSync/
 **Receive (server → client):**
 ```json
 { "type": "transcript", "content": "transcribed text" }
-{ "type": "response", "content": "AI reply", "emotion": "burnout", "audio_base64": "..." }
+{ "type": "response", "content": "AI reply", "emotion": "stressed", "audio_base64": "..." }
 { "type": "error", "content": "error message" }
 ```
 
@@ -224,7 +224,8 @@ npm run dev
 ```bash
 # From project root (SoulSync/)
 adk run multi_tool_agent     # terminal chat
-adk web multi_tool_agent     # browser UI at localhost:8000
+adk web .                    # browser UI at localhost:8000
+adk web . --port 8080        # use 8080 if backend is on 8000
 ```
 
 ---
@@ -245,7 +246,7 @@ pytest -q
 3. Say something like _"I've been feeling really burned out lately"_.
 4. Click the orb again to stop — your message appears in the transcript.
 5. SoulSync analyzes your emotion, responds empathetically, and speaks the reply aloud.
-6. The **emotion badge** updates to reflect the detected mood (burnout, stress, loneliness, neutral).
+6. The **emotion badge** updates to reflect the detected mood (stressed, anxious, sad, angry, happy, calm, neutral).
 
 ---
 

@@ -5,7 +5,8 @@ import { TextInput } from "./components/TextInput";
 import { useWebSocket } from "./hooks/useWebSocket";
 import { useVoiceInput } from "./hooks/useVoiceInput";
 import { EmotionBadge } from "./components/EmotionBadge";
-import type { OrbState, Message, Emotion, SavedEvent, WsResponse } from "./types";
+import { ResourcesCard } from "./components/ResourcesCard";
+import type { OrbState, Message, Emotion, SavedEvent } from "./types";
 import { useState, useEffect, useCallback, useRef } from "react";
 
 const getEventId = (event: SavedEvent): string => {
@@ -266,126 +267,39 @@ function App() {
               >
                 Events
               </h3>
-              {savedEvents.length === 0 ? (
-                <div
-                  className="mt-3 rounded-lg px-3.5 py-3"
-                  style={{
-                    background: "var(--soul-surface-alt)",
-                    border: "1px solid var(--soul-border-light)",
-                  }}
+              <div
+                className="mt-3 rounded-lg px-3.5 py-2.5"
+                style={{
+                  background: "var(--soul-accent-pale)",
+                  border: "1px solid var(--soul-accent-light)",
+                }}
+              >
+                <p
+                  className="text-sm font-medium"
+                  style={{ color: "var(--soul-text)" }}
                 >
-                  <p className="text-sm" style={{ color: "var(--soul-text-secondary)" }}>
-                    No events captured yet
-                  </p>
-                  <p className="text-xs mt-1" style={{ color: "var(--soul-text-muted)" }}>
-                    Mention a date, deadline, or appointment and it will appear here.
-                  </p>
-                </div>
-              ) : (
-                <div className="mt-3 max-h-40 overflow-y-auto space-y-2 pr-1">
-                  {savedEvents.map((event) => {
-                    const eventId = getEventId(event);
-                    return (
-                      <div
-                        key={eventId}
-                        className="rounded-lg px-3.5 py-2.5"
-                        style={{
-                          background: "var(--soul-accent-pale)",
-                          border: "1px solid var(--soul-accent-light)",
-                        }}
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <p
-                              className="text-sm font-medium"
-                              style={{ color: "var(--soul-text)" }}
-                            >
-                              {event.title}
-                            </p>
-                            <p
-                              className="text-xs mt-1"
-                              style={{ color: "var(--soul-accent)" }}
-                            >
-                              {event.dateLabel}
-                            </p>
-                            {event.note ? (
-                              <p
-                                className="text-xs mt-2"
-                                style={{ color: "var(--soul-text-muted)" }}
-                              >
-                                {event.note}
-                              </p>
-                            ) : null}
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => handleDismissEvent(eventId)}
-                            className="text-xs px-2 py-1 rounded-md border"
-                            style={{
-                              color: "var(--soul-text-muted)",
-                              borderColor: "var(--soul-border-light)",
-                            }}
-                          >
-                            Dismiss
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
+                  {savedEvents[0]?.title}
+                </p>
+                <p
+                  className="text-xs mt-1"
+                  style={{ color: "var(--soul-accent)" }}
+                >
+                  {savedEvents[0]?.dateLabel}
+                </p>
+              </div>
+              <p
+                className="text-xs mt-2"
+                style={{ color: "var(--soul-text-muted)" }}
+              >
+                {savedEvents[0]?.note}
+              </p>
             </article>
 
-            {/* Resources — static helpful links */}
-            <article
-              className="dashboard-card dashboard-card-hover rounded-2xl border p-5"
-              style={{ borderColor: "var(--soul-border-light)" }}
-            >
-              <h3
-                className="text-lg section-heading mb-3"
-                style={{ color: "var(--soul-text)" }}
-              >
-                Resources
-              </h3>
-              {[
-                {
-                  icon: "\u260E",
-                  label: "988 Suicide & Crisis Lifeline",
-                  sub: "Call or text 988",
-                },
-                {
-                  icon: "\uD83C\uDF2C\uFE0F",
-                  label: "Box Breathing",
-                  sub: "Inhale 4s, hold 4s, exhale 4s",
-                },
-                {
-                  icon: "\uD83E\uDDD8",
-                  label: "5-4-3-2-1 Grounding",
-                  sub: "Name 5 things you can see...",
-                },
-              ].map((r) => (
-                <div
-                  key={r.label}
-                  className="flex items-start gap-2.5 py-1.5 cursor-pointer resource-row rounded-md px-1 -mx-1"
-                >
-                  <span className="text-sm mt-0.5">{r.icon}</span>
-                  <div>
-                    <p
-                      className="text-sm font-medium"
-                      style={{ color: "var(--soul-text)" }}
-                    >
-                      {r.label}
-                    </p>
-                    <p
-                      className="text-xs"
-                      style={{ color: "var(--soul-text-muted)" }}
-                    >
-                      {r.sub}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </article>
+            {/* Resources — interactive wellness tools */}
+            <ResourcesCard
+              emotion={emotion}
+              aiSuggested={['stressed', 'anxious', 'sad', 'angry'].includes(emotion)}
+            />
           </div>
         </section>
       </div>
