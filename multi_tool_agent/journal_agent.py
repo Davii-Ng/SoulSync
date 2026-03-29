@@ -112,7 +112,7 @@ def get_prompt(emotion: str = "neutral") -> dict:
 
 
 journal_agent = Agent(
-    model="gemini-3.1-pro-preview",
+    model="gemini-3-flash-preview",
     name="journal_agent",
     description="Saves journal entries, retrieves past entries, and offers reflective prompts to help the user explore their thoughts.",
     instruction=(
