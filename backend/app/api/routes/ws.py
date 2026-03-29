@@ -8,6 +8,7 @@ from app.core.config import GOOGLE_API_KEY
 from app.ws.manager import manager
 from app.services.agent_runner import run_agent
 from multi_tool_agent.voice_agent import text_to_speech, speech_to_text
+from multi_tool_agent.core_companion import analyze_emotion, suggest_resource
 
 logger = logging.getLogger(__name__)
 
