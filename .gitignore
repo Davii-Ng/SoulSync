@@ -138,5 +138,10 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
-# Python bytecode cache
-**/__pycache__/
+__pycache__/
+*.pyc
+
+.adk/
+
+.env
+venv/
