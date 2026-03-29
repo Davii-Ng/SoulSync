@@ -4,15 +4,24 @@ import { ChatTranscript } from './components/ChatTranscript'
 import { TextInput } from './components/TextInput'
 import { useWebSocket } from './hooks/useWebSocket'
 import { useVoiceInput } from './hooks/useVoiceInput'
-import type { OrbState, Message, Emotion } from './types'
+import { EmotionBadge } from './components/EmotionBadge'
+import type { OrbState, Message, Emotion, SavedEvent } from './types'
 import { useState, useEffect, useCallback } from 'react'
 
 function App() {
   const [orbState, setOrbState] = useState<OrbState>('idle')
   const [messages, setMessages] = useState<Message[]>([])
   const [emotion, setEmotion] = useState<Emotion>('neutral')
+  const [savedEvents] = useState<SavedEvent[]>([
+    {
+      id: '1',
+      title: 'Therapy check-in reminder',
+      dateLabel: 'Monday, 7:30 PM',
+      note: 'Captured from your latest conversation.',
+    },
+  ])
   const { isConnected, sendMessage, ws } = useWebSocket()
-  const { transcript, startListening, stopListening } = useVoiceInput()
+  const { startListening, stopListening } = useVoiceInput()
 
   // Handle incoming WebSocket messages
   useEffect(() => {
@@ -47,7 +56,13 @@ function App() {
         setOrbState('idle')
       }
     }
-  }, [ws.current])
+
+    return () => {
+      if (ws.current) {
+        ws.current.onmessage = null
+      }
+    }
+  }, [isConnected, ws])
 
   // Send text message (from TextInput)
   const handleTextSend = useCallback((text: string) => {
@@ -91,27 +106,70 @@ function App() {
 
   return (
     <div
-      className="h-screen flex flex-col"
+      className="min-h-screen soul-dashboard px-4 py-6 md:px-10 md:py-8"
       style={{ background: 'var(--soul-bg)' }}
     >
-      {/* Header with emotion badge */}
-      <Header emotion={emotion} isConnected={isConnected} />
+      <div className="max-w-5xl mx-auto w-full flex flex-col gap-4 md:gap-5">
+        <Header isConnected={isConnected} />
 
-      {/* Chat area (takes all available space) */}
-      <ChatTranscript messages={messages} />
+        <section
+          className="dashboard-strip rounded-xl border px-5 py-3 flex items-center justify-center gap-3"
+          style={{ borderColor: 'var(--soul-border-light)' }}
+        >
+          <span className="text-sm" style={{ color: 'var(--soul-text-secondary)' }}>
+            Emotion signal:
+          </span>
+          <EmotionBadge emotion={emotion} />
+          <span className="text-sm" style={{ color: 'var(--soul-text-muted)' }}>
+            tone adapts with mood in real time
+          </span>
+        </section>
 
-      {/* Bottom: orb + text input */}
-      <div
-        className="px-4 pt-3 pb-4 border-t"
-        style={{ borderColor: 'var(--soul-border-light)', background: 'var(--soul-surface)' }}
-      >
-        {/* Voice orb centered */}
-        <div className="flex justify-center mb-3">
+        <section className="flex flex-col items-center py-2 md:py-3">
           <VoiceOrb state={orbState} onClick={handleOrbClick} />
-        </div>
+          <p className="text-xs mt-2" style={{ color: 'var(--soul-text-muted)' }}>
+            idle / listening / thinking / speaking
+          </p>
+        </section>
 
-        {/* Text input */}
-        <TextInput onSend={handleTextSend} disabled={isBusy} />
+        <section
+          className="dashboard-chat rounded-xl border p-4 md:p-5"
+          style={{ borderColor: 'var(--soul-border-light)' }}
+        >
+          <ChatTranscript messages={messages} />
+          <div className="mt-4">
+            <TextInput onSend={handleTextSend} disabled={isBusy} />
+          </div>
+        </section>
+
+        <section className="pt-1">
+          <p className="text-sm text-center mb-3" style={{ color: 'var(--soul-text-muted)' }}>
+            Phase 2 cards
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
+            <article className="dashboard-card rounded-xl border p-5" style={{ borderColor: 'var(--soul-border-light)' }}>
+              <h3 className="text-lg font-semibold" style={{ color: 'var(--soul-text)' }}>Mood History</h3>
+              <p className="text-sm mt-2" style={{ color: 'var(--soul-text-muted)' }}>
+                Mini trend chart and sentiment trajectory.
+              </p>
+            </article>
+
+            <article className="dashboard-card rounded-xl border p-5" style={{ borderColor: 'var(--soul-border-light)' }}>
+              <h3 className="text-lg font-semibold" style={{ color: 'var(--soul-text)' }}>Events</h3>
+              <p className="text-sm mt-2" style={{ color: 'var(--soul-text-muted)' }}>
+                {savedEvents[0]?.title ?? 'Captured by calendar agent'}
+              </p>
+            </article>
+
+            <article className="dashboard-card rounded-xl border p-5" style={{ borderColor: 'var(--soul-border-light)' }}>
+              <h3 className="text-lg font-semibold" style={{ color: 'var(--soul-text)' }}>Resources</h3>
+              <p className="text-sm mt-2" style={{ color: 'var(--soul-text-muted)' }}>
+                Hotlines, grounding prompts, and mindfulness links.
+              </p>
+            </article>
+          </div>
+        </section>
       </div>
     </div>
   )

@@ -2,22 +2,22 @@
 
 /* ── Warm therapeutic palette ── */
 :root {
-  --soul-bg: #F7F9FC;
-  --soul-surface: #FFFFFF;
-  --soul-surface-alt: #EEF3F9;
-  --soul-border: #DCE4ED;
-  --soul-border-light: #E8EEF4;
-  --soul-text: #2D3748;
-  --soul-text-secondary: #6B7B8F;
-  --soul-text-muted: #9AAFC0;
-  --soul-accent: #6BA3BE;
-  --soul-accent-light: #B8D8E7;
-  --soul-accent-pale: #E3F0F7;
-  --soul-user-bubble: #E8F4FA;
-  --soul-user-text: #2A5F7A;
-  --soul-gradient-start: #7DBAD4;
-  --soul-gradient-end: #A8D5BA;
-  --soul-orb-ring: rgba(107, 163, 190, 0.25);
+  --soul-bg: radial-gradient(circle at 20% 10%, #171717 0%, #0d0d0d 52%, #060606 100%);
+  --soul-surface: #232323;
+  --soul-surface-alt: #292929;
+  --soul-border: #646464;
+  --soul-border-light: #7f7f7f;
+  --soul-text: #f2f2f2;
+  --soul-text-secondary: #d5d5d5;
+  --soul-text-muted: #a9a9a9;
+  --soul-accent: #8bb9d1;
+  --soul-accent-light: #bad2de;
+  --soul-accent-pale: #283944;
+  --soul-user-bubble: rgba(255, 255, 255, 0.03);
+  --soul-user-text: #f2f2f2;
+  --soul-gradient-start: #2e2e2e;
+  --soul-gradient-end: #242424;
+  --soul-orb-ring: rgba(255, 255, 255, 0.2);
 }
 
 /* ── Base reset ── */
@@ -28,10 +28,15 @@
 }
 
 body {
-  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-  background: var(--soul-bg);
+  font-family: 'Manrope', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #070707;
   color: var(--soul-text);
   -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+  background: var(--soul-bg);
 }
 
 /* ── Scrollbar ── */
@@ -97,4 +102,21 @@ body {
 @keyframes wave-bar {
   0%, 100% { height: 4px; }
   50% { height: 14px; }
+}
+
+.soul-dashboard {
+  background-image:
+    radial-gradient(circle at 85% 12%, rgba(255, 255, 255, 0.05), transparent 45%),
+    radial-gradient(circle at 10% 90%, rgba(255, 255, 255, 0.04), transparent 40%);
+}
+
+.dashboard-strip,
+.dashboard-chat,
+.dashboard-card {
+  background: linear-gradient(120deg, rgba(41, 41, 41, 0.94), rgba(32, 32, 32, 0.94));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.dashboard-transcript {
+  background: transparent;
 }
