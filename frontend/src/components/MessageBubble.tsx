@@ -1,4 +1,4 @@
-// Chat bubble styled as left/right outlined capsules
+// Chat bubble with distinct user/AI styling
 
 import type { Message } from '../types'
 
@@ -11,17 +11,17 @@ export function MessageBubble({ message }: Props) {
   return (
     <div className={`flex msg-enter ${isUser ? 'justify-start' : 'justify-end'}`}>
       <div
-        className="max-w-[85%] px-4 py-3 rounded-2xl text-lg leading-relaxed border"
-        style={{
-          borderColor: 'var(--soul-border)',
-          background: 'rgba(255, 255, 255, 0.02)',
-          color: 'var(--soul-text)',
-        }}
+        className={`max-w-[85%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${
+          isUser ? 'bubble-user' : 'bubble-ai'
+        }`}
       >
-        <span style={{ color: 'var(--soul-text-secondary)' }}>
-          {isUser ? 'User: ' : 'AI: '}
+        <span
+          className="text-xs font-medium block mb-1"
+          style={{ color: 'var(--soul-text-muted)' }}
+        >
+          {isUser ? 'You' : 'SoulSync'}
         </span>
-        {message.content}
+        <span style={{ color: 'var(--soul-text)' }}>{message.content}</span>
       </div>
     </div>
   )

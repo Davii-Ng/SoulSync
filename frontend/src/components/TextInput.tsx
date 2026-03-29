@@ -28,7 +28,7 @@ export function TextInput({ onSend, disabled = false }: Props) {
   return (
     <div className="flex items-center gap-2">
       <div
-        className="flex-1 flex items-center rounded-full px-4 transition-colors"
+        className="soul-input-wrap flex-1 flex items-center rounded-full px-4"
         style={{
           background: 'var(--soul-surface)',
           border: '1px solid var(--soul-border-light)',
@@ -41,7 +41,7 @@ export function TextInput({ onSend, disabled = false }: Props) {
           onKeyDown={handleKeyDown}
           placeholder="Type a message..."
           disabled={disabled}
-          className="flex-1 py-2.5 text-sm bg-transparent outline-none placeholder:text-[var(--soul-text-muted)]"
+          className="flex-1 py-3 text-sm bg-transparent outline-none placeholder:text-[var(--soul-text-muted)]"
           style={{ color: 'var(--soul-text)' }}
         />
       </div>
@@ -53,7 +53,7 @@ export function TextInput({ onSend, disabled = false }: Props) {
         className="w-9 h-9 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95 disabled:opacity-30 disabled:hover:scale-100"
         style={{
           background: text.trim()
-            ? 'linear-gradient(135deg, var(--soul-gradient-start), var(--soul-gradient-end))'
+            ? 'var(--soul-accent)'
             : 'var(--soul-border-light)',
         }}
       >

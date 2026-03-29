@@ -25,7 +25,10 @@ export function VoiceOrb({ state, onClick }: Props) {
       <button
         onClick={onClick}
         className={`relative w-40 h-40 md:w-48 md:h-48 rounded-full flex items-center justify-center cursor-pointer transition-transform hover:scale-102 active:scale-95 ${orbClass}`}
-        style={{ background: 'linear-gradient(135deg, var(--soul-gradient-start), var(--soul-gradient-end))' }}
+        style={{
+          background: 'linear-gradient(135deg, var(--soul-gradient-start), var(--soul-gradient-end))',
+          boxShadow: '0 8px 32px rgba(74, 130, 184, 0.2), inset 0 1px 0 rgba(255,255,255,0.5)',
+        }}
         aria-label={stateLabel[state]}
       >
         {/* Pulse ring (visible when listening) */}
@@ -43,9 +46,9 @@ export function VoiceOrb({ state, onClick }: Props) {
         ) : state === 'thinking' ? (
           /* Dots when thinking */
           <div className="flex gap-2">
-            <span className="thinking-dot w-2 h-2 rounded-full bg-white" style={{ animation: 'thinking-dot 1.2s ease-in-out infinite' }} />
-            <span className="thinking-dot w-2 h-2 rounded-full bg-white" style={{ animation: 'thinking-dot 1.2s ease-in-out infinite' }} />
-            <span className="thinking-dot w-2 h-2 rounded-full bg-white" style={{ animation: 'thinking-dot 1.2s ease-in-out infinite' }} />
+            <span className="thinking-dot w-2 h-2 rounded-full bg-slate-500" style={{ animation: 'thinking-dot 1.2s ease-in-out infinite' }} />
+            <span className="thinking-dot w-2 h-2 rounded-full bg-slate-500" style={{ animation: 'thinking-dot 1.2s ease-in-out infinite' }} />
+            <span className="thinking-dot w-2 h-2 rounded-full bg-slate-500" style={{ animation: 'thinking-dot 1.2s ease-in-out infinite' }} />
           </div>
         ) : (
           /* Mic icon default */

@@ -13,10 +13,18 @@ router = APIRouter()
 
 async def _process_text(websocket: WebSocket, content: str) -> None:
     """Analyze emotion, generate reply, convert to speech, and send back."""
-    emotion_result = analyze_emotion(content)
-    emotion = emotion_result.get("emotion", "neutral")
-    resource_result = suggest_resource(emotion)
-    reply = resource_result.get("suggestion", "")
+    try:
+        emotion_result = analyze_emotion(content)
+        emotion = emotion_result.get("emotion", "neutral")
+        resource_result = suggest_resource(emotion)
+        reply = resource_result.get("suggestion", "")
+    except Exception as e:
+        logger.error(f"Agent processing failed: {e}")
+        await manager.send_json(websocket, {
+            "type": "error",
+            "content": "Something went wrong processing your message. Please try again.",
+        })
+        return
 
     audio_b64 = None
     try:
