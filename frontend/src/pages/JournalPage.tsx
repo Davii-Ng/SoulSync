@@ -11,26 +11,23 @@ export function JournalPage({ messages }: Props) {
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <h1 className="text-2xl section-heading" style={{ color: 'var(--soul-text)' }}>
+        <h1 className="text-2xl section-heading text-soul-text">
           Journal
         </h1>
-        <p className="text-sm mt-1" style={{ color: 'var(--soul-text-muted)' }}>
+        <p className="text-sm mt-1 text-soul-text-muted">
           Your reflections and conversations, saved here.
         </p>
       </div>
 
       {entries.length === 0 ? (
-        <div
-          className="dashboard-card rounded-2xl border p-8 text-center"
-          style={{ borderColor: 'var(--soul-border-light)' }}
-        >
-          <span className="material-symbols-outlined text-5xl mb-3" style={{ color: 'var(--soul-accent-light)' }}>
+        <div className="dashboard-card rounded-2xl border border-soul-border-light p-8 text-center">
+          <span className="material-symbols-outlined text-5xl mb-3 text-soul-accent-light">
             auto_stories
           </span>
-          <p className="text-base font-medium" style={{ color: 'var(--soul-text-secondary)' }}>
+          <p className="text-base font-medium text-soul-text-secondary">
             No journal entries yet
           </p>
-          <p className="text-sm mt-1" style={{ color: 'var(--soul-text-muted)' }}>
+          <p className="text-sm mt-1 text-soul-text-muted">
             Start a conversation on the Speaking page and your entries will appear here.
           </p>
         </div>
@@ -46,11 +43,10 @@ export function JournalPage({ messages }: Props) {
             return (
               <article
                 key={entry.id}
-                className="dashboard-card dashboard-card-hover rounded-2xl border p-5"
-                style={{ borderColor: 'var(--soul-border-light)' }}
+                className="dashboard-card dashboard-card-hover rounded-2xl border border-soul-border-light p-5 md:p-6"
               >
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-medium" style={{ color: 'var(--soul-text-muted)' }}>
+                  <span className="text-xs font-medium text-soul-text-muted">
                     {dateStr} at {timeStr}
                   </span>
                   {emotionStyle && (
@@ -60,11 +56,11 @@ export function JournalPage({ messages }: Props) {
                     </span>
                   )}
                 </div>
-                <p className="text-sm leading-relaxed" style={{ color: 'var(--soul-text)' }}>
+                <p className="text-sm leading-relaxed text-soul-text">
                   {entry.content}
                 </p>
                 {entry.isVoice && (
-                  <span className="inline-flex items-center gap-1 mt-2 text-xs" style={{ color: 'var(--soul-text-muted)' }}>
+                  <span className="inline-flex items-center gap-1 mt-2 text-xs text-soul-text-muted">
                     <span className="material-symbols-outlined text-sm">mic</span>
                     Voice entry
                   </span>

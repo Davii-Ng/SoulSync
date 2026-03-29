@@ -45,8 +45,9 @@ async def voices() -> JSONResponse:
 @router.post("/voices/preview")
 async def voice_preview(request: VoicePreviewRequest) -> Response:
     try:
+        name = request.voice_name or "your SoulSync companion"
         audio_bytes = text_to_speech(
-            "Hi, I'm your SoulSync companion. How are you feeling today?",
+            f"Hi, I'm {name}. How are you feeling today?",
             voice_id=request.voice_id,
         )
         return Response(

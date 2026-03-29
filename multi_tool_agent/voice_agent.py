@@ -82,11 +82,15 @@ def speech_to_text(audio_bytes: bytes, language_code: str | None = None) -> str:
 
 
 async def get_available_voices() -> list[dict]:
-    """List available ElevenLabs voices."""
+    """List available ElevenLabs voices with gender labels."""
     if not _client:
         raise RuntimeError("ELEVENLABS_API_KEY not set")
     response = _client.voices.get_all()
-    return [{"voice_id": v.voice_id, "name": v.name} for v in response.voices]
+    voices = []
+    for v in response.voices:
+        gender = (v.labels or {}).get("gender", "unknown") if hasattr(v, "labels") else "unknown"
+        voices.append({"voice_id": v.voice_id, "name": v.name, "gender": gender})
+    return voices
 
 
 voice_agent = Agent(

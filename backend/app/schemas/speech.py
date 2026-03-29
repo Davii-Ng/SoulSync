@@ -8,6 +8,7 @@ class SpeechRequest(BaseModel):
 
 class VoicePreviewRequest(BaseModel):
     voice_id: str
+    voice_name: str | None = None
 
 
 class TranscribeRequest(BaseModel):

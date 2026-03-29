@@ -1,10 +1,13 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useMemo } from 'react'
 import { API_URL } from '../utils/constants'
 import type { Voice } from '../types'
 
+type GenderFilter = 'all' | 'male' | 'female'
+type SortOption = 'name' | 'gender'
+
 interface SettingsPageProps {
   selectedVoiceId: string | null
-  onVoiceChange: (voiceId: string | null) => void
+  onVoiceChange: (voiceId: string | null, voiceName: string | null) => void
 }
 
 export function SettingsPage({ selectedVoiceId, onVoiceChange }: SettingsPageProps) {
@@ -13,6 +16,8 @@ export function SettingsPage({ selectedVoiceId, onVoiceChange }: SettingsPagePro
   const [error, setError] = useState<string | null>(null)
   const [previewingId, setPreviewingId] = useState<string | null>(null)
   const [previewError, setPreviewError] = useState<string | null>(null)
+  const [genderFilter, setGenderFilter] = useState<GenderFilter>('all')
+  const [sortBy, setSortBy] = useState<SortOption>('name')
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
   useEffect(() => {
@@ -26,20 +31,34 @@ export function SettingsPage({ selectedVoiceId, onVoiceChange }: SettingsPagePro
       .finally(() => setLoading(false))
   }, [])
 
-  const handlePreview = async (voiceId: string) => {
-    // Stop any current preview
+  const filteredVoices = useMemo(() => {
+    let result = voices
+    if (genderFilter !== 'all') {
+      result = result.filter((v) => v.gender === genderFilter)
+    }
+    return result.slice().sort((a, b) => {
+      if (sortBy === 'gender') {
+        const order = { female: 0, male: 1, unknown: 2 }
+        const diff = (order[a.gender] ?? 2) - (order[b.gender] ?? 2)
+        if (diff !== 0) return diff
+      }
+      return a.name.localeCompare(b.name)
+    })
+  }, [voices, genderFilter, sortBy])
+
+  const handlePreview = async (voice: Voice) => {
     if (audioRef.current) {
       audioRef.current.pause()
       audioRef.current = null
     }
 
-    setPreviewingId(voiceId)
+    setPreviewingId(voice.voice_id)
     setPreviewError(null)
     try {
       const res = await fetch(`${API_URL}/voices/preview`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ voice_id: voiceId }),
+        body: JSON.stringify({ voice_id: voice.voice_id, voice_name: voice.name }),
       })
       if (!res.ok) {
         const data = await res.json().catch(() => null)
@@ -60,108 +79,134 @@ export function SettingsPage({ selectedVoiceId, onVoiceChange }: SettingsPagePro
     }
   }
 
-  const handleSelect = (voiceId: string) => {
-    const newId = voiceId === selectedVoiceId ? null : voiceId
-    onVoiceChange(newId)
+  const handleSelect = (voice: Voice) => {
+    const isDeselect = voice.voice_id === selectedVoiceId
+    onVoiceChange(isDeselect ? null : voice.voice_id, isDeselect ? null : voice.name)
   }
+
 
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <h1 className="text-2xl section-heading" style={{ color: 'var(--soul-text)' }}>
+        <h1 className="text-3xl section-heading text-soul-text">
           Settings
         </h1>
-        <p className="text-sm mt-1" style={{ color: 'var(--soul-text-muted)' }}>
+        <p className="text-sm mt-1 text-soul-text-muted">
           Preferences and account configuration.
         </p>
       </div>
 
-      <div
-        className="dashboard-card rounded-2xl border p-6"
-        style={{ borderColor: 'var(--soul-border-light)' }}
-      >
+      <div className="dashboard-card rounded-2xl border border-soul-border-light p-6 md:p-8">
         <div className="flex items-center gap-2 mb-4">
-          <span
-            className="material-symbols-outlined text-2xl"
-            style={{ color: 'var(--soul-accent)' }}
-          >
+          <span className="material-symbols-outlined text-2xl text-soul-accent">
             record_voice_over
           </span>
-          <h2 className="text-lg font-semibold" style={{ color: 'var(--soul-text)' }}>
+          <h2 className="text-lg font-semibold text-soul-text">
             Voice Selection
           </h2>
         </div>
-        <p className="text-sm mb-4" style={{ color: 'var(--soul-text-muted)' }}>
+        <p className="text-sm mb-4 text-soul-text-muted">
           Choose the voice SoulSync uses when speaking to you.
           {selectedVoiceId ? '' : ' Using default voice.'}
         </p>
 
+        {/* Filter & Sort controls */}
+        <div className="flex flex-wrap items-center gap-3 mb-4">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-soul-text-secondary">
+              Filter:
+            </span>
+            {(['all', 'female', 'male'] as GenderFilter[]).map((g) => (
+              <button
+                key={g}
+                onClick={() => setGenderFilter(g)}
+                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                  genderFilter === g
+                    ? 'bg-soul-accent text-white'
+                    : 'bg-soul-border-light text-soul-text-secondary'
+                }`}
+              >
+                {g === 'all' ? 'All' : g === 'female' ? 'Female' : 'Male'}
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-soul-text-secondary">
+              Sort:
+            </span>
+            {(['name', 'gender'] as SortOption[]).map((s) => (
+              <button
+                key={s}
+                onClick={() => setSortBy(s)}
+                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                  sortBy === s
+                    ? 'bg-soul-accent text-white'
+                    : 'bg-soul-border-light text-soul-text-secondary'
+                }`}
+              >
+                {s === 'name' ? 'Name' : 'Gender'}
+              </button>
+            ))}
+          </div>
+          {!loading && !error && (
+            <span className="text-xs ml-auto text-soul-text-muted">
+              {filteredVoices.length} voice{filteredVoices.length !== 1 ? 's' : ''}
+            </span>
+          )}
+        </div>
+
         {previewError && (
-          <p className="text-sm mb-3 px-3 py-2 rounded-lg" style={{ color: '#dc2626', background: 'rgba(220, 38, 38, 0.08)' }}>
+          <p className="text-sm mb-3 px-3 py-2 rounded-lg text-soul-error bg-red-50">
             {previewError}
           </p>
         )}
 
         {loading && (
-          <p className="text-sm" style={{ color: 'var(--soul-text-muted)' }}>
+          <p className="text-sm text-soul-text-muted">
             Loading voices...
           </p>
         )}
 
         {error && (
-          <p className="text-sm" style={{ color: 'var(--soul-error, #ef4444)' }}>
+          <p className="text-sm text-soul-error">
             {error}
           </p>
         )}
 
         {!loading && !error && (
-          <div className="grid gap-2" style={{ maxHeight: '400px', overflowY: 'auto' }}>
-            {voices.map((voice) => {
+          <div className="grid gap-2 max-h-[400px] overflow-y-auto">
+            {filteredVoices.map((voice) => {
               const isSelected = voice.voice_id === selectedVoiceId
               const isPreviewing = voice.voice_id === previewingId
               return (
                 <div
                   key={voice.voice_id}
-                  className="flex items-center justify-between rounded-xl border px-4 py-3 transition-all"
-                  style={{
-                    borderColor: isSelected
-                      ? 'var(--soul-accent)'
-                      : 'var(--soul-border-light)',
-                    background: isSelected
-                      ? 'var(--soul-accent-bg, rgba(139, 92, 246, 0.08))'
-                      : 'transparent',
-                  }}
+                  className={`flex items-center justify-between rounded-xl border px-5 py-3.5 transition-all ${
+                    isSelected
+                      ? 'border-soul-accent bg-soul-accent-pale'
+                      : 'border-soul-border-light bg-transparent'
+                  }`}
                 >
                   <div className="flex items-center gap-3">
                     <span
-                      className="material-symbols-outlined text-xl"
-                      style={{
-                        color: isSelected
-                          ? 'var(--soul-accent)'
-                          : 'var(--soul-text-muted)',
-                      }}
+                      className={`material-symbols-outlined text-xl ${
+                        isSelected ? 'text-soul-accent' : 'text-soul-text-muted'
+                      }`}
                     >
                       {isSelected ? 'check_circle' : 'radio_button_unchecked'}
                     </span>
-                    <span
-                      className="text-sm font-medium"
-                      style={{ color: 'var(--soul-text)' }}
-                    >
+                    <span className="text-sm font-medium text-soul-text">
                       {voice.name}
                     </span>
                   </div>
 
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => handlePreview(voice.voice_id)}
+                      onClick={() => handlePreview(voice)}
                       disabled={isPreviewing}
-                      className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors"
-                      style={{
-                        background: 'var(--soul-border-light)',
-                        color: 'var(--soul-text-secondary)',
-                        opacity: isPreviewing ? 0.6 : 1,
-                        cursor: isPreviewing ? 'not-allowed' : 'pointer',
-                      }}
+                      className={`flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors bg-soul-border-light text-soul-text-secondary ${
+                        isPreviewing ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'
+                      }`}
                     >
                       <span className="material-symbols-outlined text-base">
                         {isPreviewing ? 'volume_up' : 'play_arrow'}
@@ -170,14 +215,12 @@ export function SettingsPage({ selectedVoiceId, onVoiceChange }: SettingsPagePro
                     </button>
 
                     <button
-                      onClick={() => handleSelect(voice.voice_id)}
-                      className="rounded-lg px-3 py-1.5 text-xs font-medium transition-colors"
-                      style={{
-                        background: isSelected
-                          ? 'var(--soul-accent)'
-                          : 'var(--soul-border-light)',
-                        color: isSelected ? '#fff' : 'var(--soul-text-secondary)',
-                      }}
+                      onClick={() => handleSelect(voice)}
+                      className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                        isSelected
+                          ? 'bg-soul-accent text-white'
+                          : 'bg-soul-border-light text-soul-text-secondary'
+                      }`}
                     >
                       {isSelected ? 'Selected' : 'Select'}
                     </button>
