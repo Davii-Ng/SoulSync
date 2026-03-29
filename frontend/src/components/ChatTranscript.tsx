@@ -2,13 +2,20 @@
 
 import type { Message } from '../types'
 import { MessageBubble } from './MessageBubble'
+import { useEffect, useRef } from 'react'
 
 interface Props {
   messages: Message[]
 }
 
 export function ChatTranscript({ messages }: Props) {
-  return (
+  const bottomRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
+
+  return (  
     <div className="dashboard-transcript p-2 md:p-3">
       <h2 className="text-4xl font-semibold mb-4" style={{ color: 'var(--soul-text)' }}>
         Chat transcript
@@ -21,6 +28,7 @@ export function ChatTranscript({ messages }: Props) {
         ) : (
           messages.map((msg) => <MessageBubble key={msg.id} message={msg} />)
         )}
+        <div ref={bottomRef} />
       </div>
     </div>
   )
