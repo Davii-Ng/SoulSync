@@ -6,6 +6,7 @@ import { useWebSocket } from "./hooks/useWebSocket";
 import { useVoiceInput } from "./hooks/useVoiceInput";
 import { EmotionBadge } from "./components/EmotionBadge";
 import { ResourcesCard } from "./components/ResourcesCard";
+import { QuickCheckIn } from "./components/QuickCheckIn";
 import type { OrbState, Message, Emotion, SavedEvent } from "./types";
 import { useState, useEffect, useCallback, useRef } from "react";
 
@@ -194,47 +195,13 @@ function App() {
 
         <section className="pt-1 md:pt-0">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
-            {/* Mood History — static emotion timeline */}
-            <article
-              className="dashboard-card dashboard-card-hover rounded-2xl border p-5"
-              style={{ borderColor: "var(--soul-border-light)" }}
-            >
-              <h3
-                className="text-lg section-heading"
-                style={{ color: "var(--soul-text)" }}
-              >
-                Mood History
-              </h3>
-              <div className="flex items-center gap-3 mt-4">
-                {[
-                  { day: "Mon", dot: "bg-green-400" },
-                  { day: "Tue", dot: "bg-teal-400" },
-                  { day: "Wed", dot: "bg-amber-400" },
-                  { day: "Thu", dot: "bg-blue-400" },
-                  { day: "Fri", dot: "bg-orange-400" },
-                  { day: "Today", dot: "bg-green-400" },
-                ].map((item) => (
-                  <div
-                    key={item.day}
-                    className="flex flex-col items-center gap-1.5"
-                  >
-                    <span className={`w-3 h-3 rounded-full ${item.dot}`} />
-                    <span
-                      className="text-xs"
-                      style={{ color: "var(--soul-text-muted)" }}
-                    >
-                      {item.day}
-                    </span>
-                  </div>
-                ))}
-              </div>
-              <p
-                className="text-xs mt-3"
-                style={{ color: "var(--soul-text-muted)" }}
-              >
-                Mostly positive this week
-              </p>
-            </article>
+            {/* Quick Check-in — one-tap mood log */}
+            <QuickCheckIn
+              onCheckIn={(mood, label) => {
+                // Send as a message so the agent processes it
+                handleTextSend(`I'm feeling ${label.toLowerCase()} right now`);
+              }}
+            />
 
             {/* Events — show saved event */}
             <article
