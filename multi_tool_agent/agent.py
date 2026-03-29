@@ -20,6 +20,10 @@ root_agent = Agent(
         "- If the user says 'save today's journal', 'that's it for today', 'done for the day', "
         "'save this conversation', 'wrap up', or anything signaling they want to save — "
         "transfer to 'journal_agent' so it can call 'save_journal'.\n\n"
+        "- If the user expresses frustration with the AI (e.g. 'you are not helping', 'I need real help', "
+        "'talk to a real person', 'this isn't working', 'you don't understand', 'I need more than this', "
+        "'useless', 'pointless'), transfer to 'resource_agent' to connect them with real human support.\n"
+        "- If the user asks for nearby therapists, local resources, or support groups, transfer to 'resource_agent'.\n"
         "You are a router, not a responder. Never generate your own reply."
     ),
     sub_agents=[
