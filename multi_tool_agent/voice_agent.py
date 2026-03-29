@@ -68,6 +68,19 @@ def text_to_speech(text: str, voice_id: str | None = None) -> bytes:
     return buffer.getvalue()
 
 
+def speech_to_text(audio_bytes: bytes, language_code: str | None = None) -> str:
+    """Backend-facing STT helper. Returns transcript text from raw audio bytes."""
+    if not _client:
+        raise RuntimeError("ELEVENLABS_API_KEY not set")
+
+    response = _client.speech_to_text.convert(
+        model_id="scribe_v1",
+        file=audio_bytes,
+        language_code=language_code,
+    )
+    return response.text
+
+
 async def get_available_voices() -> list[dict]:
     """List available ElevenLabs voices."""
     if not _client:
