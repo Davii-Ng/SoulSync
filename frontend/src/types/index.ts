@@ -4,7 +4,7 @@ export type Emotion = 'calm' | 'stressed' | 'anxious' | 'happy' | 'sad' | 'angry
 
 export type OrbState = 'idle' | 'listening' | 'thinking' | 'speaking'
 
-export type AppTab = 'chat' | 'calendar' | 'resources'
+export type AppTab = 'speak' | 'journal' | 'calendar' | 'history' | 'resources'
 
 export interface SavedEvent {
   id: string
