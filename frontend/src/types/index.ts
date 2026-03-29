@@ -27,6 +27,7 @@ export interface WsResponse {
   tts_error?: string
   events?: SavedEvent[]
   voice_id?: string
+  journal_saved?: boolean
 }
 
 export interface Message {
@@ -37,4 +38,11 @@ export interface Message {
   emotion?: Emotion
   audio_base64?: string
   isVoice?: boolean
+}
+
+export interface JournalEntry {
+  id: string
+  date: string          // "YYYY-MM-DD"
+  messages: Message[]   // conversation snapshot (audio stripped)
+  savedAt: number
 }

@@ -8,7 +8,7 @@ import { ResourcesPage } from './pages/ResourcesPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { useWebSocket } from './hooks/useWebSocket'
 import { useVoiceInput } from './hooks/useVoiceInput'
-import type { OrbState, Message, Emotion, SavedEvent, WsResponse } from './types'
+import type { OrbState, Message, Emotion, SavedEvent, WsResponse, JournalEntry } from './types'
 import { useState, useEffect, useCallback, useRef } from 'react'
 
 const getEventId = (event: SavedEvent): string => {
@@ -30,17 +30,55 @@ const mergeEvents = (existing: SavedEvent[], incoming: SavedEvent[]): SavedEvent
   return Array.from(byId.values())
 }
 
+// Phrases that signal the user wants to save today's journal
+const SAVE_PHRASES = [
+  'save today', 'save journal', 'save this conversation', 'save my journal',
+  "that's it for today", 'thats it for today', 'done for the day', 'done for today',
+  'wrap up', 'end session', 'save the chat', 'save chat',
+]
+
+function isSaveIntent(text: string): boolean {
+  const lower = text.toLowerCase()
+  return SAVE_PHRASES.some((p) => lower.includes(p))
+}
+
 function App() {
   const [orbState, setOrbState] = useState<OrbState>('idle')
   const [messages, setMessages] = useState<Message[]>([])
   const [emotion, setEmotion] = useState<Emotion>('neutral')
   const [savedEvents, setSavedEvents] = useState<SavedEvent[]>([])
+  const [savedJournals, setSavedJournals] = useState<JournalEntry[]>(() => {
+    try {
+      const stored = localStorage.getItem('soulsync_journals')
+      return stored ? JSON.parse(stored) : []
+    } catch { return [] }
+  })
   const [selectedVoiceId, setSelectedVoiceId] = useState<string | null>(
     () => localStorage.getItem('soulsync_voice_id'),
   )
   const [selectedVoiceName, setSelectedVoiceName] = useState<string | null>(
     () => localStorage.getItem('soulsync_voice_name'),
   )
+  // Snapshot current conversation as a daily journal entry (instant, no backend needed)
+  const snapshotJournal = useCallback(() => {
+    const today = new Date().toISOString().slice(0, 10)
+    setMessages((prev) => {
+      if (prev.length === 0) return prev
+      const stripped = prev.map(({ audio_base64: _, ...rest }) => rest)
+      setSavedJournals((journals) => {
+        const idx = journals.findIndex((j) => j.date === today)
+        const entry: JournalEntry = { id: today, date: today, messages: stripped, savedAt: Date.now() }
+        if (idx >= 0) {
+          const updated = [...journals]
+          updated[idx] = entry
+          return updated
+        }
+        return [entry, ...journals]
+      })
+      return prev
+    })
+  }, [])
+
   const { isConnected, sendMessage, setVoice, ws } = useWebSocket()
   const { isListening, transcript, startListening, stopListening } = useVoiceInput()
   const listeningRef = useRef(false)
@@ -88,6 +126,9 @@ function App() {
         setSavedEvents((prev) => mergeEvents(prev, data.events ?? []))
       }
 
+      // Backend fallback: re-snapshot if agent also flagged journal_saved
+      if (data.journal_saved) snapshotJournal()
+
       if (data.tts_error) {
         const note: Message = {
           id: (Date.now() + 2).toString(),
@@ -114,6 +155,9 @@ function App() {
 
   const handleTextSend = useCallback(
     (text: string) => {
+      // Save journal instantly on save-intent — no backend round-trip needed
+      if (isSaveIntent(text)) snapshotJournal()
+
       const userMsg: Message = {
         id: Date.now().toString(),
         role: 'user',
@@ -135,7 +179,7 @@ function App() {
         setMessages((prev) => [...prev, errMsg])
       }
     },
-    [sendMessage],
+    [sendMessage, snapshotJournal],
   )
 
   const handleOrbClick = useCallback(async () => {
@@ -148,6 +192,8 @@ function App() {
       setOrbState('idle')
     } else if (orbState === 'idle') {
       startListening((text: string) => {
+        if (isSaveIntent(text)) snapshotJournal()
+
         const userMsg: Message = {
           id: Date.now().toString(),
           role: 'user',
@@ -172,7 +218,7 @@ function App() {
       })
       setOrbState('listening')
     }
-  }, [orbState, startListening, stopListening, sendMessage])
+  }, [orbState, startListening, stopListening, sendMessage, snapshotJournal])
 
   const handleVoiceChange = useCallback(
     (voiceId: string | null, voiceName: string | null) => {
@@ -186,6 +232,11 @@ function App() {
     },
     [setVoice],
   )
+
+  // Persist journals to localStorage
+  useEffect(() => {
+    localStorage.setItem('soulsync_journals', JSON.stringify(savedJournals))
+  }, [savedJournals])
 
   // Send stored voice preference when WebSocket connects
   useEffect(() => {
@@ -215,7 +266,7 @@ function App() {
             />
           }
         />
-        <Route path="journal" element={<JournalPage messages={messages} />} />
+        <Route path="journal" element={<JournalPage journals={savedJournals} />} />
         <Route path="calendar" element={<CalendarPage events={savedEvents} />} />
         <Route path="history" element={<HistoryPage messages={messages} />} />
         <Route path="resources" element={<ResourcesPage />} />
