@@ -27,6 +27,8 @@ SoulSync is a **voice-first AI journal** that listens to you, understands your e
 
 ## Architecture
 
+![alt text](image-1.png)
+
 ```
 User speaks into mic (browser)
     │
