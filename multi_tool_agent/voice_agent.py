@@ -94,7 +94,7 @@ async def get_available_voices() -> list[dict]:
 
 
 voice_agent = Agent(
-    model="gemini-3-flash-preview",
+    model="gemini-3.1-pro-preview",
     name="voice_agent",
     description="Converts text responses to natural-sounding audio via ElevenLabs TTS.",
     instruction=(

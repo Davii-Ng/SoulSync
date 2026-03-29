@@ -66,7 +66,7 @@ def get_events(date: str = "") -> dict:
 
 calendar_agent = Agent(
     name="calendar_agent",
-    model="gemini-3-flash-preview",
+    model="gemini-3.1-pro-preview",
     description="Manages the user's calendar events. Saves new events and retrieves upcoming schedule when needed.",
     instruction="""You're the one who keeps track of things so the user doesn't have to stress about it.
 When they mention anything — an appointment, a deadline, a thing they have to do — just save it. Don't make it a whole thing.
