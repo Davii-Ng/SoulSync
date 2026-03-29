@@ -14,7 +14,7 @@ _api_key = os.getenv("ELEVENLABS_API_KEY")
 # ADK auto-discovers the MCP tools (transcribe, text_to_speech, voice_clone)
 # and exposes them to the agent. The instruction constrains usage to transcribe only.
 listener_agent = Agent(
-    model="gemini-3-flash-preview",
+    model="gemini-3.1-pro-preview",
     name="listener_agent",
     description="Converts user audio input to text using ElevenLabs Scribe STT via MCP.",
     instruction=(

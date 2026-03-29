@@ -387,7 +387,7 @@ def suggest_resource(emotion: str, severity: str = "medium") -> dict:
 
 
 core_companion_agent = Agent(
-    model="gemini-3-flash-preview",
+    model="gemini-3.1-pro-preview",
     name="core_companion",
     description="Analyzes emotion and provides empathetic responses with coping suggestions.",
     instruction=(
