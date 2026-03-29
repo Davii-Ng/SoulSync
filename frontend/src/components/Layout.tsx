@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
+import logo from "../assets/logo_1.png";
 
 interface Props {
   isConnected: boolean;
@@ -20,18 +21,18 @@ const sideItems = [
 ];
 
 export function Layout({ isConnected }: Props) {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div className="min-h-screen font-body text-on-surface bg-transparent">
       {/* ── Header ── */}
-      <header className="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 py-4 header-bar">
-        <div className="flex items-center gap-3">
+      <header className="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-5 py-2 header-bar">
+        <div className="flex items-center gap-2">
           {/* Sidebar toggle (desktop only) */}
           <button
             type="button"
             onClick={() => setSidebarOpen((o) => !o)}
-            className="hidden md:flex w-9 h-9 items-center justify-center rounded-lg hover:bg-soul-accent-pale transition-colors"
+            className="hidden md:flex w-8 h-8 items-center justify-center rounded-lg hover:bg-soul-accent-pale transition-colors"
             aria-label="Toggle sidebar"
           >
             <span className="material-symbols-outlined text-xl text-soul-text-secondary">
@@ -40,11 +41,10 @@ export function Layout({ isConnected }: Props) {
           </button>
           <NavLink
             to="/"
-            className="text-2xl font-bold tracking-tight text-soul-text flex items-center gap-2"
+            className="text-xl font-bold tracking-tight text-soul-text flex items-center gap-2"
           >
-            <span className="tech-font text-soul-accent">&lt;</span>
+            <img src={logo} alt="SoulSync" className="w-7 h-7 rounded-md" />
             SoulSync
-            <span className="tech-font text-soul-accent">/&gt;</span>
           </NavLink>
         </div>
         <div className="flex items-center gap-3">
@@ -74,10 +74,10 @@ export function Layout({ isConnected }: Props) {
       </header>
 
       {/* ── Body: sidebar + main ── */}
-      <div className="mt-[80px] block">
+      <div className="mt-[52px] block">
         {/* Sidebar (desktop, retractable) — only History & Resources */}
         <aside
-          className={`hidden md:flex flex-col fixed top-[80px] bottom-[88px] left-0 z-40 sidebar-panel sidebar-transition ${
+          className={`hidden md:flex flex-col fixed top-[52px] bottom-[60px] left-0 z-40 sidebar-panel sidebar-transition ${
             sidebarOpen ? "w-56" : "w-0 overflow-hidden border-r-0"
           }`}
         >
@@ -102,27 +102,17 @@ export function Layout({ isConnected }: Props) {
           </nav>
         </aside>
 
-        {/* Main content workspace */}
-        <div style={{ marginLeft: sidebarOpen ? '14rem' : '0' }} className="hidden md:block bg-transparent min-h-[calc(100vh-160px)]">
-          <main className="flex-1 flex flex-col items-center justify-start pt-8 pb-56 px-5 md:px-8 w-full">
-            <div className="w-full max-w-3xl">
-              <Outlet />
-            </div>
-          </main>
-        </div>
-        <div className="md:hidden block bg-transparent min-h-[calc(100vh-160px)]">
-          <main className="flex-1 flex flex-col items-center justify-start pt-8 pb-56 px-5 w-full">
-            <div className="w-full max-w-3xl">
-              <Outlet />
-            </div>
-          </main>
-        </div>
+        {/* Main content workspace — stays put when sidebar opens */}
+        <main className="flex-1 flex flex-col items-center justify-start pt-6 pb-24 px-5 md:px-8 w-full bg-transparent min-h-[calc(100vh-112px)]">
+          <div className="w-full max-w-3xl">
+            <Outlet />
+          </div>
+        </main>
       </div>
 
-      {/* ── Bottom Nav (always visible) ── */}
-      <nav style={{ left: sidebarOpen ? '14rem' : '0' }} className="hidden md:flex fixed bottom-0 z-50 bottom-nav-bar transition-all duration-300 right-0 justify-center">
-        <div className="flex justify-center items-center gap-8 px-4 pb-6 pt-3 w-full">
-          {/* On mobile show all tabs; on desktop only primary tabs */}
+      {/* ── Bottom Nav — centered pill ── */}
+      <div className="fixed bottom-4 left-0 right-0 z-50 flex justify-center pointer-events-none">
+        <nav className="bottom-nav-bar pointer-events-auto inline-flex items-center gap-6 px-6 pb-2 pt-1.5 rounded-full">
           {bottomItems.map((item) => (
             <NavLink
               key={item.to}
@@ -140,32 +130,8 @@ export function Layout({ isConnected }: Props) {
               </span>
             </NavLink>
           ))}
-        </div>
-      </nav>
-
-      {/* Mobile nav */}
-      <nav className="flex md:hidden fixed bottom-0 z-50 bottom-nav-bar left-0 right-0 justify-center">
-        <div className="flex justify-center items-center gap-4 px-4 pb-6 pt-3 w-full">
-          {/* On mobile show all tabs; on desktop only primary tabs */}
-          {bottomItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.to === "/"}
-              className={({ isActive }) =>
-                `bottom-nav-item ${isActive ? "bottom-nav-item-active" : ""}`
-              }
-            >
-              <span className="material-symbols-outlined text-xl">
-                {item.icon}
-              </span>
-              <span className="text-xs font-medium tracking-wide uppercase mt-0.5">
-                {item.label}
-              </span>
-            </NavLink>
-          ))}
-        </div>
-      </nav>
+        </nav>
+      </div>
     </div>
   );
 }

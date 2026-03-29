@@ -231,11 +231,11 @@
 
   .sidebar-insights-heading {
     font-family: "JetBrains Mono", monospace;
-    font-size: 0.7rem;
+    font-size: 0.85rem;
     font-weight: 700;
-    letter-spacing: 0.2em;
+    letter-spacing: 0.15em;
     padding-left: 1rem;
-    color: var(--soul-text-muted);
+    color: var(--soul-text-secondary);
     text-transform: uppercase;
   }
 
@@ -244,8 +244,9 @@
     background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
-    border-top: 1px solid var(--soul-border);
-    border-radius: 1.5rem 1.5rem 0 0;
+    border: 1px solid var(--soul-border);
+    border-radius: 999px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
   }
 
   .bottom-nav-item {
@@ -254,9 +255,9 @@
     align-items: center;
     justify-content: center;
     text-align: center;
-    width: 5.5rem;
-    padding: 0.625rem 0.5rem;
-    border-radius: 1rem;
+    width: 5rem;
+    padding: 0.375rem 0.5rem;
+    border-radius: 0.75rem;
     color: var(--soul-text-secondary);
     text-decoration: none;
     transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
