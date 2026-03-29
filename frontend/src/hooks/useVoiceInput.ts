@@ -13,6 +13,7 @@ export function useVoiceInput(): UseVoiceInputReturn {
   const [isListening, setIsListening] = useState(false)
   const [transcript, setTranscript] = useState('')
   const recognitionRef = useRef<SpeechRecognition | null>(null)
+  const latestTranscriptRef = useRef('')
 
   const startListening = useCallback(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
@@ -28,6 +29,7 @@ export function useVoiceInput(): UseVoiceInputReturn {
 
     recognition.onresult = (event) => {
       const text = event.results[0][0].transcript
+      latestTranscriptRef.current = text
       setTranscript(text)
     }
 
@@ -35,6 +37,8 @@ export function useVoiceInput(): UseVoiceInputReturn {
     recognition.onerror = () => setIsListening(false)
 
     recognitionRef.current = recognition
+    latestTranscriptRef.current = ''
+    setTranscript('')
     recognition.start()
     setIsListening(true)
   }, [])
@@ -42,7 +46,7 @@ export function useVoiceInput(): UseVoiceInputReturn {
   const stopListening = useCallback(() => {
     recognitionRef.current?.stop()
     setIsListening(false)
-    return transcript
+    return latestTranscriptRef.current || transcript
   }, [transcript])
 
   return { isListening, transcript, startListening, stopListening }

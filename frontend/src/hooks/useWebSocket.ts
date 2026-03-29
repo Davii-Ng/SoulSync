@@ -2,14 +2,6 @@
 
 import { useEffect, useRef, useCallback, useState } from 'react'
 import { WS_URL } from '../utils/constants'
-import type { Message, Emotion } from '../types'
-
-interface WSMessage {
-  type: 'response' | 'emotion' | 'error'
-  content?: string
-  emotion?: Emotion
-  audio_url?: string
-}
 
 export function useWebSocket() {
   const ws = useRef<WebSocket | null>(null)

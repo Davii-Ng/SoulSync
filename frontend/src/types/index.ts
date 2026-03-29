@@ -4,10 +4,21 @@ export type Emotion = 'calm' | 'stressed' | 'anxious' | 'happy' | 'sad' | 'angry
 
 export type OrbState = 'idle' | 'listening' | 'thinking' | 'speaking'
 
+export type AppTab = 'chat' | 'calendar' | 'resources'
+
+export interface SavedEvent {
+  id: string
+  title: string
+  dateLabel: string
+  note?: string
+}
+
 export interface Message {
   id: string
   role: 'user' | 'assistant'
   content: string
   timestamp: number
   emotion?: Emotion
+  audio_base64?: string
+  isVoice?: boolean
 }

@@ -1,19 +1,177 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@500;600;700&display=swap');
 @import "tailwindcss";
 
-@keyframes pulse-ring {
-  0% { transform: scale(1); opacity: 0.4; }
-  100% { transform: scale(1.5); opacity: 0; }
+/* ── Warm therapeutic palette ── */
+:root {
+  --soul-bg: linear-gradient(180deg, #f6f9fc 0%, #eef3f9 60%, #e8eff7 100%);
+  --soul-surface: #ffffff;
+  --soul-surface-alt: #f2f5f9;
+  --soul-border: #c5d1df;
+  --soul-border-light: #dbe4ef;
+  --soul-text: #1f2b3a;
+  --soul-text-secondary: #4a5d75;
+  --soul-text-muted: #70839b;
+  --soul-accent: #5c92c4;
+  --soul-accent-light: #b7d4ee;
+  --soul-accent-pale: #e6f2fc;
+  --soul-user-bubble: #edf5ff;
+  --soul-user-text: #1f2b3a;
+  --soul-gradient-start: #f8fbff;
+  --soul-gradient-end: #d8e8f8;
+  --soul-orb-ring: rgba(92, 146, 196, 0.22);
 }
 
-@keyframes orb-glow {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 0.7; }
+/* ── Base reset ── */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-width: 100%;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #f4f8fd;
+  color: var(--soul-text);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100vh;
+  background: var(--soul-bg);
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--soul-border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--soul-text-muted); }
+
+/* ── Orb animations ── */
+@keyframes pulse-ring {
+  0% { transform: scale(1); opacity: 0.4; }
+  50% { opacity: 0.2; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+@keyframes orb-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+}
+
+@keyframes orb-listening-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(107, 163, 190, 0.3); }
+  50% { box-shadow: 0 0 20px 8px rgba(107, 163, 190, 0.15); }
+}
+
+.orb-idle {
+  animation: orb-breathe 4s ease-in-out infinite;
+}
+
+.orb-listening {
+  animation: orb-listening-glow 1.5s ease-in-out infinite;
 }
 
 .orb-listening .pulse-ring {
-  animation: pulse-ring 1.5s ease-out infinite;
+  animation: pulse-ring 1.8s ease-out infinite;
 }
 
-.orb-listening .orb-inner {
-  animation: orb-glow 2s ease-in-out infinite;
+.orb-thinking {
+  animation: orb-breathe 1.2s ease-in-out infinite;
+}
+
+/* ── Thinking dots ── */
+@keyframes thinking-dot {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1); }
+}
+
+.thinking-dot:nth-child(1) { animation-delay: 0s; }
+.thinking-dot:nth-child(2) { animation-delay: 0.15s; }
+.thinking-dot:nth-child(3) { animation-delay: 0.3s; }
+
+/* ── Message entrance ── */
+@keyframes msg-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.msg-enter {
+  animation: msg-in 0.3s ease-out;
+}
+
+/* ── Audio waveform bars ── */
+@keyframes wave-bar {
+  0%, 100% { height: 4px; }
+  50% { height: 14px; }
+}
+
+.soul-dashboard {
+  background-image:
+    radial-gradient(circle at 85% 12%, rgba(120, 172, 219, 0.14), transparent 42%),
+    radial-gradient(circle at 12% 90%, rgba(189, 210, 233, 0.2), transparent 38%);
+}
+
+.dashboard-strip,
+.dashboard-chat,
+.dashboard-card {
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.97), rgba(243, 248, 255, 0.95));
+  box-shadow: 0 10px 30px rgba(90, 118, 149, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.dashboard-transcript {
+  background: transparent;
+}
+
+.dashboard-chat {
+  padding: 1.15rem 1.25rem 1.2rem;
+}
+
+.dashboard-card {
+  min-height: 126px;
+}
+
+.header-shell {
+  border-radius: 16px;
+  background:
+    linear-gradient(95deg, rgba(255, 255, 255, 0.99), rgba(235, 245, 255, 0.95));
+  box-shadow: 0 16px 30px rgba(84, 120, 153, 0.12);
+}
+
+.header-title {
+  font-family: 'Sora', 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.header-spark {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: radial-gradient(circle at 32% 32%, #ffffff 0%, #b9d8f6 45%, #6f9fcf 100%);
+  box-shadow: 0 0 0 6px rgba(111, 159, 207, 0.14);
+}
+
+.header-tagline {
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.header-avatar {
+  border: 1px solid var(--soul-border);
+  background: linear-gradient(145deg, #ffffff, #eff5fc);
+}
+
+@media (min-width: 768px) {
+  .soul-dashboard {
+    padding-top: 2.25rem;
+    padding-bottom: 2.75rem;
+  }
 }
