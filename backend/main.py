@@ -1,4 +1,10 @@
 import logging
+import sys
+from pathlib import Path
+
+# Add project root so `multi_tool_agent` is importable
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 from fastapi import FastAPI
 from app.core.config import LOG_LEVEL, APP_ENV
 from app.core.security import configure_cors
