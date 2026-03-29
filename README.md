@@ -19,7 +19,7 @@ SoulSync is a **voice-first AI journal** that listens to you, understands your e
 | Track | How We Use It |
 |-------|--------------|
 | **Oracle** | Human-centered AI — empathetic, proactive mental health support |
-| **Google ADK Multi-Agent** | Multi-agent orchestration with 5 specialized sub-agents |
+| **Google ADK Multi-Agent** | Multi-agent orchestration with 6 specialized sub-agents |
 | **ElevenLabs** | Natural voice I/O — TTS via SDK + STT via Scribe MCP |
 | **Gemini API** | Emotion analysis + conversational AI responses |
 
@@ -51,6 +51,8 @@ User speaks into mic (browser)
 │  sub_agents:                                      │
 │  ├── core_companion  → analyze_emotion,           │
 │  │                     suggest_resource            │
+│  ├── journal_agent   → save_entry, get_entries,   │
+│  │                     reflective prompts          │
 │  ├── calendar_agent  → save_event, get_events     │
 │  ├── resource_agent  → crisis hotlines,           │
 │  │                     therapist refs, mindfulness │
@@ -87,16 +89,22 @@ SoulSync/
 │   └── src/
 │       ├── App.tsx            # Root — orb, transcript, emotion badge
 │       ├── components/
-│       │   ├── VoiceOrb.tsx   # Mic button with listening/thinking states
+│       │   ├── VoiceOrb.tsx       # Mic button with listening/thinking states
 │       │   ├── ChatTranscript.tsx
 │       │   ├── MessageBubble.tsx
 │       │   ├── EmotionBadge.tsx
-│       │   └── Header.tsx
+│       │   ├── Header.tsx
+│       │   ├── TextInput.tsx      # Text message input field
+│       │   ├── AudioPlayer.tsx    # Inline audio playback for TTS
+│       │   └── EventsPanel.tsx    # Calendar events display
 │       ├── hooks/
-│       │   ├── useWebSocket.ts   # WS connection to backend
-│       │   └── useVoiceInput.ts  # Browser speech recognition
+│       │   ├── useWebSocket.ts    # WS connection to backend
+│       │   └── useVoiceInput.ts   # Browser speech recognition
 │       ├── types/
+│       │   ├── index.ts           # Emotion, OrbState, Message types
+│       │   └── speech.d.ts        # Web Speech API type declarations
 │       └── utils/
+│           └── constants.ts       # App-wide constants
 ├── backend/                   # FastAPI — API integration layer
 │   ├── main.py                # App entry, CORS, router registration
 │   └── app/
@@ -107,11 +115,14 @@ SoulSync/
 │       │   └── ws.py          # WS /ws — real-time conversation
 │       ├── core/              # Config, CORS, security
 │       ├── schemas/           # Pydantic request/response models
+│       ├── services/
+│       │   └── agent_runner.py  # ADK agent invocation service
 │       ├── ws/                # WebSocket manager + protocol
 │       └── utils/             # Error handling
 ├── multi_tool_agent/          # Google ADK agents
 │   ├── agent.py               # ADK entry point — root_agent orchestrator
 │   ├── core_companion.py      # Emotion analysis + empathetic response
+│   ├── journal_agent.py       # Journal entries + reflective prompts
 │   ├── calendar_agent.py      # Event detection + in-memory calendar
 │   ├── resource_agent.py      # Crisis resources + therapist referrals
 │   ├── listener_agent.py      # STT via ElevenLabs Scribe MCP
@@ -170,8 +181,6 @@ cd SoulSync
 
 Create a `.env` file in the project root:
 
-Create a `.env` file in the project root:
-
 ```env
 GOOGLE_API_KEY=your_gemini_api_key
 ELEVENLABS_API_KEY=your_elevenlabs_api_key
@@ -212,7 +221,7 @@ npm run dev
 
 ### 6. (Optional) Run agents standalone via ADK
 
-```powershell
+```bash
 # From project root (SoulSync/)
 adk run multi_tool_agent     # terminal chat
 adk web multi_tool_agent     # browser UI at localhost:8000
