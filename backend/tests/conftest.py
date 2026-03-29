@@ -8,6 +8,7 @@ for mod_name in [
     "multi_tool_agent",
     "multi_tool_agent.core_companion",
     "multi_tool_agent.voice_agent",
+    "app.services.agent_runner",
 ]:
     sys.modules[mod_name] = MagicMock()
 

@@ -9,3 +9,4 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     content: str
     emotion: str
+    events: list[dict[str, str]] | None = None
