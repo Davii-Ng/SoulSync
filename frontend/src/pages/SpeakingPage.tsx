@@ -21,68 +21,57 @@ export function SpeakingPage({
   savedEvents, onOrbClick, onTextSend,
 }: Props) {
   return (
-    <div className="flex flex-col gap-5">
-      {/* Emotion strip */}
-      <section className="dashboard-strip px-5 py-3.5 flex items-center justify-center gap-4">
-        <span className="tech-font text-[var(--soul-accent-light)]">
-          // SIGNAL_STATUS:
-        </span>
+    <div className="flex flex-col gap-6" style={{ marginTop: '60px' }}>
+      {/* Emotion signal */}
+      <section className="flex items-center justify-center gap-3 py-2">
         <EmotionBadge emotion={emotion} />
-        <span className="text-xs hidden sm:inline tech-font opacity-70">
-          [ ADAPTIVE_TONE_ACTIVE ]
-        </span>
       </section>
 
       {/* Voice orb */}
-      <section className="flex flex-col items-center pb-6 w-full" style={{ paddingTop: '15vh' }}>
+      <section className="flex flex-col items-center py-8 mb-4">
         <VoiceOrb state={orbState} onClick={onOrbClick} transcript={transcript} />
       </section>
 
-      {/* Chat section */}
-      <section className="dashboard-chat w-full pt-4">
-        <div className="dashboard-card p-4 md:p-6 w-full flex flex-col">
-          <ChatTranscript messages={messages} />
-          <div className="mt-4 pt-4 border-t border-[var(--soul-border-light)]">
-            <TextInput onSend={onTextSend} disabled={isBusy} />
-          </div>
+      {/* Conversation card — chat + input together */}
+      <section className="soul-card p-5 md:p-7 w-full flex flex-col">
+        <ChatTranscript messages={messages} />
+        <div className="mt-4">
+          <TextInput onSend={onTextSend} disabled={isBusy} />
         </div>
       </section>
 
-      {/* Dashboard cards: Quick Check-in, Events */}
-      <section className="pt-8 pb-[180px] w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 md:gap-6">
+      {/* Bottom widgets */}
+      <section className="pb-32 w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           <QuickCheckIn
             onCheckIn={(_mood, label) => {
               onTextSend(`I'm feeling ${label.toLowerCase()} right now`)
             }}
           />
 
-          <article className="dashboard-card dashboard-card-hover p-7 flex flex-col justify-between">
-            <div>
-              <h3 className="tech-font text-[var(--soul-accent-light)] mb-2">
-                &gt; SYSTEM_EVENTS
-              </h3>
-              {savedEvents.length === 0 ? (
-                <p className="text-sm mt-3 opacity-60">
-                  <span className="tech-font">null</span> {/* No active events logged. */} 
-                  <br/><br/> Mention a date or appointment and SoulSync will track it here.
+          <article className="soul-card p-6">
+            <h3 className="text-sm font-semibold tracking-wide uppercase mb-3" style={{ color: 'var(--soul-text-muted)' }}>
+              Events
+            </h3>
+            {savedEvents.length === 0 ? (
+              <p className="text-sm" style={{ color: 'var(--soul-text-muted)' }}>
+                Mention a date or appointment and SoulSync will track it here.
+              </p>
+            ) : (
+              <div className="rounded-2xl px-4 py-3" style={{ background: 'var(--soul-accent-pale)' }}>
+                <p className="text-sm font-semibold" style={{ color: 'var(--soul-text)' }}>
+                  {savedEvents[0]?.title}
                 </p>
-              ) : (
-                <>
-                  <div className="mt-4 rounded-xl px-4 py-3 bg-[var(--soul-surface-alt)] border border-[var(--soul-border)]">
-                    <p className="font-semibold text-lg text-[var(--soul-text)]">
-                      {savedEvents[0]?.title}
-                    </p>
-                    <p className="text-sm mt-1 font-mono text-[var(--soul-accent)]">
-                      {savedEvents[0]?.dateLabel}
-                    </p>
-                  </div>
-                  <p className="text-xs mt-3 opacity-75">
-                    {savedEvents[0]?.note}
+                <p className="text-xs mt-1" style={{ color: 'var(--soul-accent)' }}>
+                  {savedEvents[0]?.dateLabel}
+                </p>
+                {savedEvents[0]?.note && (
+                  <p className="text-xs mt-2" style={{ color: 'var(--soul-text-muted)' }}>
+                    {savedEvents[0].note}
                   </p>
-                </>
-              )}
-            </div>
+                )}
+              </div>
+            )}
           </article>
         </div>
       </section>

@@ -78,7 +78,7 @@ export function Layout({ isConnected }: Props) {
       </header>
 
       {/* ── Body: sidebar + main ── */}
-      <div className="mt-[72px] pb-[140px] block">
+      <div className="mt-[72px] block">
         {/* Sidebar (desktop, retractable) — only History & Resources */}
         <aside
           className={`hidden md:flex flex-col fixed top-[72px] bottom-[88px] left-0 z-40 sidebar-panel sidebar-transition ${
@@ -108,14 +108,14 @@ export function Layout({ isConnected }: Props) {
 
         {/* Main content workspace */}
         <div style={{ marginLeft: sidebarOpen ? '14rem' : '0' }} className="hidden md:block bg-transparent min-h-[calc(100vh-160px)]">
-          <main className="flex-1 flex flex-col items-center justify-start pt-8 pb-12 px-4 md:px-8 w-full">
+          <main className="flex-1 flex flex-col items-center justify-start pt-8 pb-56 px-4 md:px-8 w-full">
             <div className="w-full max-w-3xl">
               <Outlet />
             </div>
           </main>
         </div>
         <div className="md:hidden block bg-transparent min-h-[calc(100vh-160px)]">
-          <main className="flex-1 flex flex-col items-center justify-start pt-8 pb-12 px-4 w-full">
+          <main className="flex-1 flex flex-col items-center justify-start pt-8 pb-56 px-4 w-full">
             <div className="w-full max-w-3xl">
               <Outlet />
             </div>

@@ -232,15 +232,15 @@ body {
    CARDS & SURFACES
    ══════════════════════════════════ */
 
+/* Soft ambient card — large radius, subtle shadow */
+.soul-card,
 .dashboard-strip,
 .dashboard-chat,
 .dashboard-card {
   background: var(--soul-surface);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--soul-border);
-  border-radius: 1.25rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  border-radius: 1.75rem;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(0, 0, 0, 0.02);
 }
 
 .dashboard-transcript {
@@ -251,16 +251,14 @@ body {
   padding: 1.25rem 1.5rem;
 }
 
-/* Sleek Tech Glow Hover */
 .dashboard-card-hover {
   transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-  cursor: pointer;
 }
 
 .dashboard-card-hover:hover {
-  transform: translateY(-4px);
-  background: var(--soul-surface-alt);
-  border-color: rgba(6, 182, 212, 1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  border-color: var(--soul-accent-light);
 }
 
 /* ══════════════════════════════════
@@ -269,31 +267,27 @@ body {
 
 .bubble-user {
   background: var(--soul-user-bubble);
-  border: 1px solid rgba(6, 182, 212, 0.2);
-  border-radius: 1.25rem 1.25rem 0 1.25rem;
+  border: 1px solid rgba(6, 182, 212, 0.15);
+  border-radius: 1.25rem 1.25rem 0.25rem 1.25rem;
   color: var(--soul-user-text);
 }
 
 .bubble-ai {
-  background: var(--soul-ai-bubble);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: var(--soul-surface-alt);
   border: 1px solid var(--soul-border);
-  border-radius: 1.25rem 1.25rem 1.25rem 0;
-  border-left: 3px solid var(--soul-accent-light);
+  border-radius: 1.25rem 1.25rem 1.25rem 0.25rem;
 }
 
 .soul-input-wrap {
-  transition: all 0.3s ease;
-  background: rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+  background: var(--soul-surface-alt);
   border: 1px solid var(--soul-border);
   border-radius: 99px;
 }
 
 .soul-input-wrap:focus-within {
-  border-color: var(--soul-accent) !important;
-  background: rgba(0, 0, 0, 0.4);
-  box-shadow: var(--soul-glow);
+  border-color: var(--soul-accent);
+  box-shadow: 0 0 0 3px var(--soul-accent-pale);
 }
 
 /* ══════════════════════════════════
