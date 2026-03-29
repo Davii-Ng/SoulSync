@@ -6,7 +6,7 @@ from google import genai
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from app.core.config import GOOGLE_API_KEY
 from app.ws.manager import manager
-from multi_tool_agent.core_companion import analyze_emotion, suggest_resource
+from app.services.agent_runner import run_agent
 from multi_tool_agent.voice_agent import text_to_speech, speech_to_text
 
 logger = logging.getLogger(__name__)
@@ -112,7 +112,6 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
             content = data.get("content", "")
 
             if msg_type == "audio" and content:
-                # Transcribe base64 audio, then process as text
                 try:
                     audio_bytes = base64.b64decode(content)
                     transcript = await asyncio.to_thread(speech_to_text, audio_bytes)
