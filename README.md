@@ -1,6 +1,6 @@
 # SoulSync
 
-**AI-Powered Mental Health Companion for Burnout, Stress & Loneliness**
+**AI-Powered Journal & Mental Health Companion**
 
 > Built with love at USF Hackathon Tampa 2026.
 
@@ -8,7 +8,7 @@
 
 ## What is SoulSync?
 
-SoulSync is a **voice-first** AI companion that listens to you, understands your emotions, and responds with empathy — using natural voice. It proactively helps by saving calendar events, suggesting therapy resources, and guiding you through mindfulness exercises.
+SoulSync is a **voice-first AI journal** that listens to you, understands your emotions, and responds like a friend — not a chatbot. Write or speak your thoughts, and SoulSync helps you process them, reflect on past entries, and feel less alone.
 
 **You speak. SoulSync listens. You feel heard.**
 
@@ -32,10 +32,12 @@ SoulSync is a **voice-first** AI companion that listens to you, understands your
 ```
 root_agent (agent.py) — ADK entry point, orchestrator
 ├── sub_agents:
-│   ├── core_companion_agent   ← Gemini: emotion analysis + empathetic response
+│   ├── core_companion_agent   ← emotion analysis + empathetic response
 │   │   └── tools: analyze_emotion, suggest_resource
-│   ├── calendar_agent         ← save/list events (in-memory store)
-│   │   └── tools: save_event, list_events
+│   ├── journal_agent          ← save entries, retrieve past entries, journaling prompts
+│   │   └── tools: write_entry, get_entries, get_prompt
+│   ├── calendar_agent         ← save/list events (in-memory)
+│   │   └── tools: save_event, get_events
 │   └── resource_agent         ← crisis hotlines, therapy refs, mindfulness
 │       └── tools: get_crisis_resources, get_therapist_resources, get_mindfulness_exercise
 └── tools: [] (pure orchestrator)
@@ -76,9 +78,10 @@ SoulSync/
 ├── multi_tool_agent/          # Google ADK agents (adk run target)
 │   ├── agent.py               # ADK entry point — root_agent (orchestrator)
 │   ├── core_companion.py      # Emotion analysis + empathetic response
-│   ├── calendar_agent.py      # Event/deadline management
+│   ├── journal_agent.py       # Journal entries + reflective prompts
+│   ├── calendar_agent.py      # Event/deadline management (in-memory)
 │   ├── resource_agent.py      # Crisis hotlines + therapy resources
-│   ├── listener_agent.py      # Voice-to-text stub (browser handles STT)
+│   ├── listener_agent.py      # Voice-to-text (browser handles STT)
 │   ├── voice_agent.py         # ElevenLabs TTS utility
 │   ├── __init__.py
 │   └── CLAUDE.md

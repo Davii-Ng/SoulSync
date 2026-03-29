@@ -20,29 +20,59 @@ root_agent (agent.py) — ADK entry point, orchestrator
 ├── sub_agents:
 │   ├── core_companion_agent (core_companion.py) — emotion analysis + empathetic response
 │   │   └── tools: analyze_emotion, suggest_resource
+│   ├── journal_agent (journal_agent.py) — journal entries + reflective prompts
+│   │   └── tools: write_entry, get_entries, get_prompt
 │   ├── calendar_agent (calendar_agent.py) — event/deadline management
-│   │   └── tools: save_event, list_events
+│   │   └── tools: save_event, get_events
 │   └── resource_agent (resource_agent.py) — crisis support + therapy resources
 │       └── tools: get_crisis_resources, get_therapist_resources, get_mindfulness_exercise
-└── tools: [] (pure orchestrator, no direct tools)
+└── tools: [] (pure orchestrator)
 ```
 
 ### Not wired as sub_agents:
-- **voice_agent.py** — Exports `synthesize_speech()` utility function for ElevenLabs TTS. Called by backend directly (post-processing), not an ADK sub_agent.
+- **voice_agent.py** — Exports `synthesize_speech()` utility for ElevenLabs TTS. Called by backend directly.
 - **listener_agent.py** — Unused at runtime. Browser Web Speech API handles voice-to-text.
 
-## Emotion Labels
-Aligned with frontend types: `calm | stressed | anxious | happy | sad | angry | neutral`
+## Agent Definitions
 
-## Flow
-User text → root_agent → delegates to core_companion (emotion + response) → may delegate to calendar_agent or resource_agent → response text returned to backend → backend calls `synthesize_speech()` for TTS audio
+### core_companion.py
+Reads what the user wrote and tunes into how they're feeling.
+- `analyze_emotion(text)` — crisis detection first, then negation-aware keyword scoring, dynamic severity, returns top 2 emotions
+- `suggest_resource(emotion)` — returns a coping tip + follow-up question to keep the conversation going
+
+### journal_agent.py
+The core of the app — every entry gets saved here.
+- `write_entry(content, emotion)` — saves entry with timestamp
+- `get_entries(date)` — retrieves past entries, optionally filtered by date
+- `get_prompt(emotion)` — returns an emotion-specific reflective journaling prompt
+
+### calendar_agent.py
+Handles schedule mentions in conversation.
+- `save_event(title, date, time, description)` — saves to in-memory store
+- `get_events(date)` — retrieves events, optionally filtered by date
+
+### resource_agent.py
+Steps in when someone is really struggling — gently.
+- `get_crisis_resources()` — 988 Lifeline, Crisis Text Line, NAMI
+- `get_therapist_resources()` — Psychology Today, BetterHelp, Open Path Collective
+- `get_mindfulness_exercise()` — 5-4-3-2-1 grounding technique
+
+## Emotion Labels
+`calm | stressed | anxious | happy | sad | angry | neutral | crisis`
+
+## Emotion Detection Notes
+- Crisis phrases are checked before anything else
+- Negation-aware: "I'm not angry" won't match angry
+- Dynamic severity from keyword count: 1=low, 2-3=medium, 4+=high
+- Returns primary + secondary emotion for mixed states
 
 ## File Structure
 ```
 multi_tool_agent/
 ├── agent.py           # ADK entry point — root_agent (orchestrator)
 ├── core_companion.py  # Emotion analysis + empathetic response
-├── calendar_agent.py  # Event/deadline management (in-memory store)
+├── journal_agent.py   # Journal entries + reflective prompts
+├── calendar_agent.py  # Event/deadline management (in-memory)
 ├── resource_agent.py  # Crisis hotlines, therapy refs, mindfulness
 ├── voice_agent.py     # ElevenLabs TTS utility (synthesize_speech)
 ├── listener_agent.py  # Voice-to-text stub (unused — browser handles STT)
@@ -51,7 +81,7 @@ multi_tool_agent/
 ```
 
 ## Running
-```powershell
+```bash
 # From SoulSync/ root
 adk run multi_tool_agent
 adk web multi_tool_agent

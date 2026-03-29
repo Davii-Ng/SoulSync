@@ -48,22 +48,20 @@ def test_speak_response_tts_exception():
 
 # --- text_to_speech ---
 
-@pytest.mark.asyncio
-async def test_text_to_speech_no_client():
+def test_text_to_speech_no_client():
     """Raises RuntimeError when client is None."""
     with patch.object(va, "_client", None):
         with pytest.raises(RuntimeError, match="ELEVENLABS_API_KEY"):
-            await va.text_to_speech("hello")
+            va.text_to_speech("hello")
 
 
-@pytest.mark.asyncio
-async def test_text_to_speech_returns_bytes():
+def test_text_to_speech_returns_bytes():
     """Returns concatenated audio bytes from TTS."""
     mock_client = MagicMock()
     mock_client.text_to_speech.convert.return_value = [b"mp3", b"data"]
 
     with patch.object(va, "_client", mock_client):
-        result = await va.text_to_speech("test", voice_id="custom_id")
+        result = va.text_to_speech("test", voice_id="custom_id")
 
     assert result == b"mp3data"
     mock_client.text_to_speech.convert.assert_called_once_with(

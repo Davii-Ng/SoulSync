@@ -1,7 +1,7 @@
 # SoulSync
 
 ## Project Overview
-SoulSync is an AI-powered mental health companion for people experiencing burnout, stress, and loneliness. Voice-first experience: user speaks, AI listens, analyzes emotion, responds empathetically with natural voice, and proactively takes actions (save calendar events, suggest therapy resources).
+SoulSync is an AI-powered journal and mental health companion. Voice-first experience: user speaks or writes, AI listens, analyzes emotion, responds like a friend, saves journal entries, and proactively offers reflective prompts, coping tips, and crisis resources when needed.
 
 Built for USF Hackathon Tampa 2026. Targeting 4 tracks: Oracle (human-centered AI), Google ADK Multi-Agent, ElevenLabs, Gemini API.
 
@@ -25,8 +25,10 @@ root_agent (agent.py) — ADK entry point, pure orchestrator
 └── sub_agents:
     ├── core_companion_agent   ← emotion analysis + empathetic response
     │   └── tools: analyze_emotion, suggest_resource
-    ├── calendar_agent         ← event/deadline management
-    │   └── tools: save_event, list_events
+    ├── journal_agent          ← save entries, retrieve past entries, journaling prompts
+    │   └── tools: write_entry, get_entries, get_prompt
+    ├── calendar_agent         ← event/deadline management (in-memory)
+    │   └── tools: save_event, get_events
     └── resource_agent         ← crisis support + therapy resources
         └── tools: get_crisis_resources, get_therapist_resources, get_mindfulness_exercise
 
@@ -35,10 +37,11 @@ voice_agent (voice_agent.py)
 ```
 
 ### Agent Definitions
-- `agent.py` — ADK entry point. `root_agent` orchestrates via sub_agents. Pure orchestrator — no direct tools.
-- `core_companion.py` — Emotion analysis + empathetic response via Gemini. Tools: `analyze_emotion`, `suggest_resource`.
-- `calendar_agent.py` — Detects event/deadline mentions, saves to in-memory store, fetches on request.
-- `resource_agent.py` — Detects severe distress, provides crisis hotlines, therapist referrals, mindfulness exercises.
+- `agent.py` — ADK entry point. `root_agent` is a pure orchestrator — no direct tools, delegates everything via sub_agents.
+- `core_companion.py` — Reads what the user wrote and tunes into how they're feeling. Tools: `analyze_emotion` (crisis detection, negation awareness, dynamic severity, mixed emotions), `suggest_resource` (coping tip + follow-up question per emotion).
+- `journal_agent.py` — The core of the app. Saves every entry, retrieves past entries to reflect on, and offers emotion-specific journaling prompts. Tools: `write_entry`, `get_entries`, `get_prompt`.
+- `calendar_agent.py` — Detects event/deadline mentions, saves to in-memory store, fetches on request. Tools: `save_event`, `get_events`.
+- `resource_agent.py` — Steps in when someone is really struggling. Crisis hotlines, therapy referrals, mindfulness exercises. Tools: `get_crisis_resources`, `get_therapist_resources`, `get_mindfulness_exercise`.
 - `voice_agent.py` — Exports `synthesize_speech()` utility for ElevenLabs TTS. Called by backend after agent response, not wired as sub_agent.
 - `listener_agent.py` — Unused at runtime. Browser Web Speech API handles voice-to-text.
 
@@ -48,7 +51,13 @@ voice_agent (voice_agent.py)
 - `__init__.py` must be UTF-8 encoded (not UTF-16)
 
 ### Emotion Labels
-Aligned with frontend types: `calm | stressed | anxious | happy | sad | angry | neutral`
+`calm | stressed | anxious | happy | sad | angry | neutral | crisis`
+
+### Emotion Detection (core_companion.py)
+- Crisis phrases checked first — returns `emotion: "crisis", severity: "critical"` if matched
+- Negation-aware — "I'm not angry" won't match angry
+- Dynamic severity from keyword count: 1 = low, 2-3 = medium, 4+ = high
+- Returns top 2 emotions (primary + secondary) for mixed emotion support
 
 ### WebSocket Protocol
 - **Client → Server:** `{ "type": "text", "content": "user message" }`
@@ -69,7 +78,8 @@ SoulSync/
 ├── multi_tool_agent/      # Google ADK agent definitions (adk run target)
 │   ├── agent.py           # ADK entry point — root_agent (orchestrator)
 │   ├── core_companion.py  # Emotion analysis + empathetic response
-│   ├── calendar_agent.py  # Event/deadline management
+│   ├── journal_agent.py   # Journal entries + reflective prompts
+│   ├── calendar_agent.py  # Event/deadline management (in-memory)
 │   ├── resource_agent.py  # Crisis hotlines + therapy resources
 │   ├── voice_agent.py     # ElevenLabs TTS utility (synthesize_speech)
 │   ├── listener_agent.py  # Voice-to-text stub (unused — browser handles STT)
