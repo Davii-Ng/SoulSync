@@ -6,7 +6,7 @@ services (Gemini, ElevenLabs) mocked out.
 """
 
 import json
-from unittest.mock import patch, AsyncMock
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
 from fastapi.testclient import TestClient
@@ -22,13 +22,12 @@ _resource_patch = patch(
 )
 _tts_patch = patch(
     "multi_tool_agent.voice_agent.text_to_speech",
-    new_callable=AsyncMock,
     return_value=b"fake-audio-bytes",
 )
 
-_emotion_patch.start()
-_resource_patch.start()
-_tts_patch.start()
+_emotion_mock = _emotion_patch.start()
+_resource_mock = _resource_patch.start()
+_tts_mock = _tts_patch.start()
 
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "backend"))
@@ -36,6 +35,12 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "backend"))
 from main import app  # noqa: E402
 
 client = TestClient(app)
+
+
+def teardown_module() -> None:
+    _emotion_patch.stop()
+    _resource_patch.stop()
+    _tts_patch.stop()
 
 
 # ---------- Health (GET /) ----------
@@ -116,7 +121,6 @@ def test_speech_failure_returns_502():
     """When TTS fails, frontend expects a 502 JSON error."""
     with patch(
         "app.api.routes.speech.voice_agent.text_to_speech",
-        new_callable=AsyncMock,
         side_effect=RuntimeError("TTS down"),
     ):
         resp = client.post("/speech", json={"text": "test"})
