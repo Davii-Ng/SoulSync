@@ -3,7 +3,8 @@ import json
 import logging
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from app.ws.manager import manager
-from app.services import llm_service, tts_service
+from multi_tool_agent.core_companion import analyze_emotion, suggest_resource
+from multi_tool_agent.voice_agent import text_to_speech
 
 logger = logging.getLogger(__name__)
 
@@ -22,13 +23,16 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
             content = data.get("content", "")
 
             if msg_type == "text" and content:
-                # Generate empathetic response
-                llm_result = await llm_service.generate_response(content)
+                # Analyze emotion and get coping suggestion
+                emotion_result = analyze_emotion(content)
+                emotion = emotion_result.get("emotion", "neutral")
+                resource_result = suggest_resource(emotion)
+                reply = resource_result.get("suggestion", "")
 
                 # Generate TTS audio
                 audio_b64 = None
                 try:
-                    audio_bytes = await tts_service.text_to_speech(llm_result["content"])
+                    audio_bytes = await text_to_speech(reply)
                     audio_b64 = base64.b64encode(audio_bytes).decode("utf-8")
                 except Exception as e:
                     logger.error(f"TTS failed: {e}")
@@ -36,8 +40,8 @@ async def websocket_endpoint(websocket: WebSocket) -> None:
                 # Send response matching frontend's expected format
                 response = {
                     "type": "response",
-                    "content": llm_result["content"],
-                    "emotion": llm_result["emotion"],
+                    "content": reply,
+                    "emotion": emotion,
                 }
                 if audio_b64:
                     response["audio_base64"] = audio_b64
