@@ -6,7 +6,7 @@ interface UseVoiceInputReturn {
   isListening: boolean
   transcript: string
   startListening: () => void
-  stopListening: () => string
+  stopListening: () => Promise<string>
 }
 
 export function useVoiceInput(): UseVoiceInputReturn {
@@ -24,17 +24,24 @@ export function useVoiceInput(): UseVoiceInputReturn {
 
     const recognition = new SpeechRecognition()
     recognition.lang = 'en-US'
-    recognition.interimResults = false
-    recognition.continuous = false
+    recognition.interimResults = true
+    recognition.continuous = true
 
     recognition.onresult = (event) => {
-      const text = event.results[0][0].transcript
+      // Concat all results (continuous mode produces multiple)
+      let text = ''
+      for (let i = 0; i < event.results.length; i++) {
+        text += event.results[i][0].transcript
+      }
       latestTranscriptRef.current = text
       setTranscript(text)
     }
 
     recognition.onend = () => setIsListening(false)
-    recognition.onerror = () => setIsListening(false)
+    recognition.onerror = () => {
+      console.error('Speech recognition error')
+      setIsListening(false)
+    }
 
     recognitionRef.current = recognition
     latestTranscriptRef.current = ''
@@ -43,11 +50,24 @@ export function useVoiceInput(): UseVoiceInputReturn {
     setIsListening(true)
   }, [])
 
-  const stopListening = useCallback(() => {
-    recognitionRef.current?.stop()
-    setIsListening(false)
-    return latestTranscriptRef.current || transcript
-  }, [transcript])
+  const stopListening = useCallback((): Promise<string> => {
+    return new Promise((resolve) => {
+      const recognition = recognitionRef.current
+      if (!recognition) {
+        setIsListening(false)
+        resolve('')
+        return
+      }
+
+      // Override onend to resolve after final onresult has fired
+      recognition.onend = () => {
+        setIsListening(false)
+        resolve(latestTranscriptRef.current)
+      }
+
+      recognition.stop()
+    })
+  }, [])
 
   return { isListening, transcript, startListening, stopListening }
 }

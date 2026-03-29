@@ -79,12 +79,13 @@ function App() {
   }, [sendMessage])
 
   // Handle orb click (voice input)
-  const handleOrbClick = useCallback(() => {
+  // handleOrbClick — thêm async và await
+  const handleOrbClick = useCallback(async () => {
     if (orbState === 'idle') {
       startListening()
       setOrbState('listening')
     } else if (orbState === 'listening') {
-      const text = stopListening()
+      const text = await stopListening()  // ← thêm await
       if (text) {
         const userMsg: Message = {
           id: Date.now().toString(),
