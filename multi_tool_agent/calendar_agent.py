@@ -2,11 +2,13 @@
 # saves to internal store, fetches when user asks.
 # Called by Core Companion (orchestrator pattern).
 
+from pathlib import Path
+
 from dotenv import load_dotenv
 from google.adk.agents import Agent
 from datetime import datetime
 
-load_dotenv()
+load_dotenv(Path(__file__).parent.parent / ".env")
 
 # In-memory event storage
 # Each event is a dict: {id, title, date, time, description}

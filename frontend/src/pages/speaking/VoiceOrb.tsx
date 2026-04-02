@@ -1,6 +1,6 @@
 // Compact voice orb with breathing/listening animations
 
-import type { OrbState } from '../types'
+import type { OrbState } from '../../types'
 
 interface Props {
   state: OrbState

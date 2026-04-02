@@ -2,11 +2,13 @@ import io
 import os
 import logging
 
+from pathlib import Path
+
 from dotenv import load_dotenv
 from elevenlabs import ElevenLabs
 from google.adk.agents.llm_agent import Agent
 
-load_dotenv()
+load_dotenv(Path(__file__).parent.parent / ".env")
 
 logger = logging.getLogger(__name__)
 
