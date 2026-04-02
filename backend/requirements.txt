@@ -3,6 +3,7 @@ uvicorn>=0.23.0
 pydantic>=2.11
 python-dotenv>=1.0.1
 elevenlabs==2.40.0
+elevenlabs-mcp>=0.9.0
 mcp>=1.0
 httpx>=0.28
 pytest>=8.0
