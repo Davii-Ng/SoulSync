@@ -139,7 +139,7 @@ def search_local_resources(location: str, resource_type: str = "mental health th
 
 
 resource_agent = Agent(
-    model="gemini-3.1-pro-preview",
+    model="gemini-3-flash-preview",
     name="resource_agent",
     description=(
         "Provides mental health resources, crisis hotlines, therapist referrals, mindfulness exercises, "

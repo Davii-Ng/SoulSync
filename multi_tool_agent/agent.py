@@ -5,7 +5,7 @@ from multi_tool_agent.resource_agent import resource_agent
 from multi_tool_agent.journal_agent import journal_agent
 
 root_agent = Agent(
-    model="gemini-3.1-pro-preview",
+    model="gemini-3-flash-preview",
     name="soulsync_orchestrator",
     description="SoulSync's main orchestrator — an AI journal that listens, reflects, and helps users process their thoughts and emotions.",
     instruction=(
