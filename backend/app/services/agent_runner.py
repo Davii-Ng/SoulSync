@@ -1,5 +1,6 @@
 """Runs user messages through the ADK agent pipeline and returns the final response."""
 
+import re
 import logging
 import importlib
 from typing import Any
@@ -8,6 +9,7 @@ from google.adk.sessions import InMemorySessionService
 from google.genai import types
 
 from multi_tool_agent.agent import root_agent
+from multi_tool_agent.core_companion import core_companion_agent
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +19,26 @@ _runner = Runner(
     app_name="soulsync",
     session_service=_session_service,
 )
+_fast_runner = Runner(
+    agent=core_companion_agent,
+    app_name="soulsync_fast",
+    session_service=_session_service,
+)
+
+# Patterns that need the full orchestrator (calendar, crisis, journal-save)
+_ORCHESTRATOR_PATTERNS = re.compile(
+    r"(save.*journal|that'?s it for today|done for the day|save this conversation|wrap up|end session"
+    r"|appointment|deadline|schedule|meeting|event on|remind me"
+    r"|want to die|kill myself|end it all|end my life|hurt myself|suicide|self.harm"
+    r"|therapist|therapy|counselor|crisis|hotline|helpline|real help|real person"
+    r"|what'?s on my calendar|what do i have|upcoming events)",
+    re.IGNORECASE,
+)
+
+
+def _needs_orchestrator(message: str) -> bool:
+    """Check if message needs full orchestrator routing."""
+    return bool(_ORCHESTRATOR_PATTERNS.search(message))
 
 # Cache of user_id -> session_id
 _sessions: dict[str, str] = {}
@@ -98,42 +120,59 @@ def _dedupe_events(events: list[dict[str, str]]) -> list[dict[str, str]]:
     return deduped
 
 
-async def get_or_create_session(user_id: str = "default") -> str:
+async def get_or_create_session(user_id: str = "default", app_name: str = "soulsync") -> str:
     """Get existing session or create a new one for the user.
 
     Rotates the session after _MAX_TURNS exchanges to prevent the ADK
     context window from filling up (which causes truncated model responses).
     """
-    turns = _turn_counts.get(user_id, 0)
-    if user_id in _sessions and turns >= _MAX_TURNS:
-        logger.info(f"Rotating session for user {user_id} after {turns} turns")
-        del _sessions[user_id]
-        _turn_counts[user_id] = 0
+    key = f"{user_id}:{app_name}"
+    turns = _turn_counts.get(key, 0)
+    if key in _sessions and turns >= _MAX_TURNS:
+        logger.info(f"Rotating session for {key} after {turns} turns")
+        del _sessions[key]
+        _turn_counts[key] = 0
 
-    if user_id not in _sessions:
+    if key not in _sessions:
         session = await _session_service.create_session(
-            app_name="soulsync",
+            app_name=app_name,
             user_id=user_id,
         )
-        _sessions[user_id] = session.id
-        _turn_counts[user_id] = 0
+        _sessions[key] = session.id
+        _turn_counts[key] = 0
 
-    return _sessions[user_id]
+    return _sessions[key]
 
 
 async def run_agent(message: str, user_id: str = "default") -> dict:
-    """Send a message through the ADK agent and return text, emotion, and events."""
-    session_id = await get_or_create_session(user_id)
+    """Send a message through the ADK agent and return text, emotion, and events.
+
+    Uses a fast path (direct to core_companion, skip orchestrator) for normal
+    messages. Falls back to full orchestrator for calendar, crisis, and
+    journal-save triggers.
+    """
+    use_orchestrator = _needs_orchestrator(message)
+    runner = _runner if use_orchestrator else _fast_runner
+    app_name = "soulsync" if use_orchestrator else "soulsync_fast"
+
+    session_id = await get_or_create_session(user_id, app_name=app_name)
+
+    # Run local emotion analysis upfront (no Gemini call)
+    from multi_tool_agent.core_companion import analyze_emotion, suggest_resource
+    emotion_result = analyze_emotion(message)
+    emotion = emotion_result.get("emotion", "neutral")
+    severity = emotion_result.get("severity", "medium")
 
     calendar_events_before: list[Any] = []
     calendar_module = None
-    try:
-        calendar_module = importlib.import_module("multi_tool_agent.calendar_agent")
-        maybe_events = getattr(calendar_module, "events", [])
-        if isinstance(maybe_events, list):
-            calendar_events_before = list(maybe_events)
-    except Exception:
-        calendar_module = None
+    if use_orchestrator:
+        try:
+            calendar_module = importlib.import_module("multi_tool_agent.calendar_agent")
+            maybe_events = getattr(calendar_module, "events", [])
+            if isinstance(maybe_events, list):
+                calendar_events_before = list(maybe_events)
+        except Exception:
+            calendar_module = None
 
     content = types.Content(
         role="user",
@@ -141,11 +180,10 @@ async def run_agent(message: str, user_id: str = "default") -> dict:
     )
 
     final_text = ""
-    emotion = "neutral"
     captured_events: list[dict[str, str]] = []
     journal_saved = False
 
-    async for event in _runner.run_async(
+    async for event in runner.run_async(
         user_id=user_id,
         session_id=session_id,
         new_message=content,
@@ -173,13 +211,8 @@ async def run_agent(message: str, user_id: str = "default") -> dict:
                         journal_saved = True
 
     # Increment turn counter for session rotation
-    _turn_counts[user_id] = _turn_counts.get(user_id, 0) + 1
-
-    # If no emotion from state, try to detect from the function calls
-    if emotion == "neutral" and final_text:
-        from multi_tool_agent.core_companion import analyze_emotion
-        result = analyze_emotion(message)
-        emotion = result.get("emotion", "neutral")
+    key = f"{user_id}:{app_name}"
+    _turn_counts[key] = _turn_counts.get(key, 0) + 1
 
     # Fallback: read calendar in-memory store in case ADK event payload omits tool outputs.
     if calendar_module is not None:
