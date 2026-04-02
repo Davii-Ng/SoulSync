@@ -148,3 +148,4 @@ venv/
 __pycache__/
 .adk
 .vscode/
+.pytest_cache/

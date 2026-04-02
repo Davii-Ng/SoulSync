@@ -6,8 +6,6 @@ import requests
 from dotenv import load_dotenv
 from google.adk.agents.llm_agent import Agent
 
-# Load .env from multi_tool_agent/ and project root
-load_dotenv(Path(__file__).parent / ".env")
 load_dotenv(Path(__file__).parent.parent / ".env")
 
 

@@ -1,12 +1,14 @@
 import os
 
+from pathlib import Path
+
 from dotenv import load_dotenv
 from google.adk.agents.llm_agent import Agent
 from google.adk.tools.mcp_tool import McpToolset
 from google.adk.tools.mcp_tool.mcp_session_manager import StdioConnectionParams
 from mcp import StdioServerParameters
 
-load_dotenv()
+load_dotenv(Path(__file__).parent.parent / ".env")
 
 _api_key = os.getenv("ELEVENLABS_API_KEY")
 

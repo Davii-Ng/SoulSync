@@ -4,11 +4,8 @@ import sys
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Load .env from backend/ directory (where this project runs from)
-_backend_dir = Path(__file__).resolve().parent.parent.parent
-load_dotenv(_backend_dir / ".env")
-# Also try project root .env as fallback
-load_dotenv(_backend_dir.parent / ".env")
+_project_root = Path(__file__).resolve().parent.parent.parent.parent
+load_dotenv(_project_root / ".env")
 
 logger = logging.getLogger(__name__)
 
