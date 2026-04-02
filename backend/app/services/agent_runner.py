@@ -1,15 +1,19 @@
 """Runs user messages through the ADK agent pipeline and returns the final response."""
 
+import asyncio
 import re
 import logging
 import importlib
 from typing import Any
+from google import genai
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 from google.genai import types
 
 from multi_tool_agent.agent import root_agent
-from multi_tool_agent.core_companion import core_companion_agent
+from app.core.config import GOOGLE_API_KEY
+
+# Note: core_companion_agent import removed — fast path calls Gemini directly
 
 logger = logging.getLogger(__name__)
 
@@ -19,11 +23,23 @@ _runner = Runner(
     app_name="soulsync",
     session_service=_session_service,
 )
-_fast_runner = Runner(
-    agent=core_companion_agent,
-    app_name="soulsync_fast",
-    session_service=_session_service,
+
+# Direct Gemini client for fast path (no ADK overhead)
+_gemini = genai.Client(api_key=GOOGLE_API_KEY)
+
+_COMPANION_SYSTEM = (
+    "You are SoulSync, a warm and empathetic AI journal companion. "
+    "You talk like a caring friend — use contractions, be direct, keep it real. "
+    "Never lecture, never diagnose, never say 'I understand your concerns.' "
+    "Reflect their words back naturally, sit with them before offering anything. "
+    "Keep responses concise (2-3 sentences max). "
+    "If given emotion context, weave it in naturally — don't announce it. "
+    "If the emotion is neutral or it's a greeting, just be friendly and warm."
 )
+
+# Bounded conversation history for fast path (per user)
+_fast_histories: dict[str, list[dict]] = {}
+_MAX_FAST_HISTORY = 16  # messages (8 user + 8 assistant)
 
 # Patterns that need the full orchestrator (calendar, crisis, journal-save)
 _ORCHESTRATOR_PATTERNS = re.compile(
@@ -45,7 +61,7 @@ _sessions: dict[str, str] = {}
 
 # Track turn count per user to rotate sessions before context overflows
 _turn_counts: dict[str, int] = {}
-_MAX_TURNS = 15  # Rotate session after this many exchanges
+_MAX_TURNS = 8  # Rotate session after this many exchanges
 
 
 def _coerce_event_dict(raw_event: Any) -> dict[str, str] | None:
@@ -144,35 +160,67 @@ async def get_or_create_session(user_id: str = "default", app_name: str = "souls
     return _sessions[key]
 
 
-async def run_agent(message: str, user_id: str = "default") -> dict:
-    """Send a message through the ADK agent and return text, emotion, and events.
-
-    Uses a fast path (direct to core_companion, skip orchestrator) for normal
-    messages. Falls back to full orchestrator for calendar, crisis, and
-    journal-save triggers.
-    """
-    use_orchestrator = _needs_orchestrator(message)
-    runner = _runner if use_orchestrator else _fast_runner
-    app_name = "soulsync" if use_orchestrator else "soulsync_fast"
-
-    session_id = await get_or_create_session(user_id, app_name=app_name)
-
-    # Run local emotion analysis upfront (no Gemini call)
+async def _run_fast(message: str, user_id: str) -> dict:
+    """Fast path: local emotion analysis + single direct Gemini call. No ADK."""
     from multi_tool_agent.core_companion import analyze_emotion, suggest_resource
+
     emotion_result = analyze_emotion(message)
     emotion = emotion_result.get("emotion", "neutral")
     severity = emotion_result.get("severity", "medium")
+    resource = suggest_resource(emotion, severity)
+
+    # Build prompt with emotion context
+    prompt = (
+        f"The user said: \"{message}\"\n\n"
+        f"Detected emotion: {emotion} (severity: {severity}).\n"
+        f"Secondary emotion: {emotion_result.get('secondary_emotion', 'none')}\n"
+        f"Suggested coping tip: {resource.get('suggestion', '')}\n"
+        f"Suggested follow-up: {resource.get('follow_up', '')}\n\n"
+        "Using the above context, respond to the user as a caring friend. "
+        "Weave in the suggestion or follow-up naturally if appropriate. "
+        "Match the emotional intensity. Keep it short and genuine (2-3 sentences)."
+    )
+
+    # Manage bounded conversation history
+    history = _fast_histories.setdefault(user_id, [])
+    history.append({"role": "user", "parts": [{"text": prompt}]})
+    # Trim to keep history bounded
+    if len(history) > _MAX_FAST_HISTORY:
+        history[:] = history[-_MAX_FAST_HISTORY:]
+
+    contents = [{"role": "user", "parts": [{"text": _COMPANION_SYSTEM}]}] + history
+
+    response = await asyncio.to_thread(
+        _gemini.models.generate_content,
+        model="gemini-3-flash-preview",
+        contents=contents,
+    )
+    reply = (response.text or "").strip()
+
+    history.append({"role": "model", "parts": [{"text": reply}]})
+    if len(history) > _MAX_FAST_HISTORY:
+        history[:] = history[-_MAX_FAST_HISTORY:]
+
+    return {
+        "content": reply or "I'm here with you. Want to share a little more?",
+        "emotion": emotion,
+        "events": [],
+    }
+
+
+async def _run_orchestrator(message: str, user_id: str) -> dict:
+    """Full ADK orchestrator path for calendar, crisis, journal-save triggers."""
+    session_id = await get_or_create_session(user_id)
 
     calendar_events_before: list[Any] = []
     calendar_module = None
-    if use_orchestrator:
-        try:
-            calendar_module = importlib.import_module("multi_tool_agent.calendar_agent")
-            maybe_events = getattr(calendar_module, "events", [])
-            if isinstance(maybe_events, list):
-                calendar_events_before = list(maybe_events)
-        except Exception:
-            calendar_module = None
+    try:
+        calendar_module = importlib.import_module("multi_tool_agent.calendar_agent")
+        maybe_events = getattr(calendar_module, "events", [])
+        if isinstance(maybe_events, list):
+            calendar_events_before = list(maybe_events)
+    except Exception:
+        calendar_module = None
 
     content = types.Content(
         role="user",
@@ -180,21 +228,20 @@ async def run_agent(message: str, user_id: str = "default") -> dict:
     )
 
     final_text = ""
+    emotion = "neutral"
     captured_events: list[dict[str, str]] = []
     journal_saved = False
 
-    async for event in runner.run_async(
+    async for event in _runner.run_async(
         user_id=user_id,
         session_id=session_id,
         new_message=content,
     ):
-        # Collect the final agent response
         if event.content and event.content.parts:
             for part in event.content.parts:
                 if part.text and part.text.strip():
                     final_text = part.text
 
-        # Try to extract emotion from tool calls in the event
         if event.actions and event.actions.state_delta:
             if "emotion" in event.actions.state_delta:
                 emotion = event.actions.state_delta["emotion"]
@@ -205,16 +252,18 @@ async def run_agent(message: str, user_id: str = "default") -> dict:
                 function_response = getattr(part, "function_response", None)
                 if function_response:
                     captured_events.extend(_extract_events(function_response))
-                    # Detect save_journal tool signal
                     resp_data = getattr(function_response, "response", None)
                     if isinstance(resp_data, dict) and resp_data.get("journal_saved"):
                         journal_saved = True
 
-    # Increment turn counter for session rotation
-    key = f"{user_id}:{app_name}"
+    key = f"{user_id}:soulsync"
     _turn_counts[key] = _turn_counts.get(key, 0) + 1
 
-    # Fallback: read calendar in-memory store in case ADK event payload omits tool outputs.
+    if emotion == "neutral" and final_text:
+        from multi_tool_agent.core_companion import analyze_emotion
+        result = analyze_emotion(message)
+        emotion = result.get("emotion", "neutral")
+
     if calendar_module is not None:
         maybe_events = getattr(calendar_module, "events", [])
         if isinstance(maybe_events, list):
@@ -232,3 +281,10 @@ async def run_agent(message: str, user_id: str = "default") -> dict:
     if journal_saved:
         result["journal_saved"] = True
     return result
+
+
+async def run_agent(message: str, user_id: str = "default") -> dict:
+    """Route message to fast path or full orchestrator based on content."""
+    if _needs_orchestrator(message):
+        return await _run_orchestrator(message, user_id)
+    return await _run_fast(message, user_id)
