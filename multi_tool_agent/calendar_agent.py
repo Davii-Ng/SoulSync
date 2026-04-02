@@ -109,7 +109,7 @@ Dates MUST go in YYYY-MM-DD format, times in HH:MM 24h format.
 
 calendar_agent = Agent(
     name="calendar_agent",
-    model="gemini-3-flash-preview",
+    model="gemini-3.1-pro-preview",
     description="Manages the user's calendar events. Saves new events and retrieves upcoming schedule when needed.",
     instruction=_build_calendar_instruction(),
     tools=[save_event, get_events],

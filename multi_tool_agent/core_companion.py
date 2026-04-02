@@ -416,6 +416,6 @@ core_companion_agent = Agent(
     ),
     tools=[analyze_emotion, suggest_resource],
     generate_content_config=types.GenerateContentConfig(
-        max_output_tokens=300,
+        max_output_tokens=1024,
     ),
 )
