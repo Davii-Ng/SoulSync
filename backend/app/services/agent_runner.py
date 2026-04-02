@@ -21,6 +21,10 @@ _runner = Runner(
 # Cache of user_id -> session_id
 _sessions: dict[str, str] = {}
 
+# Track turn count per user to rotate sessions before context overflows
+_turn_counts: dict[str, int] = {}
+_MAX_TURNS = 15  # Rotate session after this many exchanges
+
 
 def _coerce_event_dict(raw_event: Any) -> dict[str, str] | None:
     """Normalize different calendar event shapes into the frontend contract."""
@@ -95,13 +99,25 @@ def _dedupe_events(events: list[dict[str, str]]) -> list[dict[str, str]]:
 
 
 async def get_or_create_session(user_id: str = "default") -> str:
-    """Get existing session or create a new one for the user."""
+    """Get existing session or create a new one for the user.
+
+    Rotates the session after _MAX_TURNS exchanges to prevent the ADK
+    context window from filling up (which causes truncated model responses).
+    """
+    turns = _turn_counts.get(user_id, 0)
+    if user_id in _sessions and turns >= _MAX_TURNS:
+        logger.info(f"Rotating session for user {user_id} after {turns} turns")
+        del _sessions[user_id]
+        _turn_counts[user_id] = 0
+
     if user_id not in _sessions:
         session = await _session_service.create_session(
             app_name="soulsync",
             user_id=user_id,
         )
         _sessions[user_id] = session.id
+        _turn_counts[user_id] = 0
+
     return _sessions[user_id]
 
 
@@ -155,6 +171,9 @@ async def run_agent(message: str, user_id: str = "default") -> dict:
                     resp_data = getattr(function_response, "response", None)
                     if isinstance(resp_data, dict) and resp_data.get("journal_saved"):
                         journal_saved = True
+
+    # Increment turn counter for session rotation
+    _turn_counts[user_id] = _turn_counts.get(user_id, 0) + 1
 
     # If no emotion from state, try to detect from the function calls
     if emotion == "neutral" and final_text:
