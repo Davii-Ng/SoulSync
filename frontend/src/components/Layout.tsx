@@ -15,7 +15,7 @@ const bottomItems = [
 
 // Secondary nav lives in the collapsible sidebar
 const sideItems = [
-  { to: "/", icon: "history", label: "History" },
+  { to: "/history", icon: "history", label: "History" },
   { to: "/resources", icon: "health_and_safety", label: "Resources" },
   { to: "/settings", icon: "settings", label: "Settings" },
 ];
