@@ -28,6 +28,7 @@ export function ResourcesPage() {
               description: 'Free, confidential support 24/7 for people in distress.',
               icon: 'call',
               highlight: true,
+              url: 'https://988lifeline.org',
             },
             {
               name: 'Crisis Text Line',
@@ -35,6 +36,7 @@ export function ResourcesPage() {
               description: 'Free crisis counseling via text message, available 24/7.',
               icon: 'sms',
               highlight: true,
+              url: 'https://www.crisistextline.org',
             },
             {
               name: 'National Domestic Violence Hotline',
@@ -42,6 +44,7 @@ export function ResourcesPage() {
               description: 'Confidential support for domestic violence situations.',
               icon: 'shield',
               highlight: false,
+              url: 'https://www.thehotline.org',
             },
             {
               name: 'SAMHSA National Helpline',
@@ -49,11 +52,15 @@ export function ResourcesPage() {
               description: 'Free referrals and information for mental health and substance use.',
               icon: 'support_agent',
               highlight: false,
+              url: 'https://www.samhsa.gov/find-help/national-helpline',
             },
           ].map((resource) => (
-            <div
+            <a 
               key={resource.name}
-              className={`rounded-xl p-4 flex items-start gap-3 resource-row cursor-pointer border ${
+              href={resource.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`rounded-xl p-4 flex items-start gap-3 resource-row cursor-pointer border no-underline ${
                 resource.highlight
                   ? 'bg-soul-accent-pale border-soul-accent-light'
                   : 'bg-soul-surface-alt border-soul-border-light'
@@ -79,7 +86,7 @@ export function ResourcesPage() {
                   {resource.description}
                 </p>
               </div>
-            </div>
+            </a>
           ))}
         </div>
       </div>
@@ -100,21 +107,27 @@ export function ResourcesPage() {
               name: 'Psychology Today - Find a Therapist',
               description: 'Search therapists by location, specialty, and insurance.',
               icon: 'search',
+              url: 'https://www.psychologytoday.com/us/therapists',
             },
             {
               name: 'Open Path Collective',
               description: 'Affordable therapy sessions ($30-$80) with licensed providers.',
               icon: 'volunteer_activism',
+              url: 'https://openpathcollective.org',
             },
             {
               name: 'BetterHelp / Talkspace',
               description: 'Online therapy platforms with licensed counselors.',
               icon: 'laptop',
+              url: 'https://www.betterhelp.com',
             },
           ].map((resource) => (
-            <div
+            <a
               key={resource.name}
-              className="rounded-xl p-4 flex items-start gap-3 resource-row cursor-pointer bg-soul-surface-alt border border-soul-border-light"
+              href={resource.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-xl p-4 flex items-start gap-3 resource-row cursor-pointer bg-soul-surface-alt border border-soul-border-light no-underline"
             >
               <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-soul-accent-pale">
                 <span className="material-symbols-outlined text-lg text-soul-accent">
@@ -129,7 +142,7 @@ export function ResourcesPage() {
                   {resource.description}
                 </p>
               </div>
-            </div>
+            </a>
           ))}
         </div>
       </div>
