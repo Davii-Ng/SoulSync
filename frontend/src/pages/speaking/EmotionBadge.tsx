@@ -1,7 +1,7 @@
 // Compact emotion badge with colored dot
 
-import type { Emotion } from '../types'
-import { EMOTION_CONFIG } from '../utils/constants'
+import type { Emotion } from '../../types'
+import { EMOTION_CONFIG } from '../../utils/constants'
 
 interface Props {
   emotion: Emotion

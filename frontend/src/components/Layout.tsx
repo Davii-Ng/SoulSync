@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
-import logo from "../assets/logo_1.png";
+import logo from "@assets/logo_1.png";
 
 interface Props {
   isConnected: boolean;

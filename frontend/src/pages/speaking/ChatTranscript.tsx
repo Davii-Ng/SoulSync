@@ -1,4 +1,4 @@
-import type { Message } from '../types'
+import type { Message } from '../../types'
 import { MessageBubble } from './MessageBubble'
 import { useEffect, useRef } from 'react'
 
