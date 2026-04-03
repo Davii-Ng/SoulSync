@@ -1,31 +1,4 @@
-name: CI
+name: CD
 
 on:
-  push:
-  pull_request:
-    branches: [main]
-
-jobs:
-  frontend:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 18
-      - run: npm ci
-        working-directory: frontend
-      - run: npm run lint
-        working-directory: frontend
-      - run: npm run build
-        working-directory: frontend
-
-  backend:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - run: pip install -r backend/requirements.txt
-      - run: pytest -q tests/
+  workflow_dispatch:   
