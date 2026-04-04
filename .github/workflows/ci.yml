@@ -19,9 +19,15 @@ jobs:
         working-directory: frontend
       - run: npm run build
         working-directory: frontend
+      - run: npx tsc --noEmit
+        working-directory: frontend
 
   backend:
     runs-on: ubuntu-latest
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+      GOOGLE_API_KEY: test-dummy-key
+      ELEVENLABS_API_KEY: test-dummy-key
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
