@@ -8,6 +8,9 @@ services (Gemini, ElevenLabs) mocked out.
 import json
 from unittest.mock import patch, AsyncMock, MagicMock
 
+import sys, os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "backend"))
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -40,14 +43,14 @@ _run_agent_patch = patch(
 )
 
 
+
 _emotion_mock = _emotion_patch.start()
 _resource_mock = _resource_patch.start()
 _stt_mock = _stt_patch.start()
 _tts_mock = _tts_patch.start()
 _run_agent_mock = _run_agent_patch.start()
 
-import sys, os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "backend"))
+
 
 from main import app  # noqa: E402
 
