@@ -88,6 +88,7 @@ async def test_get_available_voices_returns_list():
     mock_voice = MagicMock()
     mock_voice.voice_id = "v1"
     mock_voice.name = "Rachel"
+    mock_voice.labels = {"gender": "female"}
 
     mock_client = MagicMock()
     mock_response = MagicMock()
@@ -97,7 +98,7 @@ async def test_get_available_voices_returns_list():
     with patch.object(va, "_client", mock_client):
         voices = await va.get_available_voices()
 
-    assert voices == [{"voice_id": "v1", "name": "Rachel"}]
+    assert voices == [{"voice_id": "v1", "name": "Rachel", "gender": "female"}]
 
 
 # --- speech_to_text ---

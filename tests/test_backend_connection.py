@@ -29,10 +29,22 @@ _tts_patch = patch(
     return_value=b"fake-audio-bytes",
 )
 
+_run_agent_patch = patch(
+    "app.services.agent_runner.run_agent",
+    new_callable=AsyncMock,
+    return_value={
+        "content": "I hear you. That sounds really tough.",
+        "emotion": "stressed",
+        "events": [],
+    },
+)
+
+
 _emotion_mock = _emotion_patch.start()
 _resource_mock = _resource_patch.start()
 _stt_mock = _stt_patch.start()
 _tts_mock = _tts_patch.start()
+_run_agent_mock = _run_agent_patch.start()
 
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "backend"))
@@ -47,6 +59,7 @@ def teardown_module() -> None:
     _resource_patch.stop()
     _stt_patch.stop()
     _tts_patch.stop()
+    _run_agent_patch.stop()
 
 
 # ---------- Health (GET /) ----------
