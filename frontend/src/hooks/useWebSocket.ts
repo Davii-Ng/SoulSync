@@ -12,6 +12,7 @@ export function useWebSocket() {
   const retryCount = useRef(0)
   const retryTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const disposed = useRef(false)
+  const connectRef = useRef<() => void>(() => {})
 
   const connect = useCallback(() => {
     if (disposed.current) return
@@ -31,8 +32,9 @@ export function useWebSocket() {
       if (!disposed.current && retryCount.current < MAX_RETRIES) {
         const delay = BASE_DELAY_MS * 2 ** retryCount.current
         retryCount.current += 1
-        retryTimer.current = setTimeout(connect, delay)
+        retryTimer.current = setTimeout(() => connectRef.current(), delay)
       }
+      
     }
 
     socket.onerror = () => {
@@ -42,7 +44,10 @@ export function useWebSocket() {
     ws.current = socket
   }, [])
 
+  
+
   useEffect(() => {
+    connectRef.current = connect
     disposed.current = false
     connect()
 
