@@ -1,4 +1,0 @@
-name: CD
-
-on:
-  workflow_dispatch:   
