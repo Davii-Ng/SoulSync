@@ -1,10 +1,15 @@
-name: CI
+name: CI/CD 
 
 on:
   push:
   pull_request:
     branches: [main]
-
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version"
+        required: true
+        type: string
 jobs:
   frontend:
     runs-on: ubuntu-latest
@@ -35,3 +40,16 @@ jobs:
           python-version: "3.12"
       - run: pip install -r backend/requirements.txt
       - run: pytest -q tests/
+  
+  release:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.version }}
+          name: ${{ inputs.version }}
+          generate_release_notes: true
