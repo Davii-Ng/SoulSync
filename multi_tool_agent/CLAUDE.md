@@ -31,7 +31,6 @@ root_agent (agent.py) — ADK entry point, orchestrator
 
 ### Not wired as sub_agents:
 - **voice_agent.py** — Exports `synthesize_speech()` utility for ElevenLabs TTS. Called by backend directly.
-- **listener_agent.py** — Unused at runtime. Browser Web Speech API handles voice-to-text.
 
 ## Agent Definitions
 
@@ -75,7 +74,6 @@ multi_tool_agent/
 ├── calendar_agent.py  # Event/deadline management (in-memory)
 ├── resource_agent.py  # Crisis hotlines, therapy refs, mindfulness
 ├── voice_agent.py     # ElevenLabs TTS utility (synthesize_speech)
-├── listener_agent.py  # Voice-to-text stub (unused — browser handles STT)
 ├── __init__.py        # Must stay UTF-8 encoded
 └── CLAUDE.md
 ```

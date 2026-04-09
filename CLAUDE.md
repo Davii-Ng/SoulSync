@@ -43,7 +43,6 @@ voice_agent (voice_agent.py)
 - `calendar_agent.py` — Detects event/deadline mentions, saves to in-memory store, fetches on request. Tools: `save_event`, `get_events`.
 - `resource_agent.py` — Steps in when someone is really struggling. Crisis hotlines, therapy referrals, mindfulness exercises. Tools: `get_crisis_resources`, `get_therapist_resources`, `get_mindfulness_exercise`.
 - `voice_agent.py` — Exports `synthesize_speech()` utility for ElevenLabs TTS. Called by backend after agent response, not wired as sub_agent.
-- `listener_agent.py` — Unused at runtime. Browser Web Speech API handles voice-to-text.
 
 ### ADK Rules
 - `Agent` instances must go in `sub_agents`, not `tools` — `tools` only accepts callables/BaseTool/BaseToolset
@@ -83,7 +82,6 @@ SoulSync/
 │   ├── calendar_agent.py  # Event/deadline management (in-memory)
 │   ├── resource_agent.py  # Crisis hotlines + therapy resources
 │   ├── voice_agent.py     # ElevenLabs TTS utility (synthesize_speech)
-│   ├── listener_agent.py  # Voice-to-text stub (unused — browser handles STT)
 │   ├── __init__.py
 │   └── CLAUDE.md
 ├── .env                   # API keys (never commit)

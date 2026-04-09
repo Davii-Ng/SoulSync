@@ -66,8 +66,7 @@ User speaks into mic (browser)
 │                                                   │
 │  Backend utilities (not sub_agents):              │
 │  ├── voice_agent     → ElevenLabs TTS             │
-│  └── listener_agent  → ElevenLabs Scribe STT MCP  │
-└─────────────────────────────────────────────────┘
+└───────────────────────────────────────────────────┘
 ```
 
 ---
@@ -186,7 +185,7 @@ SoulSync/
 │       ├── schemas/           # Pydantic models (ChatRequest/Response, SpeechRequest, etc.)
 │       ├── services/
 │       │   └── agent_runner.py  # ADK runner, session mgmt, event extraction + dedup, emotion fallback
-│       ├── ws/                # ConnectionManager + WebSocket protocol envelope
+│       ├── ws/                # ConnectionManager
 │       └── utils/             # ServiceError exception + handler
 ├── multi_tool_agent/          # Google ADK agents
 │   ├── agent.py               # ADK entry point — root_agent orchestrator
@@ -194,7 +193,6 @@ SoulSync/
 │   ├── journal_agent.py       # write_entry, get_entries, save_journal, get_prompt
 │   ├── calendar_agent.py      # save_event, get_events — in-memory calendar
 │   ├── resource_agent.py      # Crisis hotlines, therapy refs, mindfulness, search_local_resources
-│   ├── listener_agent.py      # STT via ElevenLabs Scribe MCP
 │   ├── voice_agent.py         # TTS via ElevenLabs SDK
 │   └── __init__.py
 ├── tests/                     # pytest tests
@@ -364,7 +362,7 @@ pytest -q
 | **calendar_agent** | `save_event`, `get_events` | Auto-extract events/deadlines from conversation |
 | **resource_agent** | `get_crisis_resources`, `get_therapist_resources`, `get_mindfulness_exercise`, `search_local_resources` | Crisis hotlines, therapy finders, grounding exercises, local search |
 | **voice_agent** | `speak_response` | ElevenLabs TTS (backend utility, not a sub_agent) |
-| **listener_agent** | ElevenLabs MCP `transcribe` | ElevenLabs Scribe STT via MCP (unused at runtime — browser handles STT) |
+
 
 ---
 
