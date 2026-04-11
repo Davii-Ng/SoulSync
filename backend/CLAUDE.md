@@ -79,7 +79,6 @@ backend/
 		ws/
 			__init__.py
 			manager.py           # websocket connection manager
-			protocol.py          # websocket payload schema helpers
 		schemas/
 			__init__.py
 			chat.py
