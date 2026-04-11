@@ -2,32 +2,44 @@
 
 **AI-Powered Journal & Mental Health Companion**
 
-> Built with love at USF Hackathon Tampa 2026.
-
 ---
 
 ## What is SoulSync?
 
 SoulSync is a **voice-first AI journal** that listens to you, understands your emotions, and responds like a friend — not a chatbot. Write or speak your thoughts, and SoulSync helps you process them, reflect on past entries, and feel less alone.
 
-**You speak. SoulSync listens. You feel heard.**
+**Don't just write it down. Talk it out.**
 
 ---
 
-## Hackathon Tracks
+## Accomplishments
+- Voice-first AI companion with real-time bidirectional voice I/O over WebSocket (exponential backoff reconnect)
+- Google ADK multi-agent orchestration — root_agent routing to 4 specialized sub-agents
+- Emotion detection engine — 8 emotions, negation-aware, crisis detection with auto-escalation
+- ElevenLabs TTS/STT integration with per-user voice selection and preview
+- Journal auto-save, calendar event extraction, interactive wellness widgets
+- Fast-path Gemini routing — bypasses ADK for normal messages, reducing latency
+- Frontend restructure into modular page components
+- CI/CD pipeline — GitHub Actions with frontend lint/build/tsc + backend pytest and manual release tagging via `workflow_dispatch`
+- Codebase cleanup — removed legacy Gemini direct path, dead agents, unused test files
 
-| Track | How We Use It |
-|-------|--------------|
-| **Oracle** | Human-centered AI — empathetic, proactive mental health support |
-| **Google ADK Multi-Agent** | Multi-agent orchestration with 4 specialized sub-agents |
-| **ElevenLabs** | Natural voice I/O — TTS via SDK + STT via Scribe MCP |
-| **Gemini API** | Emotion analysis + conversational AI responses |
+---
+
+## Future Planning 
+
+- **Proactive Agent Layer:** Evolve from reactive API calls to a true autonomous companion — integrate with external tools (Google Calendar, health apps) to proactively review schedules, detect stress patterns, and surface mental health suggestions without being prompted
+- **Agent Autonomy with Boundaries:** Companion has read-only access to connected systems (calendar, routines) for context awareness, but never takes actions without user consent — proactive suggestions, not unsupervised control
+- **DB Persistence:** Migrate all in-memory storage with vector-first context retrieval
+- **Auth:** Users table + authentication layer (deferred until DB is in place)
+- **Latency:** Lighter models, response caching, keyword-based agent routing to replace regex
+- **Frontend Polish:** Lint fixes, UI improvements
+- **Graph Layer:** For richer context retrieval on top of vector search
 
 ---
 
 ## Architecture
 
-![alt text](image-1.png)
+![Architecture](assets/image-1.png)
 
 ```
 User speaks into mic (browser)
@@ -83,59 +95,22 @@ User speaks into mic (browser)
 | **Voice Input** | Web Speech API (browser) + ElevenLabs Scribe STT (server via MCP) |
 | **Real-time** | WebSocket — text + audio + emotion + events in a single message |
 | **Storage** | In-memory (backend) + localStorage (frontend journals & voice prefs) |
-| **Deploy** | Vercel (frontend) · Railway/Render (backend) |
+| **Deploy** | Vercel (frontend) · Render (backend) |
 
 ---
 
 ## Key Features
 
-### Emotion Detection
-- **8 emotions:** calm, stressed, anxious, happy, sad, angry, neutral, crisis
-- **Tiered keyword scoring:** high (3.0), medium (2.0), low (1.0) weights per emotion
-- **Negation-aware:** "I'm not angry" won't trigger angry detection
-- **Mixed emotions:** returns primary + secondary emotion when secondary is >= 40% of primary score
-- **Dynamic severity:** low (< 3.0), medium (>= 3.0), high (>= 6.0) based on keyword count
-
-### Crisis Detection
-- 16 direct crisis phrases (e.g., "want to die", "suicide", "self-harm") → immediate crisis response
-- 9 passive crisis phrases (e.g., "what's the point", "i'm a burden") → triggers on 2+ matches or 1 match + high severity
-- Auto-routes to resource_agent with 988 hotline and crisis resources
-
-### Quick Check-In
-- 7 mood buttons on the Speak page: Amazing, Peaceful, Unsure, Worried, Sad, Frustrated, Drained
-- One-tap mood logging that auto-sends to AI (e.g., "I'm feeling peaceful right now")
-- Visual feedback with auto-reset after 3 seconds
-
-### Journal Auto-Save
-- Trigger phrases: "save today", "save journal", "done for the day", "wrap up"
-- Frontend detects phrases instantly and snapshots full conversation to localStorage
-- Backend also signals via `journal_saved` flag for agent-initiated saves
-- Saved journals viewable on the Journal page with expandable daily entries and dominant emotion
-
-### Voice Selection
-- Settings page fetches available voices from ElevenLabs via `GET /voices`
-- Filter by gender (All / Female / Male) and sort by name or gender
-- Preview any voice before selecting via `POST /voices/preview`
-- Selected voice persisted to localStorage and sent to backend via WebSocket `set_voice`
-- Per-message voice override supported
-
-### Calendar Event Extraction
-- AI detects event/deadline mentions in conversation and saves them automatically
-- Events extracted, normalized, and deduplicated from agent responses
-- Viewable on the Calendar page as a card grid
-
-### Local Resource Search
-- `search_local_resources` tool searches DuckDuckGo for therapists and support groups near a user's location
-- Falls back to curated links (Psychology Today, SAMHSA, Open Path) if search fails
-
-### Interactive Wellness Widgets
-- **Box Breathing guide:** 4-phase cycle (inhale → hold → exhale → hold) with animated visuals and cycle counter
-- **5-4-3-2-1 Grounding walkthrough:** step-by-step sensory exercise (see, touch, hear, smell, taste)
-- Widgets highlight automatically based on detected emotion (anxious → breathing, stressed → grounding)
-
-### Connection Status
-- Real-time green/red indicator in the header showing WebSocket connection state
-- Auto-reconnect with exponential backoff (3 retries: 1s → 2s → 4s)
+| Feature | Description |
+|---------|-------------|
+| Emotion Detection | 8 emotions, negation-aware, mixed emotion support, severity levels |
+| Crisis Detection | 16 direct + 9 passive crisis phrases → auto-routes to 988 hotline + resources |
+| Quick Check-In | 7 mood buttons for one-tap mood logging |
+| Journal Auto-Save | Trigger phrases snapshot conversation to localStorage |
+| Voice Selection | Browse, preview, and select ElevenLabs voices with gender filters |
+| Calendar Extraction | AI detects event mentions and saves them automatically |
+| Wellness Widgets | Box breathing guide + 5-4-3-2-1 grounding exercise |
+| Local Resources | Search for nearby therapists + curated fallback links |
 
 ---
 
@@ -143,23 +118,21 @@ User speaks into mic (browser)
 
 ```
 SoulSync/
-├── frontend/                  # React + Vite + TypeScript
+├── frontend/                  
 │   └── src/
 │       ├── App.tsx            # Root — routing, state, WebSocket wiring
 │       ├── components/
-│       │   ├── Layout.tsx         # App shell — header, retractable sidebar, bottom nav pill
-│       │   ├── VoiceOrb.tsx       # Mic button with idle/listening/thinking/speaking states
-│       │   ├── ChatTranscript.tsx # Auto-scrolling message list
-│       │   ├── MessageBubble.tsx  # User/AI message bubbles with voice name
-│       │   ├── EmotionBadge.tsx   # Color-coded emotion pill badge
-│       │   ├── Header.tsx         # Brand, connection status dot, profile avatar
-│       │   ├── TextInput.tsx      # Text input with send button + loading state
-│       │   ├── AudioPlayer.tsx    # Inline audio player with waveform visualization
-│       │   ├── EventsPanel.tsx    # Calendar events sidebar panel
-│       │   ├── QuickCheckIn.tsx   # 7-mood emoji buttons with auto-reset
-│       │   └── ResourcesCard.tsx  # Interactive breathing guide + grounding walkthrough
+│       │   └── Layout.tsx     # App shell — header, retractable sidebar, bottom nav pill
 │       ├── pages/
-│       │   ├── SpeakingPage.tsx   # Main voice/chat interface — orb, transcript, quick check-in
+│       │   ├── speaking/          # Main voice/chat interface (refactored)
+│       │   │   ├── SpeakingPage.tsx   # Orb, transcript, quick check-in
+│       │   │   ├── VoiceOrb.tsx       # Mic button with states
+│       │   │   ├── ChatTranscript.tsx # Auto-scrolling message list
+│       │   │   ├── MessageBubble.tsx  # User/AI message bubbles with voice name
+│       │   │   ├── EmotionBadge.tsx   # Emotion pill badge
+│       │   │   ├── TextInput.tsx      # Send button + loading state
+│       │   │   ├── QuickCheckIn.tsx   # Emoji buttons with auto-reset
+│       │   │   └── index.ts          # Barrel export
 │       │   ├── JournalPage.tsx    # Expandable daily entries with dominant emotion
 │       │   ├── CalendarPage.tsx   # Event card grid from AI-extracted events
 │       │   ├── HistoryPage.tsx    # Mood timeline + weekly bar chart
@@ -175,28 +148,29 @@ SoulSync/
 │           └── constants.ts       # App-wide constants
 ├── backend/                   # FastAPI — API integration layer
 │   ├── main.py                # App entry, CORS, router registration
-│   └── app/
-│       ├── api/routes/
-│       │   ├── health.py      # GET /
-│       │   ├── chat.py        # POST /chat
-│       │   ├── speech.py      # POST /speech, GET /voices, POST /voices/preview, POST /transcribe
-│       │   └── ws.py          # WS /ws — real-time conversation + voice prefs + event extraction
-│       ├── core/              # Config (.env loading), CORS, security
-│       ├── schemas/           # Pydantic models (ChatRequest/Response, SpeechRequest, etc.)
-│       ├── services/
-│       │   └── agent_runner.py  # ADK runner, session mgmt, event extraction + dedup, emotion fallback
-│       ├── ws/                # ConnectionManager
-│       └── utils/             # ServiceError exception + handler
+│   ├── app/
+│   │   ├── api/routes/
+│   │   │   ├── health.py      # GET /
+│   │   │   ├── chat.py        # POST /chat
+│   │   │   ├── speech.py      # POST /speech, GET /voices, POST /voices/preview, POST /transcribe
+│   │   │   └── ws.py          # WS /ws — real-time conversation + voice prefs + event extraction
+│   │   ├── core/              # Config (.env loading), CORS, security
+│   │   ├── schemas/           # Pydantic models (ChatRequest/Response, SpeechRequest, etc.)
+│   │   ├── services/
+│   │   │   └── agent_runner.py  # ADK runner, session mgmt, event extraction + dedup, emotion fallback
+│   │   ├── ws/                # ConnectionManager
+│   │   └── utils/             # ServiceError exception + handler
+│   └── tests/                 # pytest — health, voices, WebSocket, journal save
 ├── multi_tool_agent/          # Google ADK agents
 │   ├── agent.py               # ADK entry point — root_agent orchestrator
-│   ├── core_companion.py      # Emotion analysis (negation-aware, crisis detection) + suggest_resource
+│   ├── core_companion.py      # Emotion analysis 
 │   ├── journal_agent.py       # write_entry, get_entries, save_journal, get_prompt
 │   ├── calendar_agent.py      # save_event, get_events — in-memory calendar
-│   ├── resource_agent.py      # Crisis hotlines, therapy refs, mindfulness, search_local_resources
+│   ├── resource_agent.py      # Resources
 │   ├── voice_agent.py         # TTS via ElevenLabs SDK
 │   └── __init__.py
-├── tests/                     # pytest tests
-├── .env                       # API keys (never commit!)
+├── tests/                     # Integration tests
+├── .env.example               # Environment variable template
 └── README.md
 ```
 
