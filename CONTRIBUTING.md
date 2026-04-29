@@ -76,6 +76,32 @@ multi_tool_agent/  Google ADK agents
 
 ---
 
+## 🧠 Core Systems & How They Work
+
+To help you get started, here is a breakdown of the key functions and how the codebase processes information.
+
+### 1. The Multi-Agent Orchestrator (`multi_tool_agent/`)
+We use **Google ADK** to intelligently route user requests. The `agent.py` file acts as the traffic cop (`root_agent`), delegating tasks to four sub-agents:
+
+- **`core_companion.py`**: The heart of the conversation. Modifying `analyze_emotion` here lets you change the keyword scoring for mood detection, handle mixed emotions, and tweak crisis phrase triggers.
+- **`journal_agent.py`**: Manages reading/writing to the journal. Check `get_prompt` if you want to add new reflective questions based on specific moods.
+- **`calendar_agent.py`**: Listens for schedule mentions and extracts dates/times.
+- **`resource_agent.py`**: A fallback agent that provides 988 hotlines or parses local therapy searches.
+
+### 2. WebSocket Gateway (`backend/app/api/routes/ws.py`)
+All real-time communication flows through a single WebSocket connection. 
+- **Inbound:** Frontend sends JSON like `{ "type": "text", "content": "I feel burned out" }`.
+- **Processing:** The backend passes this to the ADK orchestrator. Upon resolving the LLM response, it requests ElevenLabs to synthesize the audio.
+- **Outbound:** It streams back `{ "type": "response", "content": "...", "audio_base64": "...", "emotion": "stressed" }`.
+
+*Note: If you add new event types (e.g., sending image analysis), update both `ws.py` and the frontend `useWebSocket.ts` hook.*
+
+### 3. Frontend Audio & Logic (`frontend/src/`)
+- **Voice Interfacing**: Look at `hooks/useVoiceInput.ts`. It wraps the native browser Web Speech API for dictation.
+- **Storage**: To keep this hackathon project lightweight, we use React Context + `localStorage` heavily rather than a heavy database. Check `utils/constants.ts` for storage keys.
+
+---
+
 ## 🔁 Contribution Flow
 
 1. Create a feature branch from `main`.

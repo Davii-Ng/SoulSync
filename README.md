@@ -1,82 +1,46 @@
 # SoulSync
 
-**AI-Powered Journal & Mental Health Companion**
+**An AI-powered voice journal that actually listens.**
 
-> Built with love at USF Hackathon Tampa 2026.
+Journaling is a powerful tool for mental health, but writing can feel like a chore when you're overwhelmed. Therapy is amazing, but it's not available at 2 AM on a Tuesday. 
 
----
+We built **SoulSync** to bridge that gap. It's a voice-first companion that lets you vent, reflect, and process your emotions in real-time. You speak, it listens, figures out how you're feeling, and responds just like a supportive friend—while automatically saving your thoughts to a private journal. 
 
-## 🌟 What is SoulSync?
+> Built with love for the USF Hackathon Tampa 2026.
 
-SoulSync is a **voice-first AI journal** that listens to you, understands your emotions, and responds like a supportive friend. Speak or type your thoughts, and SoulSync helps you reflect, track patterns, and access support when it matters most.
+## How it works
 
----
+SoulSync is built around a real-time conversation loop. You just talk to it, and the system handles the rest.
 
-## ✨ At a Glance
+* **🗣️ Voice-first input:** Your browser captures your words as you speak.
+* **🧠 Emotion detection:** Gemini analyzes the transcript (noting mixed feelings, severity, and even crisis phrases).
+* **🤝 Empathetic response:** Specialized ADK agents craft a response tailored to your mood.
+* **🎧 Natural audio:** ElevenLabs voices read the response back to you.
+* **📓 Auto-journaling:** Mention you want to "save the journal", and it snapshots your session.
 
-| What | Why it matters |
-|------|----------------|
-| 🎙️ Voice-first chat | Natural, low-friction journaling |
-| 🧠 Emotion detection | Understands how you feel in the moment |
-| 📓 Journal autosave | Captures meaningful reflections automatically |
-| 📅 Event extraction | Pulls deadlines and plans from conversation |
-| 🆘 Crisis resources | Gentle, immediate support when needed |
+### The Flow
 
----
-
-## 🗺️ How It Works (Simple Diagram)
-
-```
-[You] --voice/text--> [Frontend] --WS/HTTP--> [Backend] --> [ADK Agents]
-    |                     |                       |            |
-    |                     |                       |            +--> Emotion + Response
-    |                     |                       |            +--> Journal + Prompts
-    |                     |                       |            +--> Events + Resources
-    |                     |<-- audio + emotion ----+<-----------+
+```text
+[You Speak] ---> (Frontend/React) ---> WS msg ---> (FastAPI/Backend)
+                                                         |
+                                                  [Google ADK Orchestrator]
+                                                         |
+ ┌───────────────┬─────────────────┬─────────────────────┼─────────────────┐
+(Core Companion) (Journal Agent) (Calendar Agent) (Resource Agent)      (Voice TTS)
+ Emotion/Coping  Saves/Prompts   Extracts Events   Crisis/Therapy      ElevenLabs
 ```
 
----
+## Features
 
-## 🧭 Architecture (Detailed Map)
-
-```
-User speaks (browser)
-     |
-     v
-Frontend (React + Vite)
-    - Voice orb + transcript
-    - Quick check-in
-    - Journal autosave
-    - Voice selection
-     |
-     v  WebSocket + REST
-Backend (FastAPI)
-    - /chat /speech /transcribe /voices /ws
-    - Emotion + response routing
-    - Per-connection voice prefs
-     |
-     v
-Google ADK Orchestrator
-    - core_companion (emotion + coping)
-    - journal_agent (entries + prompts)
-    - calendar_agent (events)
-    - resource_agent (crisis + resources)
-```
+- **8-Axis Emotion Tracking**: Recognizes calm, stressed, anxious, happy, sad, angry, neutral, and crisis states. It's negation-aware (saying "I am not angry" won't flag as angry).
+- **Proactive Wellness**: Detects when you're stressed and highlights built-in grounding or breathing exercises.
+- **Smart Calendar Extraction**: Casually mention "I have a meeting tomorrow at 2pm" and it automatically pulls into your events board.
+- **Immediate Crisis Support**: Hardcoded triggers route immediately to 988 and therapy resources if self-harm or deep crisis is detected.
+- **Multi-Voice Personalization**: Choose between different ElevenLabs voices directly in the UI.
 
 ---
 
-## 🧠 What Makes SoulSync Special
-
-- 🧩 **Emotion-aware responses** with mixed mood support
-- 🛟 **Crisis detection** with gentle, immediate resources
-- 📝 **Journal auto-save** triggered by natural phrases
-- 🎧 **Voice selection + preview** powered by ElevenLabs
-- 🗓️ **Event detection** for therapy, deadlines, and plans
-- 🌿 **Wellness widgets** (breathing + grounding)
-
----
-
-## 🧱 Tech Stack
+## Tech Stack
 
 - 🖥️ Frontend: React + Vite + TypeScript
 - ⚡ Backend: Python + FastAPI + WebSocket
@@ -87,7 +51,7 @@ Google ADK Orchestrator
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1) Environment
 
@@ -135,7 +99,7 @@ npm run dev
 
 ---
 
-## 🔌 API (Quick View)
+## API (Quick View)
 
 | Method | Path | Purpose |
 |--------|------|---------|
@@ -149,7 +113,7 @@ npm run dev
 
 ---
 
-## 🧪 Tests
+## Tests
 
 ```bash
 pip install pytest pytest-asyncio httpx
@@ -158,7 +122,7 @@ pytest -q
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 We keep contributor docs separate to keep this README lightweight.
 
@@ -166,7 +130,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for setup details, repo structure, and wo
 
 ---
 
-## 🏁 Hackathon Tracks
+## Hackathon Tracks
 
 | Track | How We Use It |
 |-------|--------------|
