@@ -1,6 +1,6 @@
 // Chat bubble with distinct user/AI styling
 
-import type { Message } from "../types";
+import type { Message } from "../../types";
 
 interface Props {
   message: Message;

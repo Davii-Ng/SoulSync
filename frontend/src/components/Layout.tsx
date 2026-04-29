@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
-import logo from "../assets/logo_1.png";
+import logo from "@assets/logo_1.png";
 
 interface Props {
   isConnected: boolean;
@@ -15,7 +15,7 @@ const bottomItems = [
 
 // Secondary nav lives in the collapsible sidebar
 const sideItems = [
-  { to: "/", icon: "history", label: "History" },
+  { to: "/history", icon: "history", label: "History" },
   { to: "/resources", icon: "health_and_safety", label: "Resources" },
   { to: "/settings", icon: "settings", label: "Settings" },
 ];

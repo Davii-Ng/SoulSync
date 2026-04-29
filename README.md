@@ -2,7 +2,7 @@
 
 **AI-Powered Journal & Mental Health Companion**
 
-You speak. SoulSync listens. You feel heard. 💙
+> Built with love at USF Hackathon Tampa 2026.
 
 ---
 

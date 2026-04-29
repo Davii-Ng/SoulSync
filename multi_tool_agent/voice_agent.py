@@ -2,11 +2,13 @@ import io
 import os
 import logging
 
+from pathlib import Path
+
 from dotenv import load_dotenv
 from elevenlabs import ElevenLabs
 from google.adk.agents.llm_agent import Agent
 
-load_dotenv()
+load_dotenv(Path(__file__).parent.parent / ".env")
 
 logger = logging.getLogger(__name__)
 
@@ -94,7 +96,7 @@ async def get_available_voices() -> list[dict]:
 
 
 voice_agent = Agent(
-    model="gemini-3.1-pro-preview",
+    model="gemini-3-flash-preview",
     name="voice_agent",
     description="Converts text responses to natural-sounding audio via ElevenLabs TTS.",
     instruction=(

@@ -1,6 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
 import { Layout } from './components/Layout'
-import { SpeakingPage } from './pages/SpeakingPage'
+import { SpeakingPage } from './pages/speaking'
 import { JournalPage } from './pages/JournalPage'
 import { CalendarPage } from './pages/CalendarPage'
 import { HistoryPage } from './pages/HistoryPage'
@@ -64,7 +64,11 @@ function App() {
     const today = new Date().toISOString().slice(0, 10)
     setMessages((prev) => {
       if (prev.length === 0) return prev
-      const stripped = prev.map(({ audio_base64: _, ...rest }) => rest)
+      const stripped = prev.map((m) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { audio_base64, ...rest } = m   
+        return rest
+      })
       setSavedJournals((journals) => {
         const idx = journals.findIndex((j) => j.date === today)
         const entry: JournalEntry = { id: today, date: today, messages: stripped, savedAt: Date.now() }
@@ -151,7 +155,7 @@ function App() {
 
     socket.addEventListener('message', handleMessage)
     return () => socket.removeEventListener('message', handleMessage)
-  }, [isConnected, ws])
+  }, [isConnected, ws, snapshotJournal])
 
   const handleTextSend = useCallback(
     (text: string) => {

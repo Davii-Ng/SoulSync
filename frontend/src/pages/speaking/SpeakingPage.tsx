@@ -1,9 +1,9 @@
-import { VoiceOrb } from '../components/VoiceOrb'
-import { ChatTranscript } from '../components/ChatTranscript'
-import { TextInput } from '../components/TextInput'
-import { EmotionBadge } from '../components/EmotionBadge'
-import { QuickCheckIn } from '../components/QuickCheckIn'
-import type { OrbState, Message, Emotion, SavedEvent } from '../types'
+import { VoiceOrb } from './VoiceOrb'
+import { ChatTranscript } from './ChatTranscript'
+import { TextInput } from './TextInput'
+import { EmotionBadge } from './EmotionBadge'
+import { QuickCheckIn } from './QuickCheckIn'
+import type { OrbState, Message, Emotion, SavedEvent } from '../../types'
 
 interface Props {
   orbState: OrbState

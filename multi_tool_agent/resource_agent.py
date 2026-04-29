@@ -6,8 +6,6 @@ import requests
 from dotenv import load_dotenv
 from google.adk.agents.llm_agent import Agent
 
-# Load .env from multi_tool_agent/ and project root
-load_dotenv(Path(__file__).parent / ".env")
 load_dotenv(Path(__file__).parent.parent / ".env")
 
 
@@ -139,7 +137,7 @@ def search_local_resources(location: str, resource_type: str = "mental health th
 
 
 resource_agent = Agent(
-    model="gemini-3.1-pro-preview",
+    model="gemini-3-flash-preview",
     name="resource_agent",
     description=(
         "Provides mental health resources, crisis hotlines, therapist referrals, mindfulness exercises, "
