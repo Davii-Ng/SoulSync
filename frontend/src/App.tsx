@@ -3,7 +3,7 @@ import { Layout } from './components/Layout'
 import { SpeakingPage } from './pages/speaking'
 import { JournalPage } from './pages/JournalPage'
 import { CalendarPage } from './pages/CalendarPage'
-import { HistoryPage } from './pages/HistoryPage'
+import { HomePage } from './pages/HomePage'
 import { ResourcesPage } from './pages/ResourcesPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { useWebSocket } from './hooks/useWebSocket'
@@ -272,7 +272,7 @@ function App() {
         />
         <Route path="journal" element={<JournalPage journals={savedJournals} />} />
         <Route path="calendar" element={<CalendarPage events={savedEvents} />} />
-        <Route path="history" element={<HistoryPage messages={messages} />} />
+        <Route path="home" element={<HomePage emotion={emotion} savedJournals={savedJournals} savedEvents={savedEvents} />} />
         <Route path="resources" element={<ResourcesPage />} />
         <Route path="settings" element={<SettingsPage selectedVoiceId={selectedVoiceId} onVoiceChange={handleVoiceChange} />} />
       </Route>
