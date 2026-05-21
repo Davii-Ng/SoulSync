@@ -31,9 +31,12 @@ def test_ws_journal_saved_forwarded(client: TestClient):
             ws.send_text(json.dumps({"type": "text", "content": "save today's journal"}))
             data = ws.receive_json()
 
-            assert data["type"] == "response"
+            assert data["type"] == "text_ready"
             assert data["journal_saved"] is True
             assert data["content"] == "Journal saved! Your conversation has been saved for today."
+
+            audio_msg = ws.receive_json()
+            assert audio_msg["type"] in ("audio_ready", "audio_error")
 
 
 def test_ws_no_journal_saved_when_not_triggered(client: TestClient):
@@ -52,8 +55,11 @@ def test_ws_no_journal_saved_when_not_triggered(client: TestClient):
             ws.send_text(json.dumps({"type": "text", "content": "I had a good day"}))
             data = ws.receive_json()
 
-            assert data["type"] == "response"
+            assert data["type"] == "text_ready"
             assert "journal_saved" not in data
+
+            audio_msg = ws.receive_json()
+            assert audio_msg["type"] in ("audio_ready", "audio_error")
 
 
 def test_ws_journal_saved_with_audio(client: TestClient):
@@ -73,6 +79,10 @@ def test_ws_journal_saved_with_audio(client: TestClient):
             ws.send_text(json.dumps({"type": "text", "content": "that's it for today"}))
             data = ws.receive_json()
 
+            assert data["type"] == "text_ready"
             assert data["journal_saved"] is True
-            assert "audio_base64" in data
             assert data["emotion"] == "happy"
+
+            audio_msg = ws.receive_json()
+            assert audio_msg["type"] == "audio_ready"
+            assert "audio_base64" in audio_msg
