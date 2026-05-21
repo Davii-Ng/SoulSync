@@ -71,7 +71,7 @@ async def _extract_event(message: str) -> dict | None:
     try:
         response = await asyncio.to_thread(
             _gemini.models.generate_content,
-            model="gemini-2.0-flash",
+            model="gemini-3-flash-preview",
             contents=[{"role": "user", "parts": [{"text": prompt}]}],
             config=_gtypes.GenerateContentConfig(
                 response_mime_type="application/json",
@@ -98,7 +98,7 @@ async def _call_gemini(prompt: str, user_id: str) -> str:
     )
     response = await asyncio.to_thread(
         _gemini.models.generate_content,
-        model="gemini-2.0-flash",
+        model="gemini-3-flash-preview",
         contents=history,
         config=config,
     )
