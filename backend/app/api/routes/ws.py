@@ -16,7 +16,7 @@ _voice_prefs: dict[int, str] = {}
 
 
 async def _process_text(websocket: WebSocket, content: str, voice_id: str | None = None) -> None:
-    """Run ADK pipeline, send text immediately, then send audio when TTS finishes."""
+    """Run agent pipeline, send text immediately, then send audio when TTS finishes."""
     try:
         user_id = str(id(websocket))
         agent_result = await run_agent(content, user_id=user_id)
