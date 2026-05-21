@@ -188,12 +188,15 @@ async def _run_fast(message: str, user_id: str) -> dict:
     if len(history) > _MAX_FAST_HISTORY:
         history[:] = history[-_MAX_FAST_HISTORY:]
 
-    contents = [{"role": "user", "parts": [{"text": _COMPANION_SYSTEM}]}] + history
+    from google.genai import types as _gtypes
+
+    _config = _gtypes.GenerateContentConfig(system_instruction=_COMPANION_SYSTEM)
 
     response = await asyncio.to_thread(
         _gemini.models.generate_content,
         model="gemini-3-flash-preview",
-        contents=contents,
+        contents=history,
+        config=_config,
     )
     reply = (response.text or "").strip()
 
