@@ -20,7 +20,7 @@ export interface Voice {
 }
 
 export interface WsResponse {
-  type?: 'response' | 'error' | 'transcript' | 'voice_set'
+  type?: 'response' | 'text_ready' | 'audio_ready' | 'audio_error' | 'error' | 'transcript' | 'voice_set'
   content?: string
   emotion?: Emotion
   audio_base64?: string
