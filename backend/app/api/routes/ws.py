@@ -16,7 +16,7 @@ _voice_prefs: dict[int, str] = {}
 
 
 async def _process_text(websocket: WebSocket, content: str, voice_id: str | None = None) -> None:
-    """Run ADK pipeline, convert response to speech, and send back."""
+    """Run ADK pipeline, send text immediately, then send audio when TTS finishes."""
     try:
         user_id = str(id(websocket))
         agent_result = await run_agent(content, user_id=user_id)
@@ -34,30 +34,31 @@ async def _process_text(websocket: WebSocket, content: str, voice_id: str | None
         })
         return
 
-    audio_b64 = None
-    tts_error = None
-    try:
-        audio_bytes = await asyncio.to_thread(text_to_speech, reply, voice_id)
-        audio_b64 = base64.b64encode(audio_bytes).decode("utf-8")
-    except Exception as e:
-        logger.error(f"TTS failed: {e}")
-        tts_error = "Voice unavailable — ElevenLabs quota exceeded." if "quota" in str(e).lower() else "Voice temporarily unavailable."
-
-    response = {
-        "type": "response",
+    # Phase 1 — send text immediately so the frontend can display it now
+    text_response: dict = {
+        "type": "text_ready",
         "content": reply,
         "emotion": emotion,
     }
     if events:
-        response["events"] = events
+        text_response["events"] = events
     if journal_saved:
-        response["journal_saved"] = True
-    if tts_error:
-        response["tts_error"] = tts_error
-    if audio_b64:
-        response["audio_base64"] = audio_b64
+        text_response["journal_saved"] = True
+    await manager.send_json(websocket, text_response)
 
-    await manager.send_json(websocket, response)
+    # Phase 2 — run TTS and send audio when ready
+    try:
+        audio_bytes = await asyncio.to_thread(text_to_speech, reply, voice_id)
+        audio_b64 = base64.b64encode(audio_bytes).decode("utf-8")
+        await manager.send_json(websocket, {"type": "audio_ready", "audio_base64": audio_b64})
+    except Exception as e:
+        logger.error(f"TTS failed: {e}")
+        tts_error = (
+            "Voice unavailable — ElevenLabs quota exceeded."
+            if "quota" in str(e).lower()
+            else "Voice temporarily unavailable."
+        )
+        await manager.send_json(websocket, {"type": "audio_error", "tts_error": tts_error})
 
 
 @router.websocket("/ws")
