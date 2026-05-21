@@ -162,27 +162,32 @@ def test_ws_connects():
 
 def test_ws_text_message_response_shape():
     """Frontend sends { type: 'text', content: '...' },
-    expects back { type: 'response', content, emotion }."""
+    expects text_ready first (content + emotion), then an audio message."""
     with client.websocket_connect("/ws") as ws:
         ws.send_text(json.dumps({"type": "text", "content": "I'm stressed"}))
-        resp = ws.receive_json()
+        text_msg = ws.receive_json()
 
-        assert resp["type"] == "response"
-        assert "content" in resp
-        assert "emotion" in resp
-        assert isinstance(resp["content"], str)
-        assert isinstance(resp["emotion"], str)
+        assert text_msg["type"] == "text_ready"
+        assert "content" in text_msg
+        assert "emotion" in text_msg
+        assert isinstance(text_msg["content"], str)
+        assert isinstance(text_msg["emotion"], str)
+
+        audio_msg = ws.receive_json()
+        assert audio_msg["type"] in ("audio_ready", "audio_error")
 
 
 def test_ws_response_includes_audio():
-    """When TTS succeeds, response should include audio_base64."""
+    """When TTS succeeds, audio_ready message includes audio_base64."""
     with client.websocket_connect("/ws") as ws:
         ws.send_text(json.dumps({"type": "text", "content": "help me"}))
-        resp = ws.receive_json()
+        ws.receive_json()  # text_ready
+        audio_msg = ws.receive_json()  # audio_ready
 
-        assert "audio_base64" in resp
-        assert isinstance(resp["audio_base64"], str)
-        assert len(resp["audio_base64"]) > 0
+        assert audio_msg["type"] == "audio_ready"
+        assert "audio_base64" in audio_msg
+        assert isinstance(audio_msg["audio_base64"], str)
+        assert len(audio_msg["audio_base64"]) > 0
 
 
 def test_ws_empty_content_returns_error():
@@ -206,9 +211,10 @@ def test_ws_multiple_messages():
     with client.websocket_connect("/ws") as ws:
         for text in ["first message", "second message"]:
             ws.send_text(json.dumps({"type": "text", "content": text}))
-            resp = ws.receive_json()
-            assert resp["type"] == "response"
-            assert resp["content"]  # non-empty
+            text_msg = ws.receive_json()
+            assert text_msg["type"] == "text_ready"
+            assert text_msg["content"]  # non-empty
+            ws.receive_json()  # consume audio_ready / audio_error
 
 
 # ---------- Transcribe (POST /transcribe) ----------
@@ -265,6 +271,6 @@ def test_ws_audio_message_returns_transcript_and_response():
         assert transcript_msg["type"] == "transcript"
         assert isinstance(transcript_msg["content"], str)
 
-        assert response_msg["type"] == "response"
+        assert response_msg["type"] == "text_ready"
         assert "content" in response_msg
         assert "emotion" in response_msg
