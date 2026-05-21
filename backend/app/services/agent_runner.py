@@ -94,7 +94,6 @@ async def _call_gemini(prompt: str, user_id: str) -> str:
 
     config = _gtypes.GenerateContentConfig(
         system_instruction=_COMPANION_SYSTEM,
-        max_output_tokens=256,
     )
     response = await asyncio.to_thread(
         _gemini.models.generate_content,
