@@ -4,7 +4,7 @@ export type Emotion = 'calm' | 'stressed' | 'anxious' | 'happy' | 'sad' | 'angry
 
 export type OrbState = 'idle' | 'listening' | 'thinking' | 'speaking'
 
-export type AppTab = 'speak' | 'journal' | 'calendar' | 'history' | 'resources'
+export type AppTab = 'speak' | 'journal' | 'calendar' | 'home' | 'resources'
 
 export interface SavedEvent {
   id: string
@@ -20,7 +20,7 @@ export interface Voice {
 }
 
 export interface WsResponse {
-  type?: 'response' | 'error' | 'transcript' | 'voice_set'
+  type?: 'response' | 'text_ready' | 'audio_ready' | 'audio_error' | 'error' | 'transcript' | 'voice_set'
   content?: string
   emotion?: Emotion
   audio_base64?: string

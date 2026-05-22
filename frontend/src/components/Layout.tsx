@@ -15,7 +15,7 @@ const bottomItems = [
 
 // Secondary nav lives in the collapsible sidebar
 const sideItems = [
-  { to: "/history", icon: "history", label: "History" },
+  { to: "/home", icon: "home", label: "Home" },
   { to: "/resources", icon: "health_and_safety", label: "Resources" },
   { to: "/settings", icon: "settings", label: "Settings" },
 ];
@@ -75,7 +75,7 @@ export function Layout({ isConnected }: Props) {
 
       {/* ── Body: sidebar + main ── */}
       <div className="mt-[52px] block">
-        {/* Sidebar (desktop, retractable) — only History & Resources */}
+        {/* Sidebar (desktop, retractable) */}
         <aside
           className={`hidden md:flex flex-col fixed top-[52px] bottom-[60px] left-0 z-40 sidebar-panel sidebar-transition ${
             sidebarOpen ? "w-56" : "w-0 overflow-hidden border-r-0"

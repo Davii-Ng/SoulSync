@@ -1,30 +1,27 @@
-"""Runs user messages through the ADK agent pipeline and returns the final response."""
+"""Direct Gemini pipeline — no ADK overhead on the API path.
+
+Architecture: analyze_emotion (Python) → build prompt → one Gemini call.
+Calendar intent triggers a parallel Gemini extraction call so it adds zero latency.
+ADK agents (multi_tool_agent/) are unchanged and still work for `adk web`/`adk run`.
+"""
 
 import asyncio
-import re
+import json
 import logging
-import importlib
+import re
+from datetime import datetime
 from typing import Any
+
 from google import genai
-from google.adk.runners import Runner
-from google.adk.sessions import InMemorySessionService
-from google.genai import types
+from google.genai import types as _gtypes
 
-from multi_tool_agent.agent import root_agent
+from multi_tool_agent.core_companion import analyze_emotion, suggest_resource
+from multi_tool_agent.calendar_agent import save_event
+from multi_tool_agent.resource_agent import get_crisis_resources
 from app.core.config import GOOGLE_API_KEY
-
-# Note: core_companion_agent import removed — fast path calls Gemini directly
 
 logger = logging.getLogger(__name__)
 
-_session_service = InMemorySessionService()
-_runner = Runner(
-    agent=root_agent,
-    app_name="soulsync",
-    session_service=_session_service,
-)
-
-# Direct Gemini client for fast path (no ADK overhead)
 _gemini = genai.Client(api_key=GOOGLE_API_KEY)
 
 _COMPANION_SYSTEM = (
@@ -37,163 +34,72 @@ _COMPANION_SYSTEM = (
     "If the emotion is neutral or it's a greeting, just be friendly and warm."
 )
 
-# Bounded conversation history for fast path (per user)
+# Per-user conversation history for the main response call
 _fast_histories: dict[str, list[dict]] = {}
-_MAX_FAST_HISTORY = 16  # messages (8 user + 8 assistant)
+_MAX_FAST_HISTORY = 16  # 8 turns each side
 
-# Patterns that need the full orchestrator (calendar, crisis, journal-save)
-_ORCHESTRATOR_PATTERNS = re.compile(
-    r"(save.*journal|that'?s it for today|done for the day|save this conversation|wrap up|end session"
-    r"|appointment|deadline|schedule|meeting|event on|remind me"
-    r"|want to die|kill myself|end it all|end my life|hurt myself|suicide|self.harm"
-    r"|therapist|therapy|counselor|crisis|hotline|helpline|real help|real person"
-    r"|what'?s on my calendar|what do i have|upcoming events)",
+_CALENDAR_PATTERN = re.compile(
+    r"(appointment|deadline|meeting|event on|remind me|tomorrow|next\s+\w+day"
+    r"|monday|tuesday|wednesday|thursday|friday|saturday|sunday"
+    r"|\d{1,2}[\/\-]\d{1,2}|\d{1,2}\s+(am|pm)|at\s+\d{1,2}(:\d{2})?\s*(am|pm)?)",
+    re.IGNORECASE,
+)
+
+_SAVE_PATTERN = re.compile(
+    r"(save.*journal|save.*today|that'?s it for today|done for the day"
+    r"|save this conversation|wrap up|end session|save chat)",
     re.IGNORECASE,
 )
 
 
-def _needs_orchestrator(message: str) -> bool:
-    """Check if message needs full orchestrator routing."""
-    return bool(_ORCHESTRATOR_PATTERNS.search(message))
+async def _extract_event(message: str) -> dict | None:
+    """Focused Gemini call to extract structured event data from a message.
 
-# Cache of user_id -> session_id
-_sessions: dict[str, str] = {}
-
-# Track turn count per user to rotate sessions before context overflows
-_turn_counts: dict[str, int] = {}
-_MAX_TURNS = 8  # Rotate session after this many exchanges
-
-
-def _coerce_event_dict(raw_event: Any) -> dict[str, str] | None:
-    """Normalize different calendar event shapes into the frontend contract."""
-    if not isinstance(raw_event, dict):
-        return None
-
-    title = str(raw_event.get("title") or raw_event.get("name") or "").strip()
-    if not title:
-        return None
-
-    date_label = str(raw_event.get("dateLabel") or "").strip()
-    if not date_label:
-        date = str(raw_event.get("date") or "").strip()
-        time = str(raw_event.get("time") or "").strip()
-        date_label = f"{date} {time}".strip() or "Upcoming"
-
-    note = str(raw_event.get("note") or raw_event.get("description") or "").strip()
-    raw_id = raw_event.get("id")
-    normalized_id = str(raw_id).strip() if raw_id is not None else ""
-    if not normalized_id:
-        normalized_id = f"{title.lower()}|{date_label.lower()}"
-
-    normalized: dict[str, str] = {
-        "id": normalized_id,
-        "title": title,
-        "dateLabel": date_label,
-    }
-    if note:
-        normalized["note"] = note
-    return normalized
-
-
-def _extract_events(payload: Any) -> list[dict[str, str]]:
-    """Collect calendar events from nested ADK payloads."""
-    if payload is None:
-        return []
-
-    found: list[dict[str, str]] = []
-
-    if isinstance(payload, dict):
-        direct = _coerce_event_dict(payload)
-        if direct:
-            found.append(direct)
-
-        for key in ("event", "events", "saved_event", "calendar_event", "calendar_events"):
-            if key in payload:
-                found.extend(_extract_events(payload[key]))
-
-        for nested_key in ("result", "response", "output", "data"):
-            if nested_key in payload:
-                found.extend(_extract_events(payload[nested_key]))
-
-    elif isinstance(payload, list):
-        for item in payload:
-            found.extend(_extract_events(item))
-
-    return found
-
-
-def _dedupe_events(events: list[dict[str, str]]) -> list[dict[str, str]]:
-    deduped: list[dict[str, str]] = []
-    seen_ids: set[str] = set()
-
-    for event in events:
-        event_id = event.get("id", "").strip()
-        if not event_id or event_id in seen_ids:
-            continue
-        seen_ids.add(event_id)
-        deduped.append(event)
-
-    return deduped
-
-
-async def get_or_create_session(user_id: str = "default", app_name: str = "soulsync") -> str:
-    """Get existing session or create a new one for the user.
-
-    Rotates the session after _MAX_TURNS exchanges to prevent the ADK
-    context window from filling up (which causes truncated model responses).
+    Runs in parallel with the main response call so it adds no perceived latency.
+    Returns None if no clear event is found.
     """
-    key = f"{user_id}:{app_name}"
-    turns = _turn_counts.get(key, 0)
-    if key in _sessions and turns >= _MAX_TURNS:
-        logger.info(f"Rotating session for {key} after {turns} turns")
-        del _sessions[key]
-        _turn_counts[key] = 0
-
-    if key not in _sessions:
-        session = await _session_service.create_session(
-            app_name=app_name,
-            user_id=user_id,
-        )
-        _sessions[key] = session.id
-        _turn_counts[key] = 0
-
-    return _sessions[key]
-
-
-async def _run_fast(message: str, user_id: str) -> dict:
-    """Fast path: local emotion analysis + single direct Gemini call. No ADK."""
-    from multi_tool_agent.core_companion import analyze_emotion, suggest_resource
-
-    emotion_result = analyze_emotion(message)
-    emotion = emotion_result.get("emotion", "neutral")
-    severity = emotion_result.get("severity", "medium")
-    resource = suggest_resource(emotion, severity)
-
-    # Build prompt with emotion context
+    today = datetime.now().strftime("%Y-%m-%d")
+    weekday = datetime.now().strftime("%A")
     prompt = (
-        f"The user said: \"{message}\"\n\n"
-        f"Detected emotion: {emotion} (severity: {severity}).\n"
-        f"Secondary emotion: {emotion_result.get('secondary_emotion', 'none')}\n"
-        f"Suggested coping tip: {resource.get('suggestion', '')}\n"
-        f"Suggested follow-up: {resource.get('follow_up', '')}\n\n"
-        "Using the above context, respond to the user as a caring friend. "
-        "Weave in the suggestion or follow-up naturally if appropriate. "
-        "Match the emotional intensity. Keep it short and genuine (2-3 sentences)."
+        f"Today is {today} ({weekday}).\n"
+        f'Extract the event or appointment from: "{message}"\n\n'
+        "Return JSON only. If a clear event exists:\n"
+        '{"title": "short title", "date": "YYYY-MM-DD", "time": "HH:MM or empty string", "description": "optional or empty string"}\n'
+        "If no clear event:\n"
+        '{"title": ""}'
     )
+    try:
+        response = await asyncio.to_thread(
+            _gemini.models.generate_content,
+            model="gemini-3-flash-preview",
+            contents=[{"role": "user", "parts": [{"text": prompt}]}],
+            config=_gtypes.GenerateContentConfig(
+                response_mime_type="application/json",
+                max_output_tokens=150,
+            ),
+        )
+        data = json.loads(response.text or "{}")
+        return data if data.get("title") else None
+    except Exception as e:
+        logger.warning(f"Event extraction failed: {e}")
+        return None
 
-    # Manage bounded conversation history
+
+async def _call_gemini(prompt: str, user_id: str) -> str:
+    """Single conversational Gemini call with bounded per-user history."""
     history = _fast_histories.setdefault(user_id, [])
     history.append({"role": "user", "parts": [{"text": prompt}]})
-    # Trim to keep history bounded
     if len(history) > _MAX_FAST_HISTORY:
         history[:] = history[-_MAX_FAST_HISTORY:]
 
-    contents = [{"role": "user", "parts": [{"text": _COMPANION_SYSTEM}]}] + history
-
+    config = _gtypes.GenerateContentConfig(
+        system_instruction=_COMPANION_SYSTEM,
+    )
     response = await asyncio.to_thread(
         _gemini.models.generate_content,
         model="gemini-3-flash-preview",
-        contents=contents,
+        contents=history,
+        config=config,
     )
     reply = (response.text or "").strip()
 
@@ -201,90 +107,85 @@ async def _run_fast(message: str, user_id: str) -> dict:
     if len(history) > _MAX_FAST_HISTORY:
         history[:] = history[-_MAX_FAST_HISTORY:]
 
-    return {
-        "content": reply or "I'm here with you. Want to share a little more?",
-        "emotion": emotion,
-        "events": [],
-    }
-
-
-async def _run_orchestrator(message: str, user_id: str) -> dict:
-    """Full ADK orchestrator path for calendar, crisis, journal-save triggers."""
-    session_id = await get_or_create_session(user_id)
-
-    calendar_events_before: list[Any] = []
-    calendar_module = None
-    try:
-        calendar_module = importlib.import_module("multi_tool_agent.calendar_agent")
-        maybe_events = getattr(calendar_module, "events", [])
-        if isinstance(maybe_events, list):
-            calendar_events_before = list(maybe_events)
-    except Exception:
-        calendar_module = None
-
-    content = types.Content(
-        role="user",
-        parts=[types.Part.from_text(text=message)],
-    )
-
-    final_text = ""
-    emotion = "neutral"
-    captured_events: list[dict[str, str]] = []
-    journal_saved = False
-
-    async for event in _runner.run_async(
-        user_id=user_id,
-        session_id=session_id,
-        new_message=content,
-    ):
-        if event.content and event.content.parts:
-            for part in event.content.parts:
-                if part.text and part.text.strip():
-                    final_text = part.text
-
-        if event.actions and event.actions.state_delta:
-            if "emotion" in event.actions.state_delta:
-                emotion = event.actions.state_delta["emotion"]
-            captured_events.extend(_extract_events(event.actions.state_delta))
-
-        if event.content and event.content.parts:
-            for part in event.content.parts:
-                function_response = getattr(part, "function_response", None)
-                if function_response:
-                    captured_events.extend(_extract_events(function_response))
-                    resp_data = getattr(function_response, "response", None)
-                    if isinstance(resp_data, dict) and resp_data.get("journal_saved"):
-                        journal_saved = True
-
-    key = f"{user_id}:soulsync"
-    _turn_counts[key] = _turn_counts.get(key, 0) + 1
-
-    if emotion == "neutral" and final_text:
-        from multi_tool_agent.core_companion import analyze_emotion
-        result = analyze_emotion(message)
-        emotion = result.get("emotion", "neutral")
-
-    if calendar_module is not None:
-        maybe_events = getattr(calendar_module, "events", [])
-        if isinstance(maybe_events, list):
-            new_events = maybe_events[len(calendar_events_before):]
-            captured_events.extend(_extract_events(new_events))
-            captured_events.extend(_extract_events(maybe_events))
-
-    deduped_events = _dedupe_events(captured_events)
-
-    result: dict[str, Any] = {
-        "content": final_text,
-        "emotion": emotion,
-        "events": deduped_events,
-    }
-    if journal_saved:
-        result["journal_saved"] = True
-    return result
+    return reply or "I'm here with you. Want to share a little more?"
 
 
 async def run_agent(message: str, user_id: str = "default") -> dict:
-    """Route message to fast path or full orchestrator based on content."""
-    if _needs_orchestrator(message):
-        return await _run_orchestrator(message, user_id)
-    return await _run_fast(message, user_id)
+    """Single-pass pipeline: Python analysis + one Gemini call. No ADK overhead."""
+
+    # --- Instant Python analysis (no network, no LLM) ---
+    emotion_result = analyze_emotion(message)
+    emotion: str = emotion_result.get("emotion", "neutral")
+    severity: str = emotion_result.get("severity", "medium")
+    is_crisis: bool = emotion_result.get("crisis", False)
+    secondary: str = emotion_result.get("secondary_emotion") or "none"
+    resource: dict = suggest_resource(emotion, severity)
+
+    # Crisis resources are pure Python — include them in the prompt at no cost
+    crisis_text = ""
+    if is_crisis:
+        crisis_info = get_crisis_resources()
+        lines = [
+            f"{r['name']}: {r['contact']}"
+            for r in crisis_info.get("resources", [])[:2]
+        ]
+        crisis_text = "URGENT — share these with the user naturally: " + " | ".join(lines)
+
+    # --- Build rich prompt for a single Gemini call ---
+    prompt_parts = [
+        f'User said: "{message}"',
+        f"Emotion: {emotion} (severity: {severity}, secondary: {secondary})",
+        f"Coping tip to weave in naturally: {resource.get('suggestion', '')}",
+        f"Follow-up to ask naturally: {resource.get('follow_up', '')}",
+    ]
+    if crisis_text:
+        prompt_parts.append(crisis_text)
+    if _SAVE_PATTERN.search(message):
+        prompt_parts.append(
+            "The user wants to wrap up — acknowledge warmly and encourage them."
+        )
+    prompt_parts.append("Respond as a caring friend. 2-3 sentences max.")
+    prompt = "\n".join(prompt_parts)
+
+    # --- Detect intents ---
+    has_calendar = bool(_CALENDAR_PATTERN.search(message))
+    journal_saved = bool(_SAVE_PATTERN.search(message))
+
+    # --- Main response + optional event extraction run in parallel ---
+    if has_calendar:
+        reply, event_data = await asyncio.gather(
+            _call_gemini(prompt, user_id),
+            _extract_event(message),
+        )
+    else:
+        reply = await _call_gemini(prompt, user_id)
+        event_data = None
+
+    # --- Persist extracted event directly (pure Python) ---
+    events: list[dict[str, Any]] = []
+    if event_data:
+        try:
+            result = save_event(
+                title=event_data["title"],
+                date=event_data.get("date", datetime.now().strftime("%Y-%m-%d")),
+                time=event_data.get("time", ""),
+                description=event_data.get("description", ""),
+            )
+            if result.get("status") == "success":
+                saved = result["event"]
+                date_label = saved["date"]
+                if saved.get("time"):
+                    date_label += f" {saved['time']}"
+                events = [{
+                    "id": f"{saved['title'].lower()}|{date_label.lower()}",
+                    "title": saved["title"],
+                    "dateLabel": date_label,
+                    "note": saved.get("description", ""),
+                }]
+        except Exception as e:
+            logger.warning(f"save_event failed: {e}")
+
+    output: dict[str, Any] = {"content": reply, "emotion": emotion, "events": events}
+    if journal_saved:
+        output["journal_saved"] = True
+    return output

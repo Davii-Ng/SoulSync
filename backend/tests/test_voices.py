@@ -116,8 +116,11 @@ def test_ws_set_voice_used_in_tts(client: TestClient):
             ws.send_text(json.dumps({"type": "text", "content": "hello"}))
             data = ws.receive_json()
 
-            assert data["type"] == "response"
-            assert "audio_base64" in data
+            assert data["type"] == "text_ready"
+
+            audio_msg = ws.receive_json()
+            assert audio_msg["type"] == "audio_ready"
+            assert "audio_base64" in audio_msg
 
             # Verify text_to_speech was called with the stored voice_id
             mock_tts.assert_called_once()
@@ -145,7 +148,8 @@ def test_ws_per_message_voice_overrides_stored(client: TestClient):
 
             # Send message with per-message override
             ws.send_text(json.dumps({"type": "text", "content": "hi", "voice_id": "override_voice"}))
-            ws.receive_json()
+            ws.receive_json()   # consume text_ready
+            ws.receive_json()   # consume audio_ready
 
             # TTS should use the per-message voice_id
             call_args = mock_tts.call_args

@@ -3,7 +3,7 @@ import { Layout } from './components/Layout'
 import { SpeakingPage } from './pages/speaking'
 import { JournalPage } from './pages/JournalPage'
 import { CalendarPage } from './pages/CalendarPage'
-import { HistoryPage } from './pages/HistoryPage'
+import { HomePage } from './pages/HomePage'
 import { ResourcesPage } from './pages/ResourcesPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { useWebSocket } from './hooks/useWebSocket'
@@ -110,7 +110,51 @@ function App() {
         return
       }
 
-      if (data.content) {
+      // Phase 1: text arrives — display immediately, keep thinking state for audio
+      if (data.type === 'text_ready' && data.content) {
+        const aiMsg: Message = {
+          id: Date.now().toString(),
+          role: 'assistant',
+          content: data.content,
+          timestamp: Date.now(),
+          emotion: data.emotion,
+        }
+        setMessages((prev) => [...prev, aiMsg])
+        if (data.emotion) setEmotion(data.emotion)
+        if (data.events && data.events.length > 0) {
+          setSavedEvents((prev) => mergeEvents(prev, data.events ?? []))
+        }
+        if (data.journal_saved) snapshotJournal()
+        setOrbState('thinking')
+        return
+      }
+
+      // Phase 2a: audio arrives — play it
+      if (data.type === 'audio_ready' && data.audio_base64) {
+        setOrbState('speaking')
+        const audio = new Audio(`data:audio/mpeg;base64,${data.audio_base64}`)
+        audio.onended = () => setOrbState('idle')
+        audio.play().catch(() => setOrbState('idle'))
+        return
+      }
+
+      // Phase 2b: TTS failed — go idle (text was already shown)
+      if (data.type === 'audio_error') {
+        if (data.tts_error) {
+          const note: Message = {
+            id: (Date.now() + 2).toString(),
+            role: 'assistant',
+            content: data.tts_error,
+            timestamp: Date.now(),
+          }
+          setMessages((prev) => [...prev, note])
+        }
+        setOrbState('idle')
+        return
+      }
+
+      // Legacy fallback: handle old 'response' type
+      if (data.type === 'response' && data.content) {
         const aiMsg: Message = {
           id: Date.now().toString(),
           role: 'assistant',
@@ -120,36 +164,28 @@ function App() {
           audio_base64: data.audio_base64,
         }
         setMessages((prev) => [...prev, aiMsg])
-      }
-
-      if (data.emotion) {
-        setEmotion(data.emotion)
-      }
-
-      if (data.events && data.events.length > 0) {
-        setSavedEvents((prev) => mergeEvents(prev, data.events ?? []))
-      }
-
-      // Backend fallback: re-snapshot if agent also flagged journal_saved
-      if (data.journal_saved) snapshotJournal()
-
-      if (data.tts_error) {
-        const note: Message = {
-          id: (Date.now() + 2).toString(),
-          role: 'assistant',
-          content: data.tts_error,
-          timestamp: Date.now(),
+        if (data.emotion) setEmotion(data.emotion)
+        if (data.events && data.events.length > 0) {
+          setSavedEvents((prev) => mergeEvents(prev, data.events ?? []))
         }
-        setMessages((prev) => [...prev, note])
-      }
-
-      if (data.audio_base64) {
-        setOrbState('speaking')
-        const audio = new Audio(`data:audio/mpeg;base64,${data.audio_base64}`)
-        audio.onended = () => setOrbState('idle')
-        audio.play().catch(() => setOrbState('idle'))
-      } else {
-        setOrbState('idle')
+        if (data.journal_saved) snapshotJournal()
+        if (data.tts_error) {
+          const note: Message = {
+            id: (Date.now() + 2).toString(),
+            role: 'assistant',
+            content: data.tts_error,
+            timestamp: Date.now(),
+          }
+          setMessages((prev) => [...prev, note])
+        }
+        if (data.audio_base64) {
+          setOrbState('speaking')
+          const audio = new Audio(`data:audio/mpeg;base64,${data.audio_base64}`)
+          audio.onended = () => setOrbState('idle')
+          audio.play().catch(() => setOrbState('idle'))
+        } else {
+          setOrbState('idle')
+        }
       }
     }
 
@@ -272,7 +308,7 @@ function App() {
         />
         <Route path="journal" element={<JournalPage journals={savedJournals} />} />
         <Route path="calendar" element={<CalendarPage events={savedEvents} />} />
-        <Route path="history" element={<HistoryPage messages={messages} />} />
+        <Route path="home" element={<HomePage emotion={emotion} savedJournals={savedJournals} savedEvents={savedEvents} />} />
         <Route path="resources" element={<ResourcesPage />} />
         <Route path="settings" element={<SettingsPage selectedVoiceId={selectedVoiceId} onVoiceChange={handleVoiceChange} />} />
       </Route>

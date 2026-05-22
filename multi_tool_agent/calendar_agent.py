@@ -84,6 +84,7 @@ def get_events(date: str = "") -> dict:
     return {"status": "success", "message": f"Found {len(filtered)} event(s).", "events": filtered}
 
 
+
 def _build_calendar_instruction() -> str:
     today = datetime.now().strftime("%Y-%m-%d")
     weekday = datetime.now().strftime("%A")
