@@ -89,12 +89,15 @@ We use **Google ADK** to intelligently route user requests. The `agent.py` file 
 - **`resource_agent.py`**: A fallback agent that provides 988 hotlines or parses local therapy searches.
 
 ### 2. WebSocket Gateway (`backend/app/api/routes/ws.py`)
-All real-time communication flows through a single WebSocket connection. 
+All real-time communication flows through a single WebSocket connection.
 - **Inbound:** Frontend sends JSON like `{ "type": "text", "content": "I feel burned out" }`.
-- **Processing:** The backend passes this to the ADK orchestrator. Upon resolving the LLM response, it requests ElevenLabs to synthesize the audio.
-- **Outbound:** It streams back `{ "type": "response", "content": "...", "audio_base64": "...", "emotion": "stressed" }`.
+- **Processing:** The WebSocket flow returns text first, then performs audio synthesis as a follow-up step. Separately, the API path uses the direct Gemini pipeline rather than routing through the ADK orchestrator.
+- **Outbound:** The server sends staged events, not a single combined response payload:
+  - `{ "type": "text_ready", "content": "...", "emotion": "stressed" }`
+  - `{ "type": "audio_ready", "audio_base64": "..." }`
+  - or `{ "type": "audio_error", "error": "..." }` if audio generation fails
 
-*Note: If you add new event types (e.g., sending image analysis), update both `ws.py` and the frontend `useWebSocket.ts` hook.*
+*Note: If you add new event types (e.g., sending image analysis), update both `ws.py` and the frontend `useWebSocket.ts` hook so the client handles the current event sequence correctly.*
 
 ### 3. Frontend Audio & Logic (`frontend/src/`)
 - **Voice Interfacing**: Look at `hooks/useVoiceInput.ts`. It wraps the native browser Web Speech API for dictation.
