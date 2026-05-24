@@ -46,11 +46,19 @@ async def _process_text(websocket: WebSocket, content: str, voice_id: str | None
         text_response["journal_saved"] = True
     await manager.send_json(websocket, text_response)
 
+    async def _send_tts_message(payload: dict) -> bool:
+        try:
+            await manager.send_json(websocket, payload)
+            return True
+        except (WebSocketDisconnect, RuntimeError) as e:
+            logger.info(f"Client disconnected before TTS delivery: {e}")
+            return False
+
     # Phase 2 — run TTS and send audio when ready
     try:
         audio_bytes = await asyncio.to_thread(text_to_speech, reply, voice_id)
         audio_b64 = base64.b64encode(audio_bytes).decode("utf-8")
-        await manager.send_json(websocket, {"type": "audio_ready", "audio_base64": audio_b64})
+        await _send_tts_message({"type": "audio_ready", "audio_base64": audio_b64})
     except Exception as e:
         logger.error(f"TTS failed: {e}")
         tts_error = (
@@ -58,7 +66,7 @@ async def _process_text(websocket: WebSocket, content: str, voice_id: str | None
             if "quota" in str(e).lower()
             else "Voice temporarily unavailable."
         )
-        await manager.send_json(websocket, {"type": "audio_error", "tts_error": tts_error})
+        await _send_tts_message({"type": "audio_error", "tts_error": tts_error})
 
 
 @router.websocket("/ws")

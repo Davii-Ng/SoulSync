@@ -4,9 +4,11 @@ import json
 from unittest.mock import AsyncMock, patch
 
 import pytest
+from fastapi import WebSocketDisconnect
 from fastapi.testclient import TestClient
 
 from main import app
+from app.api.routes.ws import _process_text
 
 
 @pytest.fixture
@@ -197,3 +199,45 @@ def test_ws_sends_audio_error_when_tts_fails(client: TestClient):
             second = ws.receive_json()
             assert second["type"] == "audio_error"
             assert "tts_error" in second
+
+
+@pytest.mark.asyncio
+async def test_process_text_ignores_disconnect_on_audio_ready_send():
+    """Disconnect/send failures while sending audio_ready should not bubble up."""
+    mock_agent_result = {
+        "content": "Take a breath.",
+        "emotion": "calm",
+        "events": [],
+    }
+    mock_websocket = object()
+
+    send_mock = AsyncMock(side_effect=[None, WebSocketDisconnect()])
+    with (
+        patch("app.api.routes.ws.run_agent", new=AsyncMock(return_value=mock_agent_result)),
+        patch("app.api.routes.ws.text_to_speech", return_value=b"fake-audio-bytes"),
+        patch("app.api.routes.ws.manager.send_json", new=send_mock),
+    ):
+        await _process_text(mock_websocket, "hello")
+
+    assert send_mock.await_count == 2
+
+
+@pytest.mark.asyncio
+async def test_process_text_ignores_disconnect_on_audio_error_send():
+    """Disconnect/send failures while sending audio_error should not bubble up."""
+    mock_agent_result = {
+        "content": "Take a breath.",
+        "emotion": "calm",
+        "events": [],
+    }
+    mock_websocket = object()
+
+    send_mock = AsyncMock(side_effect=[None, RuntimeError("Cannot call send once close message has been sent.")])
+    with (
+        patch("app.api.routes.ws.run_agent", new=AsyncMock(return_value=mock_agent_result)),
+        patch("app.api.routes.ws.text_to_speech", side_effect=Exception("tts failed")),
+        patch("app.api.routes.ws.manager.send_json", new=send_mock),
+    ):
+        await _process_text(mock_websocket, "hello")
+
+    assert send_mock.await_count == 2
