@@ -16,9 +16,9 @@ from google import genai
 from google.genai import types as _gtypes
 
 from multi_tool_agent.core_companion import analyze_emotion, suggest_resource
-from multi_tool_agent.calendar_agent import save_event
 from multi_tool_agent.resource_agent import get_crisis_resources
 from app.core.config import GOOGLE_API_KEY
+from app.services.calendar_store import save_event
 
 logger = logging.getLogger(__name__)
 
