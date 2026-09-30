@@ -1,95 +1,76 @@
+<div align="center">
+
+<img src="assets/logo.png" alt="SoulSync" width="280" />
+
 # SoulSync
 
-**An AI-powered voice journal that actually listens.**
+### A voice-first AI journal that listens, understands, and answers like a friend.
 
-Journaling is a powerful tool for mental health, but writing can feel like a chore when you're overwhelmed. Therapy is amazing, but it's not available at 2 AM on a Tuesday. 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-soul--sync--rose.vercel.app-2A6F8E?style=for-the-badge)](https://soul-sync-rose.vercel.app/)
+[![Devpost](https://img.shields.io/badge/Devpost-HackUSF_2026-003E54?style=for-the-badge)](https://devpost.com/software/soulsync-plkwy8)
 
-We built **SoulSync** to bridge that gap. It's a voice-first companion that lets you vent, reflect, and process your emotions in real-time. You speak, it listens, figures out how you're feeling, and responds just like a supportive friend—while automatically saving your thoughts to a private journal. 
+![React](https://img.shields.io/badge/React_19-20232A?logo=react&logoColor=61DAFB)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
+![Gemini](https://img.shields.io/badge/Gemini-4285F4?logo=googlegemini&logoColor=white)
+![Google ADK](https://img.shields.io/badge/Google_ADK-34A853?logo=google&logoColor=white)
+![ElevenLabs](https://img.shields.io/badge/ElevenLabs-000000?logo=elevenlabs&logoColor=white)
 
-> Built with love for the USF Hackathon Tampa 2026.
+[Overview](#-overview) · [Features](#-features) · [Quick start](#-quick-start) · [Architecture](#-architecture) · [Next steps](#-next-steps) · [Team](#-team)
 
-## How it works
-
-SoulSync is built around a real-time conversation loop. You just talk to it, and the system handles the rest.
-
-* **🗣️ Voice-first input:** Your browser captures your words as you speak.
-* **🧠 Emotion detection:** Gemini analyzes the transcript (noting mixed feelings, severity, and even crisis phrases).
-* **🤝 Empathetic response:** Specialized ADK agents craft a response tailored to your mood.
-* **🎧 Natural audio:** ElevenLabs voices read the response back to you.
-* **📓 Auto-journaling:** Mention you want to "save the journal", and it snapshots your session.
-
-### The Flow
-
-```text
-[You Speak] ---> (Frontend/React) ---> WS msg ---> (FastAPI/Backend)
-                                                         |
-                                                  [Google ADK Orchestrator]
-                                                         |
- ┌───────────────┬─────────────────┬─────────────────────┼─────────────────┐
-(Core Companion) (Journal Agent) (Calendar Agent) (Resource Agent)      (Voice TTS)
- Emotion/Coping  Saves/Prompts   Extracts Events   Crisis/Therapy      ElevenLabs
-```
-
-## Features
-
-- **8-Axis Emotion Tracking**: Recognizes calm, stressed, anxious, happy, sad, angry, neutral, and crisis states. It's negation-aware (saying "I am not angry" won't flag as angry).
-- **Proactive Wellness**: Detects when you're stressed and highlights built-in grounding or breathing exercises.
-- **Smart Calendar Extraction**: Casually mention "I have a meeting tomorrow at 2pm" and it automatically pulls into your events board.
-- **Immediate Crisis Support**: Hardcoded triggers route immediately to 988 and therapy resources if self-harm or deep crisis is detected.
-- **Multi-Voice Personalization**: Choose between different ElevenLabs voices directly in the UI.
+</div>
 
 ---
 
-## Tech Stack
+## 💙 Overview
 
-- 🖥️ Frontend: React + Vite + TypeScript
-- ⚡ Backend: Python + FastAPI + WebSocket
-- 🤖 Agents: Google ADK multi-agent
-- 🧠 LLM: Gemini API (`gemini-3-flash-preview`)
-- 🔊 Voice: ElevenLabs TTS + Web Speech API
-- 🧳 Storage: In-memory + localStorage
+We are more connected to screens than ever, and more isolated from real people. Most journaling apps are a blank page waiting for you to do the work.
 
----
+**SoulSync flips that.** You talk. It listens to what you say, reads the emotion in it, and replies out loud like a caring friend. It saves the day to your journal, catches the appointments you mention, and steps in with crisis resources if you need them.
 
-## Quick Start
+| You do | SoulSync does |
+| --- | --- |
+| 🎙️ Speak or type | Transcribes it (Web Speech API) |
+| 💭 Share how you feel | Detects emotion and severity, with negation and mixed feelings handled |
+| 🤝 Keep talking | Replies in 2–3 warm sentences, then speaks them with ElevenLabs |
+| 📅 Mention "dentist Friday at 3" | Pulls out the event and puts it on your calendar |
+| 📓 Say "that's it for today" | Saves the conversation as a journal entry |
+| 🆘 Say something alarming | Surfaces 988 and other crisis resources right away |
 
-### 1) Environment
+> Built at **HackUSF 2026** for the Oracle (human-centered AI), Google ADK multi-agent, ElevenLabs, and Gemini API tracks.
 
-Create `.env` in the project root:
+## ✨ Features
 
-```env
-GOOGLE_API_KEY=your_gemini_api_key
-ELEVENLABS_API_KEY=your_elevenlabs_api_key
-```
+- **Voice-first loop.** Orb to speech to reply to voice, with a typed fallback.
+- **Emotion engine.** Eight labels (`calm` `stressed` `anxious` `happy` `sad` `angry` `neutral` `crisis`). Crisis phrases are checked first. Negation-aware, so "I'm not angry" stays neutral. Returns a primary and a secondary emotion.
+- **Fast two-phase replies.** Text appears as soon as Gemini answers. Audio streams in afterwards, so you never wait on TTS to read the reply.
+- **Safety net.** Crisis detection adds hotline details to the prompt at zero extra latency.
+- **Journal and calendar.** Conversations snapshot into daily entries. Events are extracted in parallel with the reply.
+- **Choose your voice.** Browse and preview ElevenLabs voices in Settings.
+- **Wellness toolkit.** Resources page with grounding and breathing exercises.
 
-Optional:
+## 🚀 Quick start
 
-```env
-GOOGLE_CLOUD_PROJECT=your_gcp_project_id
-ELEVENLABS_VOICE_ID=JBFqnCBsd6RMkjVDRZzb
-ELEVENLABS_MODEL_ID=eleven_multilingual_v2
-CORS_ORIGINS=http://localhost:5173
-APP_ENV=development
-LOG_LEVEL=INFO
-REQUEST_TIMEOUT_SECONDS=20
-```
+**You need:** Python 3.11+, Node.js 18+, a [Gemini API key](https://aistudio.google.com/apikey), and an [ElevenLabs API key](https://elevenlabs.io).
 
-Frontend (optional, `frontend/.env`):
-
-```env
-VITE_WS_URL=ws://localhost:8000/ws
-VITE_API_URL=http://localhost:8000
-```
-
-### 2) Run Backend
+**1. Clone and add your keys**
 
 ```bash
-pip install -r backend/requirements.txt
-cd backend
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+git clone https://github.com/Davii-Ng/SoulSync.git
+cd SoulSync
+cp .env.example .env        # then fill in GOOGLE_API_KEY and ELEVENLABS_API_KEY
 ```
 
-### 3) Run Frontend
+**2. Start the backend** → http://localhost:8000
+
+```bash
+python -m venv venv && source venv/bin/activate     # Windows: venv\Scripts\activate
+pip install -r backend/requirements.txt
+cd backend && uvicorn main:app --reload --port 8000
+```
+
+**3. Start the frontend** → http://localhost:5173
 
 ```bash
 cd frontend
@@ -97,44 +78,108 @@ npm install
 npm run dev
 ```
 
----
+Open the app, click the orb, and say hello. Chrome or Edge is best for the Web Speech API.
 
-## API (Quick View)
+<details>
+<summary><b>Environment variables</b></summary>
 
-| Method | Path | Purpose |
-|--------|------|---------|
-| GET | `/` | Health check |
-| POST | `/chat` | Text → AI response |
-| POST | `/speech` | Text → audio |
-| GET | `/voices` | List voices |
-| POST | `/voices/preview` | Voice preview |
-| POST | `/transcribe` | Audio → text |
-| WS | `/ws` | Real-time chat + audio + emotion |
+| Variable | Required | Purpose |
+| --- | :---: | --- |
+| `GOOGLE_API_KEY` | ✅ | Gemini API |
+| `ELEVENLABS_API_KEY` | ✅ | Text-to-speech and speech-to-text |
+| `ELEVENLABS_VOICE_ID` | | Default voice (a sensible default is set) |
+| `ELEVENLABS_MODEL_ID` | | Defaults to `eleven_multilingual_v2` |
+| `GOOGLE_CLOUD_PROJECT` | | Only for ADK features that need it |
+| `CORS_ORIGINS` | | Defaults to `http://localhost:5173` |
+| `VITE_WS_URL` | | Set in `frontend/.env` to point at a non-local backend, e.g. `ws://localhost:8000/ws` |
 
----
+The backend exits at startup if `GOOGLE_API_KEY` or `ELEVENLABS_API_KEY` is missing. Never commit `.env`.
 
-## Tests
+</details>
+
+<details>
+<summary><b>Explore the multi-agent tree, run tests, troubleshoot</b></summary>
 
 ```bash
-pip install pytest pytest-asyncio httpx
-pytest -q
+adk web multi_tool_agent      # browser UI for the Google ADK agents at localhost:8000
+adk run multi_tool_agent      # terminal chat with the same agents
+cd backend && pytest -q       # backend tests
 ```
 
----
+| Symptom | Fix |
+| --- | --- |
+| Backend exits on start | Check `.env` has both API keys |
+| Orb does nothing | Use Chrome or Edge and allow microphone access |
+| "Not connected to server" | Start the backend, then check `VITE_WS_URL` |
+| "Voice unavailable" message | ElevenLabs quota is used up. Text replies still work. |
 
-## Contributing
+</details>
 
-We keep contributor docs separate to keep this README lightweight.
+## 🏗️ Architecture
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for setup details, repo structure, and workflow.
+SoulSync is a React single-page app talking to a FastAPI backend over one WebSocket. The backend calls Gemini for the reply and ElevenLabs for the voice.
 
----
+<p align="center">
+  <img src="docs/diagrams/system-architecture.png" alt="SoulSync system architecture: browser, FastAPI backend, and external AI services" width="100%" />
+</p>
 
-## Hackathon Tracks
+### What happens to one message
 
-| Track | How We Use It |
-|-------|--------------|
-| 🧑‍⚕️ Oracle | Human-centered AI — empathetic, proactive support |
-| 🧭 Google ADK | Multi-agent orchestration |
-| 🗣️ ElevenLabs | Natural voice I/O |
-| ✨ Gemini API | Emotion analysis + conversation |
+The backend runs emotion analysis in plain Python (no LLM), then makes **one** Gemini call per message. It sends the text to the UI first and the audio second, so the reply feels instant.
+
+<p align="center">
+  <img src="docs/diagrams/message-flow.png" alt="Sequence diagram of one message: text_ready is sent before audio_ready" width="100%" />
+</p>
+
+**WebSocket protocol** (`ws://<host>/ws`)
+
+| Direction | Message | Meaning |
+| --- | --- | --- |
+| Client → Server | `{ "type": "text", "content": "…" }` | User message |
+| Client → Server | `{ "type": "audio", "content": "<base64>" }` | Audio to transcribe, then answer |
+| Client → Server | `{ "type": "set_voice", "voice_id": "…" }` | Choose a voice for this connection |
+| Server → Client | `{ "type": "text_ready", "content", "emotion", "events?", "journal_saved?" }` | Reply text, shown immediately |
+| Server → Client | `{ "type": "audio_ready", "audio_base64" }` | Reply voice, plays when it arrives |
+| Server → Client | `{ "type": "audio_error", "tts_error" }` | Voice failed, text is already on screen |
+| Server → Client | `{ "type": "transcript" \| "voice_set" \| "error" }` | Status events |
+
+REST helpers: `GET /` (health), `POST /chat`, `POST /speech`, `GET /voices`, `POST /voices/preview`, `POST /transcribe`.
+
+### The agent team (Google ADK)
+
+The `multi_tool_agent/` package defines a `root_agent` that delegates to four specialist sub-agents. Their tool functions are the building blocks of the product. The live API path imports them directly and skips ADK orchestration to stay at one LLM call per message. Use `adk web` to see the full multi-agent tree.
+
+<p align="center">
+  <img src="docs/diagrams/agent-topology.png" alt="Google ADK agent topology: root_agent and four sub-agents with their tools" width="100%" />
+</p>
+
+### Repository map
+
+```text
+SoulSync/
+├── frontend/            React + Vite + TypeScript app (pages, hooks, components)
+├── backend/             FastAPI app: WebSocket gateway, REST routes, agent_runner pipeline
+├── multi_tool_agent/    Google ADK agents and their tools (emotion, journal, calendar, resources, voice)
+├── docs/diagrams/       Editable .drawio sources and exported PNGs used above
+└── assets/              Logos and brand images
+```
+
+Each of `frontend/`, `backend/`, and `multi_tool_agent/` has its own `CLAUDE.md` with conventions for contributors and AI coding agents.
+
+## 🧭 Next steps
+
+> Draft from our Devpost. To be finalized.
+
+- **Persistence.** Move from in-memory storage to a real database.
+- **Mood analytics.** Trend charts across days and weeks.
+- **Context-aware agents.** Spot patterns in behavior over time.
+- **Mobile.** Native iOS and Android apps with push reminders.
+- **Therapist sharing.** Let users share journal summaries and mood data on their terms.
+
+## 👥 Team
+
+Built in a weekend at HackUSF 2026 by **Ngoc Viet Nguyen**, **Minh Duong Nguyen**, and **Gia Huy Chau**.
+
+Want to help? Read [CONTRIBUTING.md](CONTRIBUTING.md). Licensed under [LICENSE](LICENSE).
+
+<div align="center"><sub>SoulSync is a wellness companion, not a medical service. If you are in crisis, call or text <b>988</b> (US).</sub></div>

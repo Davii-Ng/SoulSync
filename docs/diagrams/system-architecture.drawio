@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="drawio" version="26.0.0">
+  <diagram name="System Architecture">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="800" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="browser" value="BROWSER  ·  React 19 · Vite · TypeScript  (Vercel)" style="swimlane;startSize=30;html=1;fillColor=#E6F2F8;strokeColor=#2A6F8E;fontColor=#1B4B61;fontStyle=1;fontSize=13;rounded=1;arcSize=6;swimlaneFillColor=#F4FAFD;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="1080" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="b_ws" value="&lt;b&gt;useWebSocket&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;one socket, two-phase replies&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#CFE6F2;strokeColor=#2A6F8E;fontColor=#1B4B61;" vertex="1" parent="browser">
+          <mxGeometry x="20" y="50" width="180" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="b_orb" value="&lt;b&gt;Voice Orb&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;Web Speech API (speech-to-text)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#CFE6F2;strokeColor=#2A6F8E;fontColor=#1B4B61;" vertex="1" parent="browser">
+          <mxGeometry x="230" y="50" width="180" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="b_chat" value="&lt;b&gt;Chat + Emotion Badge&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;text shows first, audio follows&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#CFE6F2;strokeColor=#2A6F8E;fontColor=#1B4B61;" vertex="1" parent="browser">
+          <mxGeometry x="440" y="50" width="180" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="b_pages" value="&lt;b&gt;Journal · Calendar&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;Resources · Settings · Home&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#CFE6F2;strokeColor=#2A6F8E;fontColor=#1B4B61;" vertex="1" parent="browser">
+          <mxGeometry x="650" y="50" width="180" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="b_store" value="&lt;b&gt;localStorage&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;journals · voice choice&lt;/font&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#5C4A00;" vertex="1" parent="browser">
+          <mxGeometry x="860" y="45" width="180" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="backend" value="BACKEND  ·  FastAPI · Uvicorn · WebSocket  (Railway / Render)" style="swimlane;startSize=30;html=1;fillColor=#E2F0E0;strokeColor=#5E9457;fontColor=#2F5A2A;fontStyle=1;fontSize=13;rounded=1;arcSize=6;swimlaneFillColor=#F3F9F2;" vertex="1" parent="1">
+          <mxGeometry x="40" y="270" width="1080" height="210" as="geometry" />
+        </mxCell>
+        <mxCell id="s_ws" value="&lt;b&gt;WS /ws gateway&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;ws.py · text / audio / set_voice&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#CDE5CA;strokeColor=#5E9457;fontColor=#2F5A2A;" vertex="1" parent="backend">
+          <mxGeometry x="20" y="50" width="180" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="s_run" value="&lt;b&gt;run_agent()&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;emotion → prompt → 1 Gemini call&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#CDE5CA;strokeColor=#5E9457;fontColor=#2F5A2A;" vertex="1" parent="backend">
+          <mxGeometry x="250" y="50" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="s_evt" value="&lt;b&gt;Event extractor&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;parallel, only on calendar intent&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#CDE5CA;strokeColor=#5E9457;fontColor=#2F5A2A;" vertex="1" parent="backend">
+          <mxGeometry x="490" y="50" width="190" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="s_mem" value="&lt;b&gt;In-memory store&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;events · chat history&lt;/font&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#5C4A00;" vertex="1" parent="backend">
+          <mxGeometry x="720" y="45" width="170" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="s_voice" value="&lt;b&gt;voice_agent.py&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;text_to_speech · speech_to_text&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#CDE5CA;strokeColor=#5E9457;fontColor=#2F5A2A;" vertex="1" parent="backend">
+          <mxGeometry x="20" y="140" width="180" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="s_rest" value="&lt;b&gt;REST helpers&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;/chat · /speech · /voices · /transcribe&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#CDE5CA;strokeColor=#5E9457;fontColor=#2F5A2A;dashed=1;" vertex="1" parent="backend">
+          <mxGeometry x="720" y="140" width="250" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ext" value="EXTERNAL AI SERVICES" style="swimlane;startSize=30;html=1;fillColor=#F2F2F2;strokeColor=#808080;fontColor=#404040;fontStyle=1;fontSize=13;rounded=1;arcSize=6;dashed=1;align=left;spacingLeft=20;swimlaneFillColor=#FAFAFA;" vertex="1" parent="1">
+          <mxGeometry x="40" y="590" width="1080" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="x_el" value="&lt;b&gt;ElevenLabs&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;TTS voices · Scribe STT&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;fontColor=#3F2B4A;" vertex="1" parent="ext">
+          <mxGeometry x="20" y="50" width="180" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="x_gem" value="&lt;b&gt;Gemini API&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;gemini-3-flash-preview&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D4E2FA;strokeColor=#5B7FC4;fontColor=#1E3A6B;" vertex="1" parent="ext">
+          <mxGeometry x="350" y="50" width="230" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e1" value="WebSocket" style="edgeStyle=orthogonalEdgeStyle;rounded=1;jettySize=auto;html=1;startArrow=block;startFill=1;endArrow=block;endFill=1;endSize=8;startSize=8;strokeWidth=2;strokeColor=#2A6F8E;fontSize=11;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="b_ws" target="s_ws">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;jettySize=auto;html=1;endArrow=block;endSize=8;strokeColor=#2A6F8E;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="b_orb" target="b_ws">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;jettySize=auto;html=1;endArrow=block;endSize=8;strokeColor=#5E9457;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="s_ws" target="s_run">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;jettySize=auto;html=1;endArrow=block;endSize=8;strokeColor=#5E9457;dashed=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="s_run" target="s_evt">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;jettySize=auto;html=1;endArrow=block;endSize=8;strokeColor=#5E9457;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="s_evt" target="s_mem">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;jettySize=auto;html=1;endArrow=block;endSize=8;strokeColor=#9673A6;fontSize=11;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="s_ws" target="s_voice">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" value="TTS / STT" style="edgeStyle=orthogonalEdgeStyle;rounded=1;jettySize=auto;html=1;startArrow=block;startFill=1;startSize=8;endArrow=block;endSize=8;strokeColor=#9673A6;fontSize=11;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="s_voice" target="x_el">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" value="1 call per message" style="edgeStyle=orthogonalEdgeStyle;rounded=1;jettySize=auto;html=1;endArrow=block;endSize=8;strokeColor=#5B7FC4;fontSize=11;exitX=0.6;exitY=1;exitDx=0;exitDy=0;entryX=0.087;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="s_run" target="x_gem">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" value="parallel call" style="edgeStyle=orthogonalEdgeStyle;rounded=1;jettySize=auto;html=1;endArrow=block;endSize=8;strokeColor=#5B7FC4;dashed=1;fontSize=11;exitX=0.368;exitY=1;exitDx=0;exitDy=0;entryX=0.913;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="s_evt" target="x_gem">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="lg1" value="solid = every message" style="text;html=1;align=left;verticalAlign=middle;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="800" y="630" width="280" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lg2" value="dashed = only when needed" style="text;html=1;align=left;verticalAlign=middle;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="800" y="660" width="280" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lg1l" value="" style="endArrow=block;html=1;strokeColor=#666666;endSize=6;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="760" y="640" as="sourcePoint" />
+            <mxPoint x="790" y="640" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lg2l" value="" style="endArrow=block;html=1;strokeColor=#666666;dashed=1;endSize=6;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="760" y="670" as="sourcePoint" />
+            <mxPoint x="790" y="670" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

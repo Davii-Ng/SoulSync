@@ -4,8 +4,9 @@ import sys
 from pathlib import Path
 from dotenv import load_dotenv
 
-_project_root = Path(__file__).resolve().parent.parent.parent.parent
-load_dotenv(_project_root / ".env")
+_backend_root = Path(__file__).resolve().parent.parent.parent  # SoulSync/backend/
+_project_root = _backend_root.parent                            # SoulSync/
+load_dotenv(_backend_root / ".env") or load_dotenv(_project_root / ".env")
 
 logger = logging.getLogger(__name__)
 
