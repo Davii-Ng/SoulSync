@@ -1,7 +1,7 @@
 """Direct Gemini pipeline — no ADK overhead on the API path.
 
 Architecture: analyze_emotion (Python) → build prompt → one Gemini call.
-Calendar intent triggers a parallel Gemini extraction call so it adds zero latency.
+Calendar intent triggers a parallel Gemini extraction call; total response latency is whichever call finishes last.
 ADK agents (multi_tool_agent/) are unchanged and still work for `adk web`/`adk run`.
 """
 
