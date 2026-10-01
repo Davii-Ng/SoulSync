@@ -1,0 +1,40 @@
+{"text": "I have a dentist appointment on Friday at 3pm.", "has_event": true, "title_contains": "dentist", "time": "15:00"}
+{"text": "Remind me about the team meeting tomorrow at 10am.", "has_event": true, "title_contains": "team meeting", "time": "10:00"}
+{"text": "My project deadline is next Monday.", "has_event": true, "title_contains": "project deadline", "time": ""}
+{"text": "Interview with Google on 4/15 at 2pm.", "has_event": true, "title_contains": "interview", "time": "14:00"}
+{"text": "I have a therapy session Wednesday at 5:30 pm.", "has_event": true, "title_contains": "therapy", "time": "17:30"}
+{"text": "Don't let me forget my sister's birthday dinner on Saturday.", "has_event": true, "title_contains": "birthday dinner", "time": ""}
+{"text": "Doctor's appointment next Tuesday at 9am.", "has_event": true, "title_contains": "doctor", "time": "09:00"}
+{"text": "Final exam on 12/10.", "has_event": true, "title_contains": "final exam", "time": ""}
+{"text": "Coffee with Maya tomorrow at 8am.", "has_event": true, "title_contains": "coffee", "time": "08:00"}
+{"text": "I need to submit my application by Thursday.", "has_event": true, "title_contains": "application", "time": ""}
+{"text": "Gym class at 6pm on Monday.", "has_event": true, "title_contains": "gym", "time": "18:00"}
+{"text": "Remind me to call mom on Sunday.", "has_event": true, "title_contains": "call mom", "time": ""}
+{"text": "Group project meeting on Friday at 1pm.", "has_event": true, "title_contains": "group project meeting", "time": "13:00"}
+{"text": "Flight to Tampa next Thursday at 7am.", "has_event": true, "title_contains": "flight", "time": "07:00"}
+{"text": "Hair appointment at 4pm tomorrow.", "has_event": true, "title_contains": "hair appointment", "time": "16:00"}
+{"text": "Midterm review session on Wednesday.", "has_event": true, "title_contains": "midterm review", "time": ""}
+{"text": "I have a meeting at 3pm today.", "has_event": true, "title_contains": "meeting", "time": "15:00"}
+{"text": "Lunch with my advisor on Tuesday at noon.", "has_event": true, "title_contains": "lunch", "time": "12:00"}
+{"text": "Pay rent deadline on the 1st, remind me.", "has_event": true, "title_contains": "rent", "time": ""}
+{"text": "Dinner reservation Saturday at 7pm.", "has_event": true, "title_contains": "dinner", "time": "19:00"}
+{"text": "I feel really anxious about everything.", "has_event": false, "title_contains": "", "time": ""}
+{"text": "I'm so happy today.", "has_event": false, "title_contains": "", "time": ""}
+{"text": "I felt stressed yesterday.", "has_event": false, "title_contains": "", "time": ""}
+{"text": "My day was long and tiring.", "has_event": false, "title_contains": "", "time": ""}
+{"text": "I'm sad about what happened last week.", "has_event": false, "title_contains": "", "time": ""}
+{"text": "I think I want to be more mindful.", "has_event": false, "title_contains": "", "time": ""}
+{"text": "Thanks for listening to me.", "has_event": false, "title_contains": "", "time": ""}
+{"text": "I'm tired of the way things are going.", "has_event": false, "title_contains": "", "time": ""}
+{"text": "I miss my friends back home.", "has_event": false, "title_contains": "", "time": ""}
+{"text": "I'm proud of myself.", "has_event": false, "title_contains": "", "time": ""}
+{"text": "I think tomorrow will be better.", "has_event": false, "title_contains": "", "time": ""}
+{"text": "Tomorrow I just want to relax and not think.", "has_event": false, "title_contains": "", "time": ""}
+{"text": "I hope Friday feels lighter than this week did.", "has_event": false, "title_contains": "", "time": ""}
+{"text": "I was so nervous on Monday and cried a bit.", "has_event": false, "title_contains": "", "time": ""}
+{"text": "Sunday was a good day, I felt calm.", "has_event": false, "title_contains": "", "time": ""}
+{"text": "I'm worried the next day will be worse.", "has_event": false, "title_contains": "", "time": ""}
+{"text": "I keep thinking about last Tuesday.", "has_event": false, "title_contains": "", "time": ""}
+{"text": "I'll feel better at some point.", "has_event": false, "title_contains": "", "time": ""}
+{"text": "It's been a hectic week.", "has_event": false, "title_contains": "", "time": ""}
+{"text": "I feel hopeful about next year.", "has_event": false, "title_contains": "", "time": ""}
