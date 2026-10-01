@@ -17,7 +17,7 @@
 ![Google ADK](https://img.shields.io/badge/Google_ADK-34A853?logo=google&logoColor=white)
 ![ElevenLabs](https://img.shields.io/badge/ElevenLabs-000000?logo=elevenlabs&logoColor=white)
 
-[Overview](#-overview) · [Features](#-features) · [Quick start](#-quick-start) · [Architecture](#-architecture) · [Next steps](#-next-steps) · [Team](#-team)
+[Overview](#-overview) · [Features](#-features) · [Quick start](#-quick-start) · [Architecture](#-architecture) · [Results](#-measured-results) · [Next steps](#-next-steps) · [Team](#-team)
 
 </div>
 
@@ -165,6 +165,27 @@ SoulSync/
 ```
 
 Each of `frontend/`, `backend/`, and `multi_tool_agent/` has its own `CLAUDE.md` with conventions for contributors and AI coding agents.
+
+## 📊 Measured results
+
+Every number comes from a script in [`benchmarks/`](benchmarks/) and can be rerun. Full tables, sample sizes and caveats: [`benchmarks/RESULTS.md`](benchmarks/RESULTS.md).
+
+| What | Result |
+| --- | --- |
+| Crisis detection recall | **100%** on 30 crisis messages (a CI gate fails the build below 100%) |
+| Crisis false positives | 2.8% across 144 non-crisis messages |
+| Emotion engine speed | ~17 µs per message, no LLM call |
+| Backend under load (providers stubbed) | 200 concurrent sessions, 1,000 messages, 0 errors |
+| Tests | 142 across backend, agents and frontend, run in CI |
+| Live site, desktop Lighthouse | 100 performance, 96 best practices |
+
+Known limits, measured: the keyword emotion engine scores only 16.8% on an external tweet dataset (Gemini handles nuance; the engine exists for instant crisis checks), and throughput plateaus near 17 messages per second because provider calls use Python's default thread pool.
+
+```bash
+python benchmarks/eval_emotion.py --gate   # accuracy + crisis recall
+python benchmarks/bench_load.py            # concurrency ladder
+python benchmarks/report.py                # rebuild benchmarks/RESULTS.md
+```
 
 ## 🧭 Next steps
 

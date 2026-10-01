@@ -8,39 +8,9 @@ import { ResourcesPage } from './pages/ResourcesPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { useWebSocket } from './hooks/useWebSocket'
 import { useVoiceInput } from './hooks/useVoiceInput'
+import { mergeEvents, isSaveIntent } from './utils/conversation'
 import type { OrbState, Message, Emotion, SavedEvent, WsResponse, JournalEntry } from './types'
 import { useState, useEffect, useCallback, useRef } from 'react'
-
-const getEventId = (event: SavedEvent): string => {
-  const trimmed = event.id?.trim()
-  if (trimmed) return trimmed
-  return `${event.title}|${event.dateLabel}`.toLowerCase()
-}
-
-const mergeEvents = (existing: SavedEvent[], incoming: SavedEvent[]): SavedEvent[] => {
-  if (incoming.length === 0) return existing
-  const byId = new Map<string, SavedEvent>()
-  for (const event of existing) {
-    byId.set(getEventId(event), { ...event, id: getEventId(event) })
-  }
-  for (const event of incoming) {
-    const normalized = { ...event, id: getEventId(event) }
-    byId.set(normalized.id, normalized)
-  }
-  return Array.from(byId.values())
-}
-
-// Phrases that signal the user wants to save today's journal
-const SAVE_PHRASES = [
-  'save today', 'save journal', 'save this conversation', 'save my journal',
-  "that's it for today", 'thats it for today', 'done for the day', 'done for today',
-  'wrap up', 'end session', 'save the chat', 'save chat',
-]
-
-function isSaveIntent(text: string): boolean {
-  const lower = text.toLowerCase()
-  return SAVE_PHRASES.some((p) => lower.includes(p))
-}
 
 function App() {
   const [orbState, setOrbState] = useState<OrbState>('idle')

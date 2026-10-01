@@ -1,0 +1,47 @@
+{
+  "_comment": "Each inner list is one WebSocket session. 'kind' tags drive per-category reporting. plain = no special routing; calendar/save/crisis = messages the old orchestrator routed through ADK sub-agents.",
+  "conversations": [
+    [
+      {"kind": "plain", "text": "Hey, I'm back. Long day today."},
+      {"kind": "plain", "text": "I'm feeling really overwhelmed with everything at work."},
+      {"kind": "calendar", "text": "I have a team meeting tomorrow at 10am and I'm dreading it."},
+      {"kind": "plain", "text": "Yeah, I just feel like I can't keep up."},
+      {"kind": "save", "text": "That's it for today, please save this conversation."}
+    ],
+    [
+      {"kind": "plain", "text": "Good morning! I actually slept well for once."},
+      {"kind": "plain", "text": "I feel calm and kind of grateful today."},
+      {"kind": "plain", "text": "I think meditating before bed really helped."},
+      {"kind": "calendar", "text": "Remind me about my dentist appointment on Friday at 3pm."},
+      {"kind": "plain", "text": "Thanks, talking this out always helps."}
+    ],
+    [
+      {"kind": "plain", "text": "I'm so anxious about my interview next week."},
+      {"kind": "plain", "text": "My heart is racing just thinking about it."},
+      {"kind": "plain", "text": "What if I blank out and forget everything?"},
+      {"kind": "calendar", "text": "The interview is next Tuesday at 2pm."},
+      {"kind": "plain", "text": "Okay, I'll try the breathing thing."}
+    ],
+    [
+      {"kind": "plain", "text": "I've been feeling really lonely lately."},
+      {"kind": "plain", "text": "I miss my friends back home so much."},
+      {"kind": "plain", "text": "I guess I just feel kind of numb."},
+      {"kind": "crisis", "text": "Sometimes I feel like there's no reason to live."},
+      {"kind": "plain", "text": "Thank you for staying with me."}
+    ],
+    [
+      {"kind": "plain", "text": "I'm so angry at my roommate right now."},
+      {"kind": "plain", "text": "He left dishes everywhere again and just doesn't care."},
+      {"kind": "plain", "text": "I'm fed up honestly."},
+      {"kind": "plain", "text": "Maybe I should talk to him calmly."},
+      {"kind": "save", "text": "I'm done for the day, save my journal."}
+    ],
+    [
+      {"kind": "plain", "text": "I got the internship! I'm so happy!"},
+      {"kind": "plain", "text": "I can't believe it, I'm over the moon."},
+      {"kind": "calendar", "text": "I start on June 3rd at 9am."},
+      {"kind": "plain", "text": "A little nervous too, but mostly excited."},
+      {"kind": "plain", "text": "Thanks for celebrating with me."}
+    ]
+  ]
+}

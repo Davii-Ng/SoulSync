@@ -1,0 +1,163 @@
+{
+  "with_negation": {
+    "emotion": {
+      "n": 111,
+      "accuracy": 0.946,
+      "macro_f1": 0.955,
+      "per_class": {
+        "calm": {
+          "precision": 1.0,
+          "recall": 0.778,
+          "f1": 0.875,
+          "support": 18
+        },
+        "stressed": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 13
+        },
+        "anxious": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 14
+        },
+        "happy": {
+          "precision": 0.938,
+          "recall": 0.938,
+          "f1": 0.938,
+          "support": 16
+        },
+        "sad": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 14
+        },
+        "angry": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 14
+        },
+        "neutral": {
+          "precision": 0.808,
+          "recall": 0.955,
+          "f1": 0.875,
+          "support": 22
+        }
+      }
+    },
+    "by_tag_accuracy": {
+      "mixed": 1.0,
+      "negation": 0.615,
+      "neutral": 0.938,
+      "plain": 1.0
+    },
+    "mixed": {
+      "n": 10,
+      "primary_accuracy": 1.0,
+      "secondary_accuracy": 1.0
+    },
+    "confusion": {
+      "stressed": {
+        "stressed": 13
+      },
+      "anxious": {
+        "anxious": 14
+      },
+      "sad": {
+        "sad": 14
+      },
+      "angry": {
+        "angry": 14
+      },
+      "happy": {
+        "happy": 15,
+        "neutral": 1
+      },
+      "calm": {
+        "calm": 14,
+        "neutral": 4
+      },
+      "neutral": {
+        "neutral": 21,
+        "happy": 1
+      }
+    },
+    "crisis": {
+      "n": 30,
+      "recall": 1.0,
+      "missed": []
+    },
+    "crisis_false_positives": {
+      "n_non_crisis": 144,
+      "false_positive_rate": 0.028,
+      "hard_negative_n": 33,
+      "hard_negative_fp": 4,
+      "hard_negative_fp_texts": [
+        "I drank an overdose of caffeine, now I'm jittery and nervous.",
+        "We watched a documentary about suicide prevention awareness for class.",
+        "I'm writing a paper on self-harm statistics for my psychology class.",
+        "The doctor said never to overdose on vitamins, so I read the label."
+      ]
+    },
+    "hard_negative_emotion_accuracy": 0.485
+  },
+  "without_negation": {
+    "emotion_accuracy": 0.901,
+    "macro_f1": 0.904,
+    "negation_subset_accuracy": 0.231
+  },
+  "external_dair_ai_emotion": {
+    "n": 500,
+    "accuracy": 0.168,
+    "macro_f1": 0.271,
+    "per_class": {
+      "calm": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 0
+      },
+      "stressed": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 0
+      },
+      "anxious": {
+        "precision": 0.909,
+        "recall": 0.135,
+        "f1": 0.235,
+        "support": 74
+      },
+      "happy": {
+        "precision": 0.707,
+        "recall": 0.164,
+        "f1": 0.266,
+        "support": 177
+      },
+      "sad": {
+        "precision": 0.88,
+        "recall": 0.138,
+        "f1": 0.238,
+        "support": 160
+      },
+      "angry": {
+        "precision": 0.523,
+        "recall": 0.258,
+        "f1": 0.346,
+        "support": 89
+      },
+      "neutral": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 0
+      }
+    },
+    "predicted_neutral_rate": 0.698
+  }
+}

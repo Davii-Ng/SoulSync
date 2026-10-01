@@ -1,0 +1,91 @@
+{
+  "stub": {
+    "llm_ms": 300,
+    "tts_ms": 800,
+    "floor_text_s": 0.3,
+    "floor_audio_s": 1.1
+  },
+  "machine": {
+    "python": "3.13.11",
+    "os": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 198 Stepping 2, GenuineIntel"
+  },
+  "levels": [
+    {
+      "concurrency": 10,
+      "messages_total": 50,
+      "errors": 0,
+      "error_rate": 0.0,
+      "wall_s": 5.54,
+      "throughput_msg_per_s": 9.0,
+      "time_to_text_s": {
+        "p50": 0.303,
+        "p95": 0.312,
+        "p99": 0.313
+      },
+      "time_to_audio_s": {
+        "p50": 1.104,
+        "p95": 1.113,
+        "p99": 1.114
+      },
+      "server_rss_mb": 143.2
+    },
+    {
+      "concurrency": 50,
+      "messages_total": 250,
+      "errors": 0,
+      "error_rate": 0.0,
+      "wall_s": 14.83,
+      "throughput_msg_per_s": 16.9,
+      "time_to_text_s": {
+        "p50": 1.199,
+        "p95": 1.402,
+        "p99": 1.404
+      },
+      "time_to_audio_s": {
+        "p50": 2.81,
+        "p95": 3.105,
+        "p99": 3.107
+      },
+      "server_rss_mb": 157.7
+    },
+    {
+      "concurrency": 100,
+      "messages_total": 500,
+      "errors": 0,
+      "error_rate": 0.0,
+      "wall_s": 29.75,
+      "throughput_msg_per_s": 16.8,
+      "time_to_text_s": {
+        "p50": 2.601,
+        "p95": 3.003,
+        "p99": 3.091
+      },
+      "time_to_audio_s": {
+        "p50": 5.812,
+        "p95": 5.919,
+        "p99": 6.197
+      },
+      "server_rss_mb": 192.1
+    },
+    {
+      "concurrency": 200,
+      "messages_total": 1000,
+      "errors": 0,
+      "error_rate": 0.0,
+      "wall_s": 58.98,
+      "throughput_msg_per_s": 17.0,
+      "time_to_text_s": {
+        "p50": 5.408,
+        "p95": 6.303,
+        "p99": 6.498
+      },
+      "time_to_audio_s": {
+        "p50": 11.61,
+        "p95": 12.014,
+        "p99": 12.015
+      },
+      "server_rss_mb": 260.3
+    }
+  ]
+}

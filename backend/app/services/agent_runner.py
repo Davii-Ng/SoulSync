@@ -9,6 +9,7 @@ import asyncio
 import json
 import logging
 import re
+import time
 from datetime import datetime
 from typing import Any
 
@@ -85,8 +86,12 @@ async def _extract_event(message: str) -> dict | None:
         return None
 
 
-async def _call_gemini(prompt: str, user_id: str) -> str:
-    """Single conversational Gemini call with bounded per-user history."""
+async def _call_gemini(prompt: str, user_id: str, metrics: dict | None = None) -> str:
+    """Single conversational Gemini call with bounded per-user history.
+
+    If `metrics` is given, fills gemini_ms and token counts (used by benchmarks/).
+    """
+    started = time.perf_counter()
     history = _fast_histories.setdefault(user_id, [])
     history.append({"role": "user", "parts": [{"text": prompt}]})
     if len(history) > _MAX_FAST_HISTORY:
@@ -103,6 +108,14 @@ async def _call_gemini(prompt: str, user_id: str) -> str:
     )
     reply = (response.text or "").strip()
 
+    if metrics is not None:
+        metrics["gemini_ms"] = round((time.perf_counter() - started) * 1000, 1)
+        usage = getattr(response, "usage_metadata", None)
+        for key, attr in (("input_tokens", "prompt_token_count"), ("output_tokens", "candidates_token_count")):
+            value = getattr(usage, attr, None)
+            if isinstance(value, int):
+                metrics[key] = value
+
     history.append({"role": "model", "parts": [{"text": reply}]})
     if len(history) > _MAX_FAST_HISTORY:
         history[:] = history[-_MAX_FAST_HISTORY:]
@@ -110,11 +123,17 @@ async def _call_gemini(prompt: str, user_id: str) -> str:
     return reply or "I'm here with you. Want to share a little more?"
 
 
-async def run_agent(message: str, user_id: str = "default") -> dict:
-    """Single-pass pipeline: Python analysis + one Gemini call. No ADK overhead."""
+async def run_agent(message: str, user_id: str = "default", metrics: dict | None = None) -> dict:
+    """Single-pass pipeline: Python analysis + one Gemini call. No ADK overhead.
+
+    Pass a dict as `metrics` to collect timings and token counts (benchmarks only).
+    """
 
     # --- Instant Python analysis (no network, no LLM) ---
+    analysis_started = time.perf_counter()
     emotion_result = analyze_emotion(message)
+    if metrics is not None:
+        metrics["emotion_us"] = round((time.perf_counter() - analysis_started) * 1e6, 1)
     emotion: str = emotion_result.get("emotion", "neutral")
     severity: str = emotion_result.get("severity", "medium")
     is_crisis: bool = emotion_result.get("crisis", False)
@@ -154,11 +173,11 @@ async def run_agent(message: str, user_id: str = "default") -> dict:
     # --- Main response + optional event extraction run in parallel ---
     if has_calendar:
         reply, event_data = await asyncio.gather(
-            _call_gemini(prompt, user_id),
+            _call_gemini(prompt, user_id, metrics),
             _extract_event(message),
         )
     else:
-        reply = await _call_gemini(prompt, user_id)
+        reply = await _call_gemini(prompt, user_id, metrics)
         event_data = None
 
     # --- Persist extracted event directly (pure Python) ---
