@@ -1,0 +1,20 @@
+{
+  "regex_gate": {
+    "n": 40,
+    "precision": 0.769,
+    "recall": 1.0,
+    "tp": 20,
+    "fp": 6,
+    "fn": 0,
+    "tn": 14,
+    "false_positives": [
+      "I think tomorrow will be better.",
+      "Tomorrow I just want to relax and not think.",
+      "I hope Friday feels lighter than this week did.",
+      "I was so nervous on Monday and cried a bit.",
+      "Sunday was a good day, I felt calm.",
+      "I keep thinking about last Tuesday."
+    ],
+    "false_negatives": []
+  }
+}

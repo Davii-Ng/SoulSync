@@ -1,0 +1,22 @@
+{
+  "note": "Captured from the CI commands on this machine; rerun them to refresh.",
+  "base_commit": "5a22b61",
+  "backend": {
+    "cmd": "cd backend && pytest -q tests --cov=app",
+    "tests": 25,
+    "coverage_pct": 78
+  },
+  "agents": {
+    "cmd": "pytest -q tests --cov=multi_tool_agent",
+    "tests": 104,
+    "coverage_pct": 69,
+    "core_companion_coverage_pct": 98
+  },
+  "frontend": {
+    "cmd": "cd frontend && npm test",
+    "tests": 13,
+    "bundle_js_kb": 268.77,
+    "bundle_js_gzip_kb": 83.05,
+    "bundle_css_gzip_kb": 6.39
+  }
+}
