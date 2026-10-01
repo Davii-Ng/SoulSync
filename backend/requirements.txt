@@ -9,3 +9,4 @@ pytest>=8.0
 pytest-asyncio>=0.25
 google-adk>=0.3.0
 google-genai
+pytest-cov>=5.0

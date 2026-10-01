@@ -22,6 +22,8 @@ jobs:
         working-directory: frontend
       - run: npm run lint
         working-directory: frontend
+      - run: npm test
+        working-directory: frontend
       - run: npm run build
         working-directory: frontend
       - run: npx tsc --noEmit
@@ -39,7 +41,14 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -r backend/requirements.txt
-      - run: pytest -q tests/
+      # backend/tests stub the agent modules, so they run in their own process from backend/
+      - name: Backend tests + coverage
+        run: pytest -q tests --cov=app --cov-report=term
+        working-directory: backend
+      - name: Agent / emotion engine tests + coverage
+        run: pytest -q tests --cov=multi_tool_agent --cov-report=term
+      - name: Safety gate (crisis recall must be 100%)
+        run: python benchmarks/eval_emotion.py --gate
   
   release:
     if: github.event_name == 'workflow_dispatch'
