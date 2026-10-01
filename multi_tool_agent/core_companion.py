@@ -13,7 +13,19 @@ CRISIS_PHRASES = [
     "jump off", "hang myself", "overdose", "take all the pills",
     "nobody would care if i", "wish i was dead", "wish i wasn't alive",
     "can't go on", "goodbye forever", "final note", "not gonna be around",
+    # Inflected forms: plain substring matching misses "-ing" / "-ed" variants.
+    "killing myself", "hurting myself", "hanging myself", "cutting myself",
+    "taking all the pills", "took all the pills", "ending my life", "ending it all",
 ]
+
+# Whole-word match with simple suffixes, so "overdosed" still fires but
+# "ending my lifelong habit" does not.
+_CRISIS_RE = re.compile(
+    r"\b(?:" + "|".join(re.escape(p) for p in CRISIS_PHRASES) + r")(?:s|d|ed|ing)?\b"
+)
+
+# Everyday idioms that reuse crisis wording. Stripped before the crisis check only.
+_BENIGN_IDIOMS_RE = re.compile(r"\b(?:cut|cutting|kill|killing)\s+myself\s+(?:some\s+slack|laughing)\b")
 
 # Passive crisis — not as direct, but still red flags when combined with other signals
 PASSIVE_CRISIS_PHRASES = [
@@ -176,7 +188,7 @@ def analyze_emotion(text: str) -> dict:
     text_lower = text.lower()
 
     # 1. Direct crisis — highest priority, no negation check needed
-    if any(phrase in text_lower for phrase in CRISIS_PHRASES):
+    if _CRISIS_RE.search(_BENIGN_IDIOMS_RE.sub(" ", text_lower)):
         return {
             "status": "success",
             "emotion": "crisis",
